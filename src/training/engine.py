@@ -6,7 +6,18 @@ from typing import Callable, Optional
 import torch
 from torch import nn
 
-from src.training.metrics import ClassificationMetrics, classification_metrics
+from src.training.checkpoint import (
+    CheckpointError,
+    load_checkpoint,
+    save_checkpoint,
+)
+from src.training.metrics import (
+    ClassificationMetrics,
+    classification_metrics,
+)
+
+
+ARCHITECTURE_VERSION = "CV_MODEL_ARCHITECTURE_v1.0"
 
 
 class TrainingError(RuntimeError):
@@ -22,7 +33,7 @@ class TrainingConfig:
     epochs: int = 10
     learning_rate: float = 1e-4
     weight_decay: float = 1e-4
-    device: str = "cpu"
+    device: str = "auto"
     gradient_clip_norm: Optional[float] = None
 
     def __post_init__(self) -> None:
@@ -80,10 +91,15 @@ class TrainingHistory:
                 "Cannot determine best epoch from empty validation history."
             )
 
-        return max(
-            range(len(self.val)),
-            key=lambda index: self.val[index].metrics.macro_f1,
-        ) + 1
+        return (
+            max(
+                range(len(self.val)),
+                key=lambda index: (
+                    self.val[index].metrics.macro_f1
+                ),
+            )
+            + 1
+        )
 
     @property
     def best_val_macro_f1(self) -> float:
@@ -101,7 +117,25 @@ class TrainingHistory:
 def _resolve_device(device: str) -> torch.device:
     """
     Resolve and validate the requested torch device.
+
+    Supported:
+      - auto
+      - cpu
+      - cuda
+      - mps
     """
+
+    if device == "auto":
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+
+        if (
+            hasattr(torch.backends, "mps")
+            and torch.backends.mps.is_available()
+        ):
+            return torch.device("mps")
+
+        return torch.device("cpu")
 
     if device == "cuda":
         if not torch.cuda.is_available():
@@ -115,7 +149,12 @@ def _resolve_device(device: str) -> torch.device:
                 "MPS was requested but is not available."
             )
 
-    return torch.device(device)
+    try:
+        return torch.device(device)
+    except RuntimeError as exc:
+        raise TrainingError(
+            f"Unsupported device: {device!r}"
+        ) from exc
 
 
 def _extract_batch(
@@ -245,7 +284,9 @@ def _run_epoch(
                     "Training requires an optimizer."
                 )
 
-            optimizer.zero_grad(set_to_none=True)
+            optimizer.zero_grad(
+                set_to_none=True
+            )
 
         with torch.set_grad_enabled(training):
             logits = model(
@@ -289,7 +330,9 @@ def _run_epoch(
 
         total_samples += batch_size
 
-        predictions = logits.detach().argmax(dim=1)
+        predictions = (
+            logits.detach().argmax(dim=1)
+        )
 
         all_predictions.append(
             predictions.cpu()
@@ -346,7 +389,10 @@ class Trainer:
         config: TrainingConfig | None = None,
         criterion: nn.Module | None = None,
         optimizer_factory: Optional[
-            Callable[[list[nn.Parameter]], torch.optim.Optimizer]
+            Callable[
+                [list[nn.Parameter]],
+                torch.optim.Optimizer,
+            ]
         ] = None,
     ) -> None:
 
@@ -356,6 +402,7 @@ class Trainer:
         self.config = config
         self.dataset_id = dataset_id
         self.num_classes = num_classes
+        self.architecture = ARCHITECTURE_VERSION
 
         self.device = _resolve_device(
             config.device
@@ -401,7 +448,9 @@ class Trainer:
             num_classes=self.num_classes,
             dataset_id=self.dataset_id,
             training=True,
-            gradient_clip_norm=self.config.gradient_clip_norm,
+            gradient_clip_norm=(
+                self.config.gradient_clip_norm
+            ),
         )
 
     @torch.no_grad()
@@ -431,6 +480,7 @@ class Trainer:
         Train for the configured number of epochs.
 
         Best checkpoint is selected using validation macro-F1.
+
         The test set is never touched.
         """
 
@@ -454,29 +504,50 @@ class Trainer:
                 val_result
             )
 
+            val_macro_f1 = (
+                val_result.metrics.macro_f1
+            )
+
             print(
-                f"Epoch {epoch:03d}/{self.config.epochs:03d} | "
-                f"train_loss={train_result.loss:.4f} | "
+                f"Epoch {epoch:03d}/"
+                f"{self.config.epochs:03d} | "
+                f"train_loss="
+                f"{train_result.loss:.4f} | "
                 f"train_macro_f1="
                 f"{train_result.metrics.macro_f1:.4f} | "
-                f"val_loss={val_result.loss:.4f} | "
+                f"val_loss="
+                f"{val_result.loss:.4f} | "
                 f"val_macro_f1="
-                f"{val_result.metrics.macro_f1:.4f}"
+                f"{val_macro_f1:.4f}"
             )
 
             if (
                 checkpoint_path is not None
-                and val_result.metrics.macro_f1
+                and val_macro_f1
                 > best_macro_f1
             ):
                 best_macro_f1 = (
-                    val_result.metrics.macro_f1
+                    val_macro_f1
                 )
 
-                self.save_checkpoint(
+                save_checkpoint(
                     checkpoint_path,
+                    model=self.model,
+                    optimizer=self.optimizer,
                     epoch=epoch,
-                    val_result=val_result,
+                    dataset_id=self.dataset_id,
+                    num_classes=self.num_classes,
+                    architecture=self.architecture,
+                    val_macro_f1=val_macro_f1,
+                    config={
+                        "training": self.config,
+                    },
+                )
+
+                print(
+                    "  → saved best checkpoint "
+                    f"(val_macro_f1="
+                    f"{val_macro_f1:.4f})"
                 )
 
         return TrainingHistory(
@@ -484,82 +555,48 @@ class Trainer:
             val=tuple(val_history),
         )
 
-    def save_checkpoint(
-        self,
-        path: str,
-        *,
-        epoch: int,
-        val_result: EpochResult,
-    ) -> None:
-        """
-        Save a reproducible training checkpoint.
-        """
-
-        checkpoint = {
-            "epoch": epoch,
-            "dataset_id": self.dataset_id,
-            "num_classes": self.num_classes,
-            "model_state_dict": self.model.state_dict(),
-            "optimizer_state_dict": self.optimizer.state_dict(),
-            "config": self.config,
-            "val_result": val_result.as_dict(),
-        }
-
-        torch.save(
-            checkpoint,
-            path,
-        )
-
     def load_checkpoint(
         self,
         path: str,
     ) -> dict:
         """
-        Load model and optimizer state from a checkpoint.
+        Load a strict checkpoint into the model
+        and optimizer.
+
+        Dataset, class-count, and architecture compatibility
+        are validated before the checkpoint is accepted.
+
+        Returns a dictionary containing the loaded metadata.
         """
 
-        checkpoint = torch.load(
-            path,
-            map_location=self.device,
-            weights_only=False,
-        )
+        try:
+            metadata = load_checkpoint(
+                path,
+                model=self.model,
+                optimizer=self.optimizer,
+                expected_dataset_id=self.dataset_id,
+                expected_num_classes=self.num_classes,
+                expected_architecture=self.architecture,
+                map_location=self.device,
+            )
+        except CheckpointError as exc:
+            raise TrainingError(
+                str(exc)
+            ) from exc
 
-        required_keys = {
-            "epoch",
-            "dataset_id",
-            "num_classes",
-            "model_state_dict",
-            "optimizer_state_dict",
+        return {
+            "checkpoint_version": 1,
+            "architecture": (
+                metadata.architecture
+            ),
+            "dataset_id": (
+                metadata.dataset_id
+            ),
+            "num_classes": (
+                metadata.num_classes
+            ),
+            "epoch": metadata.epoch,
+            "val_macro_f1": (
+                metadata.val_macro_f1
+            ),
         }
-
-        missing = required_keys - checkpoint.keys()
-
-        if missing:
-            raise TrainingError(
-                "Checkpoint is missing required keys: "
-                f"{sorted(missing)}"
-            )
-
-        if checkpoint["dataset_id"] != self.dataset_id:
-            raise TrainingError(
-                "Checkpoint dataset_id does not match "
-                f"trainer dataset_id: "
-                f"{checkpoint['dataset_id']!r} vs "
-                f"{self.dataset_id!r}."
-            )
-
-        if checkpoint["num_classes"] != self.num_classes:
-            raise TrainingError(
-                "Checkpoint num_classes does not match "
-                "trainer configuration."
-            )
-
-        self.model.load_state_dict(
-            checkpoint["model_state_dict"]
-        )
-
-        self.optimizer.load_state_dict(
-            checkpoint["optimizer_state_dict"]
-        )
-
-        return checkpoint
