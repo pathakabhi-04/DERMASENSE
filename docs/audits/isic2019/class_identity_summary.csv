@@ -1,0 +1,9 @@
+native_diagnosis,images,identified_images,unknown_images,unknown_image_pct,unique_identified_lesions,multi_image_lesions
+AK,867,867,0,0.0,324,242
+BCC,3323,3323,0,0.0,1310,943
+BKL,2624,2426,198,7.55,1269,577
+DF,239,239,0,0.0,113,70
+MEL,4522,4185,337,7.45,1339,892
+NV,12875,11326,1549,12.03,7095,2119
+SCC,628,628,0,0.0,262,153
+VASC,253,253,0,0.0,135,63
