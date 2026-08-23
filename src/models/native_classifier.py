@@ -6,7 +6,9 @@ import torch
 from torch import nn
 from torchvision.models import (
     ResNet18_Weights,
+    ResNet50_Weights,
     resnet18,
+    resnet50,
 )
 
 
@@ -46,10 +48,14 @@ class NativeClassifierConfig:
     dropout: float = 0.0
 
     def __post_init__(self) -> None:
-        if self.backbone != "resnet18":
+        if self.backbone not in {
+            "resnet18",
+            "resnet50",
+        }:
             raise ModelError(
                 f"Unsupported backbone: {self.backbone!r}. "
-                "Only 'resnet18' is currently supported."
+                "Supported backbones are "
+                "'resnet18' and 'resnet50'."
             )
 
         if not 0.0 <= self.dropout < 1.0:
@@ -60,10 +66,10 @@ class NativeClassifierConfig:
 
 class SharedResNet18Backbone(nn.Module):
     """
-    Shared visual feature extractor.
+    Shared ResNet-18 visual feature extractor.
 
-    Produces a 512-dimensional representation from a
-    224x224 RGB image.
+    Produces a 512-dimensional representation from
+    a 224x224 RGB image.
     """
 
     feature_dim = 512
@@ -78,6 +84,52 @@ class SharedResNet18Backbone(nn.Module):
         )
 
         backbone = resnet18(weights=weights)
+
+        self.features = nn.Sequential(
+            *list(backbone.children())[:-1]
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.ndim != 4:
+            raise ModelError(
+                "Expected input shape [B, C, H, W]. "
+                f"Got {tuple(x.shape)}."
+            )
+
+        if x.shape[1] != 3:
+            raise ModelError(
+                "Expected 3-channel RGB input. "
+                f"Got {x.shape[1]} channels."
+            )
+
+        features = self.features(x)
+
+        return torch.flatten(
+            features,
+            start_dim=1,
+        )
+
+
+class SharedResNet50Backbone(nn.Module):
+    """
+    Shared ResNet-50 visual feature extractor.
+
+    Produces a 2048-dimensional representation from
+    a 224x224 RGB image.
+    """
+
+    feature_dim = 2048
+
+    def __init__(self, pretrained: bool = True) -> None:
+        super().__init__()
+
+        weights = (
+            ResNet50_Weights.DEFAULT
+            if pretrained
+            else None
+        )
+
+        backbone = resnet50(weights=weights)
 
         self.features = nn.Sequential(
             *list(backbone.children())[:-1]
@@ -136,7 +188,10 @@ class NativeDiagnosisHead(nn.Module):
                 num_classes,
             )
 
-    def forward(self, features: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        features: torch.Tensor,
+    ) -> torch.Tensor:
         return self.classifier(features)
 
 
@@ -151,7 +206,7 @@ class DermaSenseNativeClassifier(nn.Module):
         image
           |
           v
-    shared ResNet-18
+    shared ResNet
           |
        features
         /     \
@@ -173,9 +228,18 @@ class DermaSenseNativeClassifier(nn.Module):
 
         self.config = config
 
-        self.backbone = SharedResNet18Backbone(
-            pretrained=config.pretrained
-        )
+        if config.backbone == "resnet18":
+            self.backbone = SharedResNet18Backbone(
+                pretrained=config.pretrained
+            )
+        elif config.backbone == "resnet50":
+            self.backbone = SharedResNet50Backbone(
+                pretrained=config.pretrained
+            )
+        else:
+            raise ModelError(
+                f"Unsupported backbone: {config.backbone!r}."
+            )
 
         self.pad_ufes_head = NativeDiagnosisHead(
             feature_dim=self.backbone.feature_dim,

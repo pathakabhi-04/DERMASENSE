@@ -109,6 +109,7 @@ def load_checkpoint(
     checkpoint = torch.load(
         checkpoint_path,
         map_location=map_location,
+        weights_only=False,
     )
 
     if not isinstance(checkpoint, dict):
@@ -228,6 +229,7 @@ def inspect_checkpoint(
     checkpoint = torch.load(
         checkpoint_path,
         map_location=map_location,
+        weights_only=False,
     )
 
     if not isinstance(checkpoint, dict):
