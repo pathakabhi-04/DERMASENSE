@@ -15,10 +15,7 @@ class TransformError(ValueError):
 @dataclass(frozen=True)
 class ImageTransformConfig:
     """
-    Configuration for the deterministic CV image pipeline.
-
-    The preprocessing stage is intentionally separate from
-    dataset identity, labels, splits, and augmentation.
+    Configuration for the DermaSense CV image pipeline.
     """
 
     image_size: int = 224
@@ -34,6 +31,15 @@ class ImageTransformConfig:
         0.224,
         0.225,
     )
+
+    horizontal_flip_probability: float = 0.5
+    vertical_flip_probability: float = 0.5
+    rotation_degrees: float = 15.0
+
+    color_jitter_brightness: float = 0.10
+    color_jitter_contrast: float = 0.10
+    color_jitter_saturation: float = 0.10
+    color_jitter_hue: float = 0.02
 
     def __post_init__(self) -> None:
         if self.image_size <= 0:
@@ -56,28 +62,86 @@ class ImageTransformConfig:
                 "All std values must be greater than zero."
             )
 
+        probabilities = {
+            "horizontal_flip_probability":
+                self.horizontal_flip_probability,
+            "vertical_flip_probability":
+                self.vertical_flip_probability,
+        }
+
+        for name, value in probabilities.items():
+            if not 0.0 <= value <= 1.0:
+                raise TransformError(
+                    f"{name} must be between 0 and 1."
+                )
+
+        if self.rotation_degrees < 0:
+            raise TransformError(
+                "rotation_degrees cannot be negative."
+            )
+
+        jitter_values = {
+            "brightness": self.color_jitter_brightness,
+            "contrast": self.color_jitter_contrast,
+            "saturation": self.color_jitter_saturation,
+            "hue": self.color_jitter_hue,
+        }
+
+        for name, value in jitter_values.items():
+            if value < 0:
+                raise TransformError(
+                    f"color_jitter_{name} cannot be negative."
+                )
+
+
+def _base_preprocessing(
+    config: ImageTransformConfig,
+) -> list:
+    """
+    Deterministic preprocessing shared by train/eval.
+    """
+
+    return [
+        transforms.Resize(
+            (
+                config.image_size,
+                config.image_size,
+            )
+        ),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=config.mean,
+            std=config.std,
+        ),
+    ]
+
 
 def build_deterministic_transform(
     config: ImageTransformConfig | None = None,
 ) -> Callable[[Image.Image], torch.Tensor]:
     """
-    Build the deterministic image preprocessing pipeline.
+    Build deterministic preprocessing.
 
-    Pipeline:
+    Used by validation and test.
 
-        PIL RGB image
-            ↓
-        Resize
-            ↓
-        CenterCrop
-            ↓
-        ToTensor
-            ↓
-        Normalize
-            ↓
-        model-ready tensor
+    No random augmentation is applied.
+    """
 
-    No random augmentation is performed here.
+    if config is None:
+        config = ImageTransformConfig()
+
+    return transforms.Compose(
+        _base_preprocessing(config)
+    )
+
+
+def build_train_transform(
+    config: ImageTransformConfig | None = None,
+) -> Callable[[Image.Image], torch.Tensor]:
+    """
+    Build the training transform.
+
+    Augmentation is applied only during training.
     """
 
     if config is None:
@@ -85,19 +149,36 @@ def build_deterministic_transform(
 
     return transforms.Compose(
         [
-            transforms.Resize(
-                (
-                    config.image_size,
-                    config.image_size,
-                )
+            transforms.RandomHorizontalFlip(
+                p=config.horizontal_flip_probability
             ),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=config.mean,
-                std=config.std,
+            transforms.RandomVerticalFlip(
+                p=config.vertical_flip_probability
             ),
+            transforms.RandomRotation(
+                degrees=config.rotation_degrees
+            ),
+            transforms.ColorJitter(
+                brightness=config.color_jitter_brightness,
+                contrast=config.color_jitter_contrast,
+                saturation=config.color_jitter_saturation,
+                hue=config.color_jitter_hue,
+            ),
+            *_base_preprocessing(config),
         ]
     )
+
+
+def build_eval_transform(
+    config: ImageTransformConfig | None = None,
+) -> Callable[[Image.Image], torch.Tensor]:
+    """
+    Build validation/test preprocessing.
+
+    This is deterministic and contains no random augmentation.
+    """
+
+    return build_deterministic_transform(config)
 
 
 def preprocess_image(
@@ -105,7 +186,7 @@ def preprocess_image(
     transform: Callable[[Image.Image], torch.Tensor],
 ) -> torch.Tensor:
     """
-    Convert an arbitrary PIL image into a normalized RGB tensor.
+    Convert a PIL image into a normalized RGB tensor.
     """
 
     if not isinstance(image, Image.Image):
@@ -135,33 +216,9 @@ def preprocess_image(
             f"Got {tensor.shape[0]} channels."
         )
 
+    if not torch.isfinite(tensor).all():
+        raise TransformError(
+            "Transform produced non-finite tensor values."
+        )
+
     return tensor
-
-
-def build_train_transform(
-    config: ImageTransformConfig | None = None,
-) -> Callable[[Image.Image], torch.Tensor]:
-    """
-    Stage-1 training transform.
-
-    For now this intentionally uses the same deterministic
-    preprocessing pipeline as evaluation.
-
-    Random augmentation will be introduced separately after
-    the baseline preprocessing contract is validated.
-    """
-
-    return build_deterministic_transform(config)
-
-
-def build_eval_transform(
-    config: ImageTransformConfig | None = None,
-) -> Callable[[Image.Image], torch.Tensor]:
-    """
-    Validation/test preprocessing.
-
-    This must remain deterministic and contain no random
-    augmentation.
-    """
-
-    return build_deterministic_transform(config)
