@@ -1,0 +1,36 @@
+dataset:
+  id: isic2019
+  train_split: train
+  val_split: val
+  test_split: test
+
+model:
+  backbone: resnet50
+  pretrained: true
+  dropout: 0.0
+
+training:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  gradient_clip_norm: null
+
+optimizer:
+  name: adamw
+
+scheduler:
+  name: none
+
+runtime:
+  device: auto
+  num_workers: 4
+  pin_memory: true
+
+evaluation:
+  primary_metric: macro_f1
+  use_test_during_training: false
+
+checkpoint:
+  directory: checkpoints
+  filename: isic2019_resnet50_best.pt

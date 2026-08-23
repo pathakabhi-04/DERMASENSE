@@ -25,3 +25,7 @@ data/raw/pad_ufes/images/
 
 # OS files
 .DS_Store
+
+
+# Raw datasets and dataset metadata
+data/raw/
