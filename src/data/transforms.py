@@ -36,6 +36,10 @@ class ImageTransformConfig:
     vertical_flip_probability: float = 0.5
     rotation_degrees: float = 15.0
 
+    random_resized_crop_enabled: bool = False
+    random_resized_crop_scale_min: float = 0.7
+    random_resized_crop_scale_max: float = 1.0
+
     color_jitter_brightness: float = 0.10
     color_jitter_contrast: float = 0.10
     color_jitter_saturation: float = 0.10
@@ -78,6 +82,25 @@ class ImageTransformConfig:
         if self.rotation_degrees < 0:
             raise TransformError(
                 "rotation_degrees cannot be negative."
+            )
+
+        if not 0.0 < self.random_resized_crop_scale_min <= 1.0:
+            raise TransformError(
+                "random_resized_crop_scale_min must be in (0, 1]."
+            )
+
+        if not 0.0 < self.random_resized_crop_scale_max <= 1.0:
+            raise TransformError(
+                "random_resized_crop_scale_max must be in (0, 1]."
+            )
+
+        if (
+            self.random_resized_crop_scale_min
+            > self.random_resized_crop_scale_max
+        ):
+            raise TransformError(
+                "random_resized_crop_scale_min cannot exceed "
+                "random_resized_crop_scale_max."
             )
 
         jitter_values = {
@@ -147,14 +170,28 @@ def build_train_transform(
     if config is None:
         config = ImageTransformConfig()
 
-    return transforms.Compose(
+    augmentation = [
+        transforms.RandomHorizontalFlip(
+            p=config.horizontal_flip_probability
+        ),
+        transforms.RandomVerticalFlip(
+            p=config.vertical_flip_probability
+        ),
+    ]
+
+    if config.random_resized_crop_enabled:
+        augmentation.append(
+            transforms.RandomResizedCrop(
+                size=config.image_size,
+                scale=(
+                    config.random_resized_crop_scale_min,
+                    config.random_resized_crop_scale_max,
+                ),
+            )
+        )
+
+    augmentation.extend(
         [
-            transforms.RandomHorizontalFlip(
-                p=config.horizontal_flip_probability
-            ),
-            transforms.RandomVerticalFlip(
-                p=config.vertical_flip_probability
-            ),
             transforms.RandomRotation(
                 degrees=config.rotation_degrees
             ),
@@ -164,9 +201,25 @@ def build_train_transform(
                 saturation=config.color_jitter_saturation,
                 hue=config.color_jitter_hue,
             ),
-            *_base_preprocessing(config),
         ]
     )
+
+    if not config.random_resized_crop_enabled:
+        augmentation.extend(
+            _base_preprocessing(config)
+        )
+    else:
+        augmentation.extend(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=config.mean,
+                    std=config.std,
+                ),
+            ]
+        )
+
+    return transforms.Compose(augmentation)
 
 
 def build_eval_transform(

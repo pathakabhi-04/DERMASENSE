@@ -12,6 +12,7 @@ from src.data.loader import (
     build_dataloader,
 )
 from src.data.torch_dataset import CVDatasetTorch
+from src.data.transforms import ImageTransformConfig
 from src.models.native_classifier import (
     DermaSenseNativeClassifier,
     NativeClassifierConfig,
@@ -85,13 +86,71 @@ def resolve_device(config: dict) -> str:
     return requested
 
 
+def build_transform_config(
+    config: dict,
+) -> ImageTransformConfig:
+    transform_config = config.get(
+        "transforms",
+        {},
+    )
+
+    return ImageTransformConfig(
+        image_size=transform_config.get(
+            "image_size",
+            224,
+        ),
+        horizontal_flip_probability=transform_config.get(
+            "horizontal_flip_probability",
+            0.5,
+        ),
+        vertical_flip_probability=transform_config.get(
+            "vertical_flip_probability",
+            0.5,
+        ),
+        rotation_degrees=transform_config.get(
+            "rotation_degrees",
+            15.0,
+        ),
+        random_resized_crop_enabled=transform_config.get(
+            "random_resized_crop_enabled",
+            False,
+        ),
+        random_resized_crop_scale_min=transform_config.get(
+            "random_resized_crop_scale_min",
+            0.7,
+        ),
+        random_resized_crop_scale_max=transform_config.get(
+            "random_resized_crop_scale_max",
+            1.0,
+        ),
+        color_jitter_brightness=transform_config.get(
+            "color_jitter_brightness",
+            0.10,
+        ),
+        color_jitter_contrast=transform_config.get(
+            "color_jitter_contrast",
+            0.10,
+        ),
+        color_jitter_saturation=transform_config.get(
+            "color_jitter_saturation",
+            0.10,
+        ),
+        color_jitter_hue=transform_config.get(
+            "color_jitter_hue",
+            0.02,
+        ),
+    )
+
+
 def build_dataset(
     dataset_id: str,
     split: str,
+    transform_config: ImageTransformConfig,
 ) -> CVDatasetTorch:
     return CVDatasetTorch(
         dataset_id=dataset_id,
         split=split,
+        transform_config=transform_config,
         verify_images=True,
     )
 
@@ -172,14 +231,20 @@ def main() -> None:
 
     print("=" * 70)
 
+    transform_config = build_transform_config(
+        config
+    )
+
     train_dataset = build_dataset(
         dataset_id,
         train_split,
+        transform_config,
     )
 
     val_dataset = build_dataset(
         dataset_id,
         val_split,
+        transform_config,
     )
 
     print()
