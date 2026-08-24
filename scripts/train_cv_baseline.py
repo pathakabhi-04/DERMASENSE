@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 import torch
+from torch import nn
 import yaml
 
 from src.data.loader import (
@@ -249,6 +250,71 @@ def main() -> None:
             f"{name:20s}: {count:,}"
         )
 
+    class_weighting = config["training"].get(
+        "class_weighting",
+        "none",
+    )
+
+    criterion = None
+
+    if class_weighting == "sqrt_inverse_frequency":
+        class_counts = torch.zeros(
+            train_dataset.num_classes,
+            dtype=torch.float64,
+        )
+
+        for index in range(len(train_dataset)):
+            target = train_dataset.get_target(index)
+            class_counts[target] += 1
+
+        if torch.any(class_counts <= 0):
+            raise RuntimeError(
+                "Cannot calculate class weights because "
+                "one or more classes have zero training samples."
+            )
+
+        total_samples = class_counts.sum()
+        num_classes = train_dataset.num_classes
+
+        class_weights = torch.sqrt(
+            total_samples
+            / (num_classes * class_counts)
+        )
+
+        class_weights = (
+            class_weights
+            / class_weights.mean()
+        )
+
+        class_weights = class_weights.float()
+
+        print()
+        print("CLASS WEIGHTING")
+        print(
+            f"Strategy:       {class_weighting}"
+        )
+
+        for index, class_name in enumerate(
+            train_dataset.class_names
+        ):
+            print(
+                f"  {class_name:6s} | "
+                f"count={int(class_counts[index]):5d} | "
+                f"weight={class_weights[index].item():.4f}"
+            )
+
+        criterion = nn.CrossEntropyLoss(
+            weight=class_weights
+        )
+
+    elif class_weighting != "none":
+        raise ValueError(
+            "Unsupported class_weighting strategy: "
+            f"{class_weighting!r}. "
+            "Expected 'none' or "
+            "'sqrt_inverse_frequency'."
+        )
+
     training_config = TrainingConfig(
         epochs=(
             1
@@ -278,6 +344,7 @@ def main() -> None:
         dataset_id=dataset_id,
         num_classes=train_dataset.num_classes,
         config=training_config,
+        criterion=criterion,
     )
 
     if args.smoke_test:
@@ -315,10 +382,7 @@ def main() -> None:
         print(val_result)
 
         print()
-        print(
-            "BASELINE SMOKE TEST PASSED"
-        )
-
+        print("SMOKE TEST PASSED")
         return
 
     checkpoint_dir = Path(

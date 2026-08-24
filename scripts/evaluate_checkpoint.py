@@ -17,7 +17,11 @@ from src.models.native_classifier import (
 )
 from src.training.checkpoint import load_checkpoint
 from src.training.engine import _resolve_device
-from src.training.metrics import classification_metrics
+from src.training.metrics import (
+    classification_metrics,
+    confusion_matrix,
+    per_class_metrics,
+)
 
 
 ARCHITECTURE_VERSION = "CV_MODEL_ARCHITECTURE_v1.0"
@@ -114,7 +118,7 @@ def evaluate(
     dataset_id: str,
     num_classes: int,
     device: torch.device,
-) -> tuple[float, object]:
+) -> tuple[float, object, torch.Tensor, torch.Tensor]:
     model.eval()
 
     total_loss = 0.0
@@ -205,7 +209,12 @@ def evaluate(
         total_loss / total_samples
     )
 
-    return mean_loss, metrics
+    return (
+        mean_loss,
+        metrics,
+        predictions,
+        targets,
+    )
 
 
 def main() -> None:
@@ -344,7 +353,12 @@ def main() -> None:
         f"{metadata.val_macro_f1:.4f}"
     )
 
-    loss, metrics = evaluate(
+    (
+        loss,
+        metrics,
+        predictions,
+        targets,
+    ) = evaluate(
         model=model,
         loader=loader,
         dataset_id=dataset_id,
@@ -370,12 +384,51 @@ def main() -> None:
         f"{metrics.weighted_f1:.6f}"
     )
 
+    matrix = confusion_matrix(
+        predictions,
+        targets,
+        dataset.num_classes,
+    )
+
+    print()
+    print("CONFUSION MATRIX")
+    print(
+        "Rows = true class, "
+        "Columns = predicted class"
+    )
+    print()
+
+    header = "          " + " ".join(
+        f"{name:>6s}"
+        for name in dataset.class_names
+    )
+
+    print(header)
+
+    for index, class_name in enumerate(
+        dataset.class_names
+    ):
+        values = " ".join(
+            f"{int(value):6d}"
+            for value in matrix[index].tolist()
+        )
+
+        print(
+            f"{class_name:>8s} {values}"
+        )
+
     print()
     print(
         "Per-class metrics:"
     )
 
-    for detail in metrics.per_class:
+    per_class = per_class_metrics(
+        predictions,
+        targets,
+        dataset.num_classes,
+    )
+
+    for detail in per_class:
         class_index = int(
             detail["class_index"]
         )

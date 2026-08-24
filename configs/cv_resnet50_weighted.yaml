@@ -1,7 +1,7 @@
-# DermaSense CV ResNet-50 Configuration v1.0
+# DermaSense CV ResNet-50 Weighted Configuration v1.0
 
 experiment:
-  name: isic2019_resnet50
+  name: isic2019_resnet50_weighted
   architecture: CV_MODEL_ARCHITECTURE_v1.0
   seed: 42
 
@@ -22,6 +22,7 @@ training:
   learning_rate: 0.0001
   weight_decay: 0.0001
   gradient_clip_norm: null
+  class_weighting: sqrt_inverse_frequency
 
 optimizer:
   name: adamw
@@ -40,4 +41,4 @@ evaluation:
 
 checkpoint:
   directory: checkpoints
-  filename: isic2019_resnet50_best.pt
+  filename: isic2019_resnet50_weighted_best.pt
