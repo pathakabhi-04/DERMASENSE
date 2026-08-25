@@ -106,6 +106,16 @@ def build_dataset(split: str):
         verify_images=True,
     )
 
+def collate_images_and_targets(batch):
+    return {
+        "image": torch.stack(
+            [item["image"] for item in batch]
+        ),
+        "target": torch.tensor(
+            [item["target"] for item in batch],
+            dtype=torch.long,
+        ),
+    }
 
 def build_loader(dataset, batch_size: int, shuffle: bool):
     return DataLoader(
@@ -114,8 +124,8 @@ def build_loader(dataset, batch_size: int, shuffle: bool):
         shuffle=shuffle,
         num_workers=4,
         pin_memory=True,
+        collate_fn=collate_images_and_targets,
     )
-
 
 def extract_features(
     backbone,
