@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import random
 from pathlib import Path
 
 import numpy as np
@@ -91,12 +92,32 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for reproducible training.",
+    )
+
+    parser.add_argument(
         "--device",
         choices=("auto", "cuda", "cpu"),
         default="auto",
     )
 
     return parser.parse_args()
+
+
+def set_seed(seed: int):
+    """Configure random generators and deterministic PyTorch behavior."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.use_deterministic_algorithms(True)
 
 
 def resolve_device(requested: str):
@@ -139,6 +160,7 @@ def build_loader(
     dataset,
     batch_size: int,
     shuffle: bool,
+    generator=None,
 ):
     return DataLoader(
         dataset,
@@ -147,6 +169,7 @@ def build_loader(
         num_workers=4,
         pin_memory=True,
         collate_fn=collate_images_and_targets,
+        generator=generator,
     )
 
 
@@ -283,6 +306,8 @@ def print_metrics(
 def main():
     args = parse_args()
 
+    set_seed(args.seed)
+
     device = resolve_device(args.device)
 
     print("=" * 70)
@@ -297,6 +322,7 @@ def main():
     print(f"Checkpoint:          {args.checkpoint}")
     print(f"Epochs:              {args.epochs}")
     print(f"Batch size:          {args.batch_size}")
+    print(f"Seed:                {args.seed}")
     print(
         f"Backbone LR:         "
         f"{args.backbone_learning_rate}"
@@ -499,10 +525,20 @@ def main():
             f"{train_dataset.class_names}"
         )
 
+    train_generator = torch.Generator()
+    train_generator.manual_seed(args.seed)
+
     train_loader = build_loader(
         train_dataset,
         args.batch_size,
         shuffle=True,
+        generator=train_generator,
+    )
+
+    train_eval_loader = build_loader(
+        train_dataset,
+        args.batch_size,
+        shuffle=False,
     )
 
     val_loader = build_loader(
@@ -643,7 +679,7 @@ def main():
 
         train_metrics = evaluate(
             model,
-            train_loader,
+            train_eval_loader,
             device,
             criterion,
         )
@@ -786,6 +822,7 @@ def main():
                 "resnet50_layer4_finetune"
             ),
             "dataset_id": "pad_ufes",
+            "seed": args.seed,
             "classes": PAD_CLASSES,
             "best_epoch": best_epoch,
             "best_val_macro_f1": (
@@ -804,6 +841,7 @@ def main():
             "source_checkpoint": str(
                 checkpoint_path
             ),
+            "deterministic": True,
         },
         c1_checkpoint_path,
     )
