@@ -672,6 +672,7 @@ def main():
             best_val_f1 = (
                 val_metrics["macro_f1"]
             )
+
             best_epoch = epoch
 
             best_state = {
@@ -685,7 +686,7 @@ def main():
             epochs_without_improvement = 0
 
             print(
-                "  → saved best C1 checkpoint "
+                "  → saved best C1 state "
                 f"(val_macro_f1="
                 f"{best_val_f1:.4f})"
             )
@@ -708,6 +709,10 @@ def main():
         raise RuntimeError(
             "No best C1 checkpoint was produced."
         )
+
+    # ------------------------------------------------------------
+    # Restore best validation model
+    # ------------------------------------------------------------
 
     model.load_state_dict(
         best_state,
@@ -748,6 +753,7 @@ def main():
 
     print()
     print("VALIDATION PER-CLASS METRICS")
+
     print(
         classification_report(
             best_val_metrics["targets"],
@@ -756,6 +762,55 @@ def main():
             digits=4,
             zero_division=0,
         )
+    )
+
+    # ------------------------------------------------------------
+    # SAVE BEST C1 CHECKPOINT
+    # ------------------------------------------------------------
+
+    c1_checkpoint_path = Path(
+        "checkpoints/"
+        "pad_ufes_c1_partial_finetune_best.pt"
+    )
+
+    c1_checkpoint_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    torch.save(
+        {
+            "model_state_dict": best_state,
+            "experiment": "C1",
+            "architecture": (
+                "resnet50_layer4_finetune"
+            ),
+            "dataset_id": "pad_ufes",
+            "classes": PAD_CLASSES,
+            "best_epoch": best_epoch,
+            "best_val_macro_f1": (
+                best_val_metrics["macro_f1"]
+            ),
+            "backbone_learning_rate": (
+                args.backbone_learning_rate
+            ),
+            "head_learning_rate": (
+                args.head_learning_rate
+            ),
+            "weight_decay": args.weight_decay,
+            "patience": args.patience,
+            "batch_size": args.batch_size,
+            "max_epochs": args.epochs,
+            "source_checkpoint": str(
+                checkpoint_path
+            ),
+        },
+        c1_checkpoint_path,
+    )
+
+    print(
+        f"Best checkpoint: "
+        f"{c1_checkpoint_path}"
     )
 
     # ------------------------------------------------------------
@@ -800,6 +855,7 @@ def main():
 
     print()
     print("CONFUSION MATRIX")
+
     print(
         "Rows = true class, "
         "Columns = predicted class"
@@ -844,6 +900,12 @@ def main():
             digits=4,
             zero_division=0,
         )
+    )
+
+    print()
+    print(
+        f"Best checkpoint: "
+        f"{c1_checkpoint_path}"
     )
 
     print("=" * 70)
