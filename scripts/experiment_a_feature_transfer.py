@@ -307,7 +307,7 @@ def main() -> None:
         f"Epoch:       {metadata.epoch}"
     )
     print(
-        f"Best val F1: {metadata.best_val_metric:.4f}"
+        f"Best val F1: {metadata.val_macro_f1:.4f}"
     )
 
     # --------------------------------------------------------------
