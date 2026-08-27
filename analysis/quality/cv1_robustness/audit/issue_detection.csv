@@ -1,0 +1,13 @@
+degradation,severity,samples,expected_issue,expected_issue_detection_rate,mean_issue_count
+brightness,1,48,low_brightness,0.0,0.6458333333333334
+brightness,2,48,low_brightness,22.916666666666664,1.8958333333333333
+brightness,3,48,low_brightness,100.0,3.4166666666666665
+contrast,1,48,low_contrast,29.166666666666668,0.8125
+contrast,2,48,low_contrast,79.16666666666666,1.8541666666666667
+contrast,3,48,low_contrast,100.0,2.5833333333333335
+blur,1,48,motion_blur,77.08333333333334,1.5208333333333333
+blur,2,48,motion_blur,100.0,2.0208333333333335
+blur,3,48,motion_blur,100.0,2.0833333333333335
+resolution,1,48,resolution,68.75,1.4375
+resolution,2,48,resolution,95.83333333333334,1.9583333333333333
+resolution,3,48,resolution,100.0,2.0833333333333335
