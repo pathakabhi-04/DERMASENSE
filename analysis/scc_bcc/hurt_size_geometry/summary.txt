@@ -1,0 +1,12 @@
+DERMASENSE SCC HURT × SIZE × GEOMETRY AUDIT
+================================================================================
+
+C1
+----------------------------------------
+hurt=True: n=5, problematic=5, clean=0
+hurt=False: n=17, problematic=6, clean=11
+
+F1
+----------------------------------------
+hurt=True: n=5, problematic=5, clean=0
+hurt=False: n=17, problematic=6, clean=11

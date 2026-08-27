@@ -1,0 +1,70 @@
+DERMASENSE SCC CONSOLIDATED EVIDENCE SUMMARY
+================================================================================
+
+DATASET / SAMPLE
+--------------------------------------------------------------------------------
+Matched SCC lesions: 22
+Problematic SCC lesions: 11
+Clean SCC lesions: 11
+
+PRIMARY FINDINGS
+--------------------------------------------------------------------------------
+1. C1 lesion-level geometry:
+   Problematic SCC lesions are substantially more BCC-side
+   than clean SCC lesions.
+   Raw geometry Mann-Whitney p = 0.025575.
+
+2. Centroid-side analysis:
+   C1 problematic SCC: 5/11 closer to BCC centroid.
+   C1 clean SCC:       0/11 closer to BCC centroid.
+   Therefore 6/11 problematic lesions remain SCC-side,
+   while all 11 clean lesions are SCC-side.
+
+3. Clinical size confound:
+   Problematic SCC lesions are larger.
+   diameter_1: problematic mean 16.27 vs clean 9.55,
+   p = 0.012214.
+   diameter_2: problematic mean 13.55 vs clean 8.82,
+   p = 0.024337.
+   lesion-area proxy: problematic mean 241.09 vs clean 115.09,
+   p = 0.016418.
+
+4. Size ↔ feature-margin relationship:
+   Associations are weak and non-significant.
+   C1 diameter_1 Spearman rho = 0.1372, p = 0.5425.
+   C1 diameter_2 Spearman rho = 0.1526, p = 0.4977.
+   C1 area proxy Spearman rho = 0.1278, p = 0.5710.
+   Thus lesion size is strongly associated with error status,
+   but size alone does not explain the feature margin.
+
+5. Hurt confound:
+   5/5 hurt lesions are problematic and all are large.
+   However, among the 17 non-hurt lesions, 6/17 remain
+   problematic and the C1 margin difference remains significant:
+   p = 0.014544.
+   Therefore hurt cannot fully explain the geometry finding.
+
+6. F1 / SupCon displacement:
+   Problematic mean margin changed from -0.3392 to -0.4614.
+   Clean mean margin changed from -1.5318 to -1.3398.
+   Overall paired mean Δ margin = +0.0349.
+   Wilcoxon p = 0.222107.
+   F1 therefore changed the geometry but did not produce a
+   statistically reliable selective correction of problematic SCCs.
+
+INTERPRETATION
+-
+The evidence is consistent with a lesion-level representation
+shift in problematic SCC cases toward the BCC side of the learned
+feature space. The effect persists after examining the non-hurt
+subgroup and is not explained by a simple linear relationship
+between lesion size and feature margin.
+
+However, the sample is small (22 lesions), the problematic/clean
+groups are not independent clinical cohorts, and multiple
+exploratory tests were performed. The results should therefore
+be treated as diagnostic evidence rather than confirmatory proof.
+
+F1 did not clearly solve the problem: some problematic lesions
+moved toward the SCC side, but the paired lesion-level analysis
+does not show a reliable overall selective improvement.

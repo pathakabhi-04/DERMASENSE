@@ -1,0 +1,44 @@
+DERMASENSE PROBLEMATIC SCC F1 RESPONSE ANALYSIS
+================================================================================
+
+Matched SCC lesions: 22
+Problematic SCC lesions: 11
+
+DIRECTION CONVENTIONS
+--------------------------------------------------------------------------------
+Embedding delta < 0 = movement toward SCC
+Embedding delta > 0 = movement toward BCC
+Logit delta > 0 = movement toward SCC
+Logit delta < 0 = movement toward BCC
+
+RESPONSE COUNTS
+--------------------------------------------------------------------------------
+A_both_improved: 4
+B_embedding_only: 0
+C_both_worsened: 6
+D_logit_only: 1
+
+DIRECTIONAL RESPONSE
+--------------------------------------------------------------------------------
+Embedding movement toward SCC: 4/11
+Classifier movement toward SCC: 5/11
+
+CLASSIFIER RESCUE
+--------------------------------------------------------------------------------
+Actual BCC-side → SCC-side classifier boundary crossing: NOT DETERMINABLE
+Reason: this analysis table contains delta_logit_margin but not absolute C1/F1 classifier margins.
+
+DETAILED LESIONS
+--------------------------------------------------------------------------------
+patient_id    lesion_uid  response_class  delta_embedding_margin  delta_logit_margin  embedding_moved_toward_scc  classifier_moved_toward_scc  error_fraction_c1  error_fraction_f1  age  diameter_1  diameter_2  lesion_area_proxy  hurt  skin_cancer_history  region
+    PAT_56    PAT_56__86 A_both_improved               -2.368061            1.221127                        True                         True                1.0                1.0   70        24.0        20.0              480.0  True                False     ARM
+   PAT_824 PAT_824__1560 A_both_improved               -1.023677            1.513276                        True                         True                1.0                1.0   83         9.0         9.0               81.0 False                 True    BACK
+   PAT_689 PAT_689__1306 A_both_improved               -0.642004            0.815981                        True                         True                1.0                1.0   55        10.0         7.0               70.0 False                False     ARM
+   PAT_365  PAT_365__750 A_both_improved               -0.482417            0.092638                        True                         True                1.0                1.0   70        21.0        21.0              441.0  True                False    BACK
+   PAT_492  PAT_492__937 C_both_worsened                0.070426           -0.198546                       False                        False                1.0                1.0   70        18.0        13.0              234.0 False                False   CHEST
+    PAT_49    PAT_49__75 C_both_worsened                0.202394           -0.464590                       False                        False                1.0                1.0   69        20.0        13.0              260.0 False                False FOREARM
+   PAT_365  PAT_365__751 C_both_worsened                0.365765           -1.852075                       False                        False                1.0                1.0   70        11.0         9.0               99.0 False                False    FACE
+   PAT_113  PAT_113__172 C_both_worsened                0.516945           -1.222566                       False                        False                1.0                1.0   71        20.0        15.0              300.0  True                False    HAND
+   PAT_590 PAT_590__1121 C_both_worsened                0.914231           -0.198345                       False                        False                1.0                1.0   57        19.0        18.0              342.0  True                False     ARM
+   PAT_220  PAT_220__338 C_both_worsened                0.937796           -0.906474                       False                        False                1.0                1.0   67        17.0        15.0              255.0  True                 True     LIP
+   PAT_164  PAT_164__255    D_logit_only                0.164074            0.415485                       False                         True                1.0                1.0   77        10.0         9.0               90.0 False                 True   THIGH

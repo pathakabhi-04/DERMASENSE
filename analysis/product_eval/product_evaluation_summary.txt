@@ -1,0 +1,84 @@
+DERMASENSE C1 vs F1 PRODUCT EVALUATION
+================================================================================
+
+DATASET
+--------------------------------------------------------------------------------
+PAD-UFES exact test set: 352 images
+Classes: ACK, BCC, MEL, NEV, SCC, SEK
+High-risk definition: BCC + SCC + MEL
+ACK is outside the primary high-risk bucket.
+Malignant tie-break: minimum of MEL/BCC/SCC recall.
+
+OVERALL
+--------------------------------------------------------------------------------
+C1 accuracy:  0.701705
+F1 accuracy:  0.704545
+C1 macro-F1:  0.647038
+F1 macro-F1:  0.652991
+
+HIGH-RISK
+--------------------------------------------------------------------------------
+C1 pooled high-risk recall: 0.821229 95% CI [0.758533, 0.870427]
+F1 pooled high-risk recall: 0.821229 95% CI [0.758533, 0.870427]
+
+Minimum malignant recall (MEL/BCC/SCC)
+C1: 0.285714
+F1: 0.178571
+
+PER-CLASS RECALL
+--------------------------------------------------------------------------------
+ACK (n=109):
+  C1 recall = 0.770642 95% CI [0.683313, 0.839545]
+  F1 recall = 0.770642 95% CI [0.683313, 0.839545]
+BCC (n=142):
+  C1 recall = 0.718310 95% CI [0.639329, 0.785790]
+  F1 recall = 0.732394 95% CI [0.654163, 0.798384]
+MEL (n=9):
+  C1 recall = 0.666667 95% CI [0.354202, 0.879416]
+  F1 recall = 0.666667 95% CI [0.354202, 0.879416]
+NEV (n=33):
+  C1 recall = 0.818182 95% CI [0.656118, 0.913892]
+  F1 recall = 0.878788 95% CI [0.726745, 0.951838]
+SCC (n=28):
+  C1 recall = 0.285714 95% CI [0.152540, 0.470593]
+  F1 recall = 0.178571 95% CI [0.078785, 0.355914]
+SEK (n=31):
+  C1 recall = 0.645161 95% CI [0.469480, 0.788833]
+  F1 recall = 0.645161 95% CI [0.469480, 0.788833]
+
+CALIBRATION
+--------------------------------------------------------------------------------
+C1 ECE (10 bins): 0.066536
+F1 ECE (10 bins): 0.069638
+
+ACK FLAGGED ERRORS
+--------------------------------------------------------------------------------
+PAT_1029_135_239.png | C1=BCC | F1=BCC
+PAT_1029_135_983.png | C1=ACK | F1=BCC
+PAT_1070_304_845.png | C1=SCC | F1=SCC
+PAT_1246_846_899.png | C1=SEK | F1=SEK
+PAT_126_190_376.png | C1=BCC | F1=BCC
+PAT_126_192_208.png | C1=SCC | F1=ACK
+PAT_1265_908_754.png | C1=BCC | F1=BCC
+PAT_1316_1114_517.png | C1=BCC | F1=BCC
+PAT_1481_1674_735.png | C1=BCC | F1=ACK
+PAT_163_254_719.png | C1=BCC | F1=BCC
+PAT_1688_3066_491.png | C1=BCC | F1=BCC
+PAT_1931_3879_727.png | C1=BCC | F1=BCC
+PAT_224_1340_142.png | C1=SCC | F1=BCC
+PAT_224_1340_551.png | C1=SCC | F1=BCC
+PAT_236_361_180.png | C1=SEK | F1=SEK
+PAT_393_793_852.png | C1=BCC | F1=BCC
+PAT_414_822_420.png | C1=SEK | F1=SEK
+PAT_492_4723_890.png | C1=ACK | F1=SCC
+PAT_539_1023_928.png | C1=ACK | F1=SCC
+PAT_59_94_849.png | C1=SEK | F1=SEK
+PAT_704_1324_359.png | C1=BCC | F1=SCC
+PAT_71_108_56.png | C1=BCC | F1=BCC
+PAT_71_108_617.png | C1=BCC | F1=BCC
+PAT_731_1387_634.png | C1=SCC | F1=ACK
+PAT_735_1391_683.png | C1=SCC | F1=ACK
+PAT_742_1402_818.png | C1=ACK | F1=BCC
+PAT_824_1561_796.png | C1=BCC | F1=BCC
+PAT_891_1700_180.png | C1=SCC | F1=SCC
+PAT_931_1762_69.png | C1=BCC | F1=BCC

@@ -1,0 +1,49 @@
+DERMASENSE C1 → F1 PAIRED SCC LESION DISPLACEMENT
+================================================================================
+
+Margin definition:
+  BCC-minus-SCC distance = distance_to_SCC - distance_to_BCC
+  Positive = closer to BCC
+  Negative = closer to SCC
+  Negative Δ = movement toward SCC
+  Positive Δ = movement toward BCC
+
+Matched lesions: 22
+Problematic: 11
+Clean: 11
+
+PROBLEMATIC
+------------------------------------------------------------
+Mean C1 margin: -0.339215
+Mean F1 margin: -0.461445
+Mean Δ margin: -0.122230
+Median Δ margin: 0.164074
+Mean Δ BCC distance: 0.753988
+Mean Δ SCC distance: 0.631758
+C1 BCC-side: 5/11
+F1 BCC-side: 3/11
+C1 SCC-side: 6/11
+F1 SCC-side: 8/11
+
+CLEAN
+------------------------------------------------------------
+Mean C1 margin: -1.531785
+Mean F1 margin: -1.339751
+Mean Δ margin: 0.192034
+Median Δ margin: 0.162552
+Mean Δ BCC distance: 0.075331
+Mean Δ SCC distance: 0.267365
+C1 BCC-side: 0/11
+F1 BCC-side: 2/11
+C1 SCC-side: 11/11
+F1 SCC-side: 9/11
+
+PAIRED WILCOXON TEST
+Statistic: 88.0
+p-value: 0.2221074104309082
+
+OVERALL
+Mean Δ margin: 0.034902
+Median Δ margin: 0.163313
+Mean Δ BCC distance: 0.414659
+Mean Δ SCC distance: 0.449561

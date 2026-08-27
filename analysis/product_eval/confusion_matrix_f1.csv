@@ -1,0 +1,7 @@
+,pred_ACK,pred_BCC,pred_MEL,pred_NEV,pred_SCC,pred_SEK
+true_ACK,84,16,0,0,5,4
+true_BCC,22,104,1,0,12,3
+true_MEL,0,2,6,1,0,0
+true_NEV,2,2,0,29,0,0
+true_SCC,4,17,0,1,5,1
+true_SEK,2,0,0,8,1,20

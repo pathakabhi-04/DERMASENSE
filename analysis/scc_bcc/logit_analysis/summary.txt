@@ -1,0 +1,34 @@
+DERMASENSE C1 → F1 SCC LOGIT ANALYSIS
+================================================================================
+
+C1 checkpoint: checkpoints/archive/pad_ufes_c1_partial_finetune_seed42_best.pt
+F1 checkpoint: artifacts/f1_supcon_seed42/pad_ufes_f1_supcon_best.pt
+Matched SCC lesions: 22
+SCC logit margin = SCC logit - BCC logit
+
+PROBLEMATIC
+--------------------------------------------------
+n: 11
+C1 mean margin: -1.585754
+F1 mean margin: -1.657035
+Mean delta: -0.071281
+Median delta: -0.198345
+C1 SCC-side: 0/11
+F1 SCC-side: 0/11
+
+CLEAN
+--------------------------------------------------
+n: 11
+C1 mean margin: 0.237207
+F1 mean margin: 0.005502
+Mean delta: -0.231705
+Median delta: -0.355481
+C1 SCC-side: 7/11
+F1 SCC-side: 6/11
+
+OVERALL
+--------------------------------------------------
+Mean delta: -0.151493
+Median delta: -0.212978
+Problematic vs clean delta p: 0.645764
+Paired Wilcoxon p: 0.320883

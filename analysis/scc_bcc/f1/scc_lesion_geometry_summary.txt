@@ -1,0 +1,23 @@
+DERMASENSE C1 SCC LESION GEOMETRY
+============================================================
+
+Total SCC lesions: 22
+Problematic lesions: 11
+Clean lesions: 11
+
+Problematic SCC lesions
+  N: 11
+  Mean distance to BCC: 15.824681
+  Mean distance to SCC: 15.363236
+  Mean SCC advantage: -0.461445
+  Median SCC advantage: -0.436748
+
+Clean SCC lesions
+  N: 11
+  Mean distance to BCC: 19.856117
+  Mean distance to SCC: 18.516366
+  Mean SCC advantage: -1.339751
+  Median SCC advantage: -1.142329
+
+Problematic lesions closer to BCC: 3/11
+Clean lesions closer to BCC: 2/11

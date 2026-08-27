@@ -6,6 +6,8 @@ from pathlib import Path
 import torch
 import yaml
 
+from torch.utils.data import DataLoader
+
 from src.data.loader import (
     DataLoaderConfig,
     build_dataloader,
@@ -115,20 +117,27 @@ def build_dataset(
     )
 
 
-def build_loader(
-    dataset: CVDatasetTorch,
-    batch_size: int,
-) -> torch.utils.data.DataLoader:
-    return build_dataloader(
-        dataset=dataset,
-        config=DataLoaderConfig(
-            batch_size=batch_size,
-            num_workers=0,
-            pin_memory=False,
-            drop_last=False,
+def collate_images_and_targets(batch):
+    return {
+        "image": torch.stack(
+            [item["image"] for item in batch]
         ),
-    )
+        "target": torch.tensor(
+            [item["target"] for item in batch],
+            dtype=torch.long,
+        ),
+    }
 
+
+def build_loader(dataset, batch_size: int, shuffle: bool):
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True,
+        collate_fn=collate_images_and_targets,
+    )
 
 @torch.no_grad()
 def extract_features(

@@ -1,0 +1,32 @@
+DERMASENSE SCC/BCC FEATURE GEOMETRY ANALYSIS
+======================================================================
+
+Checkpoint experiment: C1
+Architecture: resnet50_layer4_finetune
+Seed: 42
+
+pad_ufes / train
+--------------------------------------------------
+Feature dimension: 2048
+BCC count: 584
+SCC count: 136
+BCC within-class distance: 23.366762161254883
+SCC within-class distance: 25.041961669921875
+SCC-BCC mean pairwise distance: 25.09251594543457
+SCC-BCC centroid distance: 6.951147079467773
+Mean within-class distance: 24.20436191558838
+Pairwise separation ratio: 1.0366939658621692
+Centroid separation ratio: 0.2871857189918737
+
+isic2019 / test
+--------------------------------------------------
+Feature dimension: 2048
+BCC count: 502
+SCC count: 109
+BCC within-class distance: 26.349334716796875
+SCC within-class distance: 26.513938903808594
+SCC-BCC mean pairwise distance: 27.529226303100586
+SCC-BCC centroid distance: 8.04181957244873
+Mean within-class distance: 26.431636810302734
+Pairwise separation ratio: 1.041525596794294
+Centroid separation ratio: 0.304249775757895

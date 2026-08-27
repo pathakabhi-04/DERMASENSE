@@ -1,0 +1,5 @@
+response_class,n,delta_embedding_margin_mean,delta_embedding_margin_median,delta_logit_margin_mean,delta_logit_margin_median,error_fraction_c1_mean,error_fraction_c1_median,error_fraction_f1_mean,error_fraction_f1_median,diameter_1_mean,diameter_1_median,diameter_2_mean,diameter_2_median,lesion_area_proxy_mean,lesion_area_proxy_median,age_mean,age_median,embedding_toward_scc_n,classifier_toward_scc_n
+A_both_improved,4,-1.1290397644042969,-0.8328404426574707,0.9107553449999999,1.01855375,1.0,1.0,1.0,1.0,16.0,15.5,14.25,14.5,268.0,261.0,69.5,70.0,4,4
+B_embedding_only,0,,,,,,,,,,,,,,,,,0,0
+C_both_worsened,6,0.5012594858805338,0.44135475158691406,-0.8070993533333333,-0.6855321,1.0,1.0,1.0,1.0,17.5,18.5,13.833333333333334,14.0,248.33333333333334,257.5,67.33333333333333,69.5,0,0
+D_logit_only,1,0.1640739440917968,0.1640739440917968,0.41548526,0.41548526,1.0,1.0,1.0,1.0,10.0,10.0,9.0,9.0,90.0,90.0,77.0,77.0,0,1

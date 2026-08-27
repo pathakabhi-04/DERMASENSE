@@ -1,0 +1,30 @@
+DERMASENSE SCC LESION GEOMETRY
+============================================================
+
+Centroid margin definition:
+  BCC-minus-SCC distance = distance_to_SCC - distance_to_BCC
+  Positive = closer to BCC
+  Negative = closer to SCC
+
+Total SCC lesions: 22
+Problematic lesions: 11
+Clean lesions: 11
+
+Problematic SCC lesions
+  N: 11
+  Mean distance to BCC: 15.070693
+  Mean distance to SCC: 14.731479
+  Mean BCC-minus-SCC distance: -0.339215
+  Median BCC-minus-SCC distance: -0.180329
+
+Clean SCC lesions
+  N: 11
+  Mean distance to BCC: 19.780786
+  Mean distance to SCC: 18.249001
+  Mean BCC-minus-SCC distance: -1.531785
+  Median BCC-minus-SCC distance: -1.522926
+
+Problematic lesions closer to BCC: 5/11
+Problematic lesions closer to SCC: 6/11
+Clean lesions closer to BCC: 0/11
+Clean lesions closer to SCC: 11/11

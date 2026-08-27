@@ -1,0 +1,31 @@
+category,analysis,group,n,C1_value,F1_value,change,p_value,interpretation
+Paired geometry,C1 → F1 margin change,problematic,11.0,-0.3392147584394975,-0.46144459464333276,-0.12222983620383522,,Negative change = movement toward SCC
+Paired geometry,C1 → F1 margin change,clean,11.0,-1.5317851846868342,-1.3397507234053179,0.19203446128151624,,Negative change = movement toward SCC
+Paired geometry,Overall C1 → F1 margin change,all,22.0,-0.9354999715631659,-0.9005976590243253,0.03490231253884051,0.222107,Wilcoxon paired test; not statistically significant
+Clinical confound audit,size ↔ margin,all SCC lesions,22.0,,,,0.5425386037810475,Weak/non-significant monotonic association
+Clinical confound audit,size ↔ margin,all SCC lesions,22.0,,,,0.4977222158103531,Weak/non-significant monotonic association
+Clinical confound audit,size ↔ margin,all SCC lesions,22.0,,,,0.570999476231625,Weak/non-significant monotonic association
+Clinical confound audit,size ↔ margin,all SCC lesions,22.0,,,,0.5663473765171478,Weak/non-significant monotonic association
+Clinical confound audit,size ↔ margin,all SCC lesions,22.0,,,,0.465784463160539,Weak/non-significant monotonic association
+Clinical confound audit,size ↔ margin,all SCC lesions,22.0,,,,0.5254690818535293,Weak/non-significant monotonic association
+Clinical metadata,age,problematic vs clean,,69.0,,,0.8175667273331583,Exploratory clinical confound comparison
+Clinical metadata,diameter_1,problematic vs clean,,16.272727272727273,,,0.0122138354116837,Exploratory clinical confound comparison
+Clinical metadata,diameter_2,problematic vs clean,,13.545454545454543,,,0.0243372027998806,Exploratory clinical confound comparison
+Clinical metadata,fitspatrick,problematic vs clean,,2.272727272727273,,,0.788062142685333,Exploratory clinical confound comparison
+Clinical metadata,hurt,problematic vs clean,22.0,0.5087470190691683,,,0.0350877192982456,Exploratory categorical effect size
+Clinical metadata,grew,problematic vs clean,22.0,0.4229960045138852,,,,Exploratory categorical effect size
+Clinical metadata,changed,problematic vs clean,22.0,0.4085855464408042,,,0.0861089375021263,Exploratory categorical effect size
+Clinical metadata,skin_cancer_history,problematic vs clean,22.0,0.4085855464408042,,,0.0861089375021263,Exploratory categorical effect size
+Clinical metadata,region,problematic vs clean,22.0,0.0,,,,Exploratory categorical effect size
+Clinical metadata,pesticide,problematic vs clean,22.0,0.0,,,0.6594427244582043,Exploratory categorical effect size
+Clinical metadata,drink,problematic vs clean,22.0,0.0,,,0.6594427244582043,Exploratory categorical effect size
+Clinical metadata,smoke,problematic vs clean,22.0,0.0,,,1.0,Exploratory categorical effect size
+Clinical metadata,gender,problematic vs clean,22.0,0.0,,,1.0,Exploratory categorical effect size
+Clinical metadata,itch,problematic vs clean,22.0,0.0,,,1.0,Exploratory categorical effect size
+Clinical metadata,cancer_history,problematic vs clean,22.0,0.0,,,1.0,Exploratory categorical effect size
+Clinical metadata,bleed,problematic vs clean,22.0,0.0,,,0.6351172047766476,Exploratory categorical effect size
+Clinical metadata,elevation,problematic vs clean,22.0,0.0,,,1.0,Exploratory categorical effect size
+Hurt × geometry,Hurt status,True,10.0,0.0,,,,Problematic fraction within hurt subgroup
+Hurt × geometry,Hurt status,False,34.0,0.0,,,,Problematic fraction within hurt subgroup
+Hurt × geometry,Hurt status,True,10.0,0.0,,,,Problematic fraction within hurt subgroup
+Hurt × geometry,Hurt status,False,34.0,0.0,,,,Problematic fraction within hurt subgroup

@@ -1,0 +1,16 @@
+DERMASENSE SCC TRAINING-COVERAGE ANALYSIS
+================================================================================
+Training SCC images: 136
+Training SCC lesions: 102
+Training SCC patients: 93
+Training BCC images: 584
+Test SCC images: 28
+Problematic SCC images: 15
+Clean SCC images: 13
+
+STATISTICAL COMPARISON
+                        metric  problematic_mean  clean_mean    U        p
+             nearest_train_SCC         16.290876   19.280893 49.0 0.027026
+                nearest_margin         -0.980865   -1.091251 89.0 0.712483
+distance_to_train_SCC_centroid         17.053963   19.113735 71.0 0.231034
+               centroid_margin         -1.427676    1.316952 17.0 0.000228

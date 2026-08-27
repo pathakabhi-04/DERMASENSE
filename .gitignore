@@ -29,3 +29,23 @@ data/raw/pad_ufes/images/
 
 # Raw datasets and dataset metadata
 data/raw/
+
+# Model checkpoints / trained weights
+checkpoints/
+artifacts/**/*.pt
+artifacts/**/*.pth
+artifacts/**/*.ckpt
+
+# Generated analysis outputs
+analysis/**/*.npz
+analysis/**/*.png
+analysis/**/*.jpg
+analysis/**/*.jpeg
+analysis/**/*.webp
+
+# Generated analysis tables/reports can be committed selectively.
+# Do not blanket-ignore analysis/**/*.csv or analysis/**/*.txt.
+
+
+# Generated experiment artifacts
+artifacts/

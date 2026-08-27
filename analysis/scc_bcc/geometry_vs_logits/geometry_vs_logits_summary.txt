@@ -1,0 +1,40 @@
+DERMASENSE SCC GEOMETRY → LOGIT ALIGNMENT ANALYSIS
+================================================================================
+
+Matched SCC lesions: 22
+Problematic: 11
+Clean:       11
+
+DIRECTION CONVENTIONS
+--------------------------------------------------------------------------------
+Embedding delta > 0 = movement toward BCC
+Embedding delta < 0 = movement toward SCC
+Logit delta > 0 = movement toward SCC
+Logit delta < 0 = movement toward BCC
+
+ALL
+--------------------------------------------------------------------------------
+N: 22
+Pearson r: -0.712341
+Pearson p: 0.000200
+Spearman rho: -0.634105
+Spearman p: 0.001529
+Semantic-direction agreement: 0.863636
+
+PROBLEMATIC
+--------------------------------------------------------------------------------
+N: 11
+Pearson r: -0.752460
+Pearson p: 0.007540
+Spearman rho: -0.809091
+Spearman p: 0.002559
+Semantic-direction agreement: 0.909091
+
+CLEAN
+--------------------------------------------------------------------------------
+N: 11
+Pearson r: -0.614125
+Pearson p: 0.044422
+Spearman rho: -0.354545
+Spearman p: 0.284693
+Semantic-direction agreement: 0.818182
