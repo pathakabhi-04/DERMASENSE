@@ -1,0 +1,151 @@
+{
+  "corpus_id": "dermasense-medical",
+  "version": "0.1",
+  "description": "Initial authoritative medical knowledge corpus for the DermaSense RAG pipeline.",
+  "documents": [
+    {
+      "document_id": "AAD_MOLES_SYMPTOMS_001",
+      "title": "Moles: Signs and symptoms",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/a-z/moles-symptoms",
+      "topic": "skin_lesions",
+      "condition": "melanoma",
+      "sections": [
+        "mole_characteristics",
+        "melanoma_characteristics",
+        "ABCDE",
+        "when_to_see_dermatologist"
+      ]
+    },
+    {
+      "document_id": "AAD_SKIN_CANCER_RISK_001",
+      "title": "Skin cancer: Everyone's at risk",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/skin-cancer/find/at-risk",
+      "topic": "skin_cancer",
+      "condition": "melanoma",
+      "sections": [
+        "warning_signs",
+        "ABCDE",
+        "skin_self_exam"
+      ]
+    },
+    {
+      "document_id": "NCI_MOLES_MELANOMA_001",
+      "title": "Common Moles, Dysplastic Nevi, and Risk of Melanoma",
+      "source": "National Cancer Institute",
+      "source_url": "https://www.cancer.gov/types/skin/moles-fact-sheet",
+      "topic": "skin_lesions",
+      "condition": "melanoma",
+      "sections": [
+        "common_moles",
+        "dysplastic_nevi",
+        "melanoma",
+        "ABCDE",
+        "evolution"
+      ]
+    },
+    {
+      "document_id": "NCI_MELANOMA_APPEARANCE_001",
+      "title": "What Does Melanoma Look Like?",
+      "source": "National Cancer Institute",
+      "source_url": "https://www.cancer.gov/types/skin/melanoma-photos",
+      "topic": "skin_cancer",
+      "condition": "melanoma",
+      "sections": [
+        "appearance",
+        "ABCDE",
+        "diagnosis_boundary"
+      ]
+    },
+    {
+      "document_id": "AAD_MOLE_PROBLEM_001",
+      "title": "When is a mole a problem?",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/a-z/when-is-a-mole-a-problem",
+      "topic": "skin_lesions",
+      "condition": "mole",
+      "sections": [
+        "warning_signs",
+        "changing_mole",
+        "itching",
+        "bleeding",
+        "professional_evaluation"
+      ]
+    },
+    {
+      "document_id": "MEDLINEPLUS_SCRAPE_001",
+      "title": "Scrape",
+      "source": "MedlinePlus",
+      "source_url": "https://medlineplus.gov/ency/article/007212.htm",
+      "topic": "wounds",
+      "condition": "abrasion",
+      "sections": [
+        "definition",
+        "first_aid",
+        "wound_cleaning",
+        "bandaging",
+        "medical_attention"
+      ]
+    },
+    {
+      "document_id": "MEDLINEPLUS_CUTS_001",
+      "title": "Cuts and puncture wounds",
+      "source": "MedlinePlus",
+      "source_url": "https://medlineplus.gov/ency/article/000043.htm",
+      "topic": "wounds",
+      "condition": "cut",
+      "sections": [
+        "first_aid",
+        "bleeding",
+        "wound_cleaning",
+        "infection",
+        "medical_attention"
+      ]
+    },
+    {
+      "document_id": "NHS_FIRST_AID_001",
+      "title": "First aid",
+      "source": "NHS",
+      "source_url": "https://www.nhs.uk/tests-and-treatments/first-aid/",
+      "topic": "first_aid",
+      "condition": "burn",
+      "sections": [
+        "burns",
+        "scalds",
+        "cooling",
+        "covering",
+        "medical_attention"
+      ]
+    },
+    {
+      "document_id": "MEDLINEPLUS_BURNS_001",
+      "title": "Burns",
+      "source": "MedlinePlus",
+      "source_url": "https://medlineplus.gov/ency/article/000030.htm",
+      "topic": "burns",
+      "condition": "burn",
+      "sections": [
+        "severity",
+        "first_aid",
+        "major_burn",
+        "infection",
+        "medical_attention"
+      ]
+    },
+    {
+      "document_id": "MEDLINEPLUS_MINOR_BURNS_001",
+      "title": "Minor burns - aftercare",
+      "source": "MedlinePlus",
+      "source_url": "https://medlineplus.gov/ency/patientinstructions/000662.htm",
+      "topic": "burns",
+      "condition": "minor_burn",
+      "sections": [
+        "first_aid",
+        "aftercare",
+        "infection",
+        "medical_attention"
+      ]
+    }
+  ]
+}

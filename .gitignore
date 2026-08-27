@@ -29,3 +29,10 @@ data/raw/pad_ufes/images/
 
 # Raw datasets and dataset metadata
 data/raw/
+
+
+
+# RAG generated/raw data
+data/rag/raw/
+data/rag/processed/
+data/rag/indexes/
