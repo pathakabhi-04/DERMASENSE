@@ -1,0 +1,32 @@
+DERMASENSE PHASE 4 SAFETY POLICY DESIGN
+================================================================================
+
+Purpose:
+Compare candidate safety-gate policies using downstream
+action consequences rather than ordinary classification accuracy.
+
+HIGH-RISK:
+BCC, MEL, SCC
+
+LOW-RISK / MONITOR:
+NEV, SEK
+
+INTERMEDIATE / EVALUATE SOON:
+ACK
+
+Dangerous failure definition:
+True high-risk class predicted into MONITOR.
+
+Candidate policies:
+1. baseline_no_gate
+2. global confidence thresholds
+3. low-risk prediction -> review
+4. low-risk + confidence -> review
+5. low-risk + high-risk probability -> review
+
+Important:
+This is a policy-design experiment, not production validation.
+No threshold or policy should be considered clinically validated
+from this test set alone.
+
+Results: analysis/product_eval/phase4_safety_policy/safety_policy_comparison.csv

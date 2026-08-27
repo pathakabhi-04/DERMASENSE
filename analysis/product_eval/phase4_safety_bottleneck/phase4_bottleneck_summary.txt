@@ -1,0 +1,85 @@
+DERMASENSE PHASE 4 SAFETY BOTTLENECK ANALYSIS
+================================================================================
+
+Input: analysis/product_eval/c1_f1_test_predictions.csv
+Total test images: 352
+
+C1 TIER-1 SOURCE CLASSES
+--------------------------------------------------------------------------------
+true_class  tier1_count  fraction_of_tier1
+       BCC           26            0.81250
+       SCC            5            0.15625
+       MEL            1            0.03125
+
+F1 TIER-1 SOURCE CLASSES
+--------------------------------------------------------------------------------
+true_class  tier1_count  fraction_of_tier1
+       BCC           25            0.78125
+       SCC            6            0.18750
+       MEL            1            0.03125
+
+C1 TIER-1 DESTINATIONS
+--------------------------------------------------------------------------------
+true_class predicted_class  count
+       BCC             ACK     22
+       BCC             SEK      4
+       SCC             ACK      3
+       MEL             NEV      1
+       SCC             NEV      1
+       SCC             SEK      1
+
+F1 TIER-1 DESTINATIONS
+--------------------------------------------------------------------------------
+true_class predicted_class  count
+       BCC             ACK     22
+       SCC             ACK      4
+       BCC             SEK      3
+       MEL             NEV      1
+       SCC             NEV      1
+       SCC             SEK      1
+
+C1 CONFIDENCE BY ERROR TYPE
+--------------------------------------------------------------------------------
+        group   n  mean_confidence  median_confidence  confidence_ge_0.70  confidence_ge_0.80  confidence_ge_0.90
+      CORRECT 247         0.804865           0.860152            0.712551            0.615385            0.412955
+ALL_INCORRECT 105         0.658920           0.633788            0.419048            0.257143            0.114286
+       TIER_1  32         0.640722           0.569615            0.375000            0.281250            0.187500
+       TIER_2  31         0.664521           0.648397            0.387097            0.193548            0.096774
+       TIER_3  26         0.624634           0.575730            0.346154            0.230769            0.000000
+       TIER_4  16         0.740178           0.728245            0.687500            0.375000            0.187500
+
+F1 CONFIDENCE BY ERROR TYPE
+--------------------------------------------------------------------------------
+        group   n  mean_confidence  median_confidence  confidence_ge_0.70  confidence_ge_0.80  confidence_ge_0.90
+      CORRECT 248         0.798856           0.839322            0.737903            0.576613            0.383065
+ALL_INCORRECT 104         0.660502           0.639696            0.403846            0.298077            0.086538
+       TIER_1  32         0.683626           0.682041            0.437500            0.375000            0.187500
+       TIER_2  32         0.671759           0.654187            0.468750            0.281250            0.000000
+       TIER_3  24         0.602309           0.596308            0.250000            0.208333            0.041667
+       TIER_4  16         0.679028           0.696950            0.437500            0.312500            0.125000
+
+C1 TIER-1 CONFIDENCE BY SOURCE
+--------------------------------------------------------------------------------
+true_class  n  mean_confidence  median_confidence  confidence_ge_0.70  confidence_ge_0.80  confidence_ge_0.90
+       BCC 26         0.634158           0.547257            0.346154            0.269231            0.192308
+       SCC  5         0.605510           0.643090            0.400000            0.200000            0.000000
+       MEL  1         0.987443           0.987443            1.000000            1.000000            1.000000
+
+F1 TIER-1 CONFIDENCE BY SOURCE
+--------------------------------------------------------------------------------
+true_class  n  mean_confidence  median_confidence  confidence_ge_0.70  confidence_ge_0.80  confidence_ge_0.90
+       BCC 25         0.668224           0.675977                 0.4                0.32            0.120000
+       SCC  6         0.698981           0.744801                 0.5                0.50            0.333333
+       MEL  1         0.976555           0.976555                 1.0                1.00            1.000000
+
+PHASE 4 INTERVENTION INTERPRETATION
+--------------------------------------------------------------------------------
+C1 Tier-1 mean confidence: 0.6407
+F1 Tier-1 mean confidence: 0.6836
+C1 Tier-1 confidence >= 0.90: 18.8%
+F1 Tier-1 confidence >= 0.90: 18.8%
+
+INTERPRETATION: Tier-1 errors are predominantly low-confidence.
+A confidence-based abstention/review mechanism is a strong candidate.
+
+IMPORTANT: This is an engineering screening interpretation, not a final intervention decision.

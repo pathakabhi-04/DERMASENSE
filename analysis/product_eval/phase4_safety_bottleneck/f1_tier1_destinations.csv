@@ -1,0 +1,7 @@
+true_class,predicted_class,count
+BCC,ACK,22
+SCC,ACK,4
+BCC,SEK,3
+MEL,NEV,1
+SCC,NEV,1
+SCC,SEK,1
