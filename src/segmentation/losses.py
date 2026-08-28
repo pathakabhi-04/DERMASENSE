@@ -155,3 +155,57 @@ class BCEDiceLoss(nn.Module):
             self.bce_weight * bce
             + self.dice_weight * dice
         )
+
+
+class BCELoss(nn.Module):
+    """Binary cross-entropy loss operating directly on logits."""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.loss = nn.BCEWithLogitsLoss()
+
+    def forward(
+        self,
+        logits: torch.Tensor,
+        targets: torch.Tensor,
+    ) -> torch.Tensor:
+
+        if logits.shape != targets.shape:
+            raise ValueError(
+                "logits and targets must have identical shapes"
+            )
+
+        return self.loss(
+            logits,
+            targets.float(),
+        )
+
+
+def build_loss(
+    name: str,
+) -> nn.Module:
+    """
+    Construct a CV-2 loss-ablation variant.
+
+    Supported variants:
+        bce_dice: 0.5 BCE + 0.5 Dice
+        dice:     Dice only
+        bce:      BCE only
+    """
+
+    normalized = name.lower().strip()
+
+    if normalized == "bce_dice":
+        return BCEDiceLoss()
+
+    if normalized == "dice":
+        return DiceLoss()
+
+    if normalized == "bce":
+        return BCELoss()
+
+    raise ValueError(
+        f"Unknown loss '{name}'. "
+        "Expected one of: bce_dice, dice, bce"
+    )

@@ -2,7 +2,9 @@ import torch
 
 from src.segmentation.losses import (
     BCEDiceLoss,
+    BCELoss,
     DiceLoss,
+    build_loss,
     dice_score,
 )
 
@@ -131,4 +133,67 @@ def test_loss_rejects_shape_mismatch():
 
     raise AssertionError(
         "Expected ValueError for shape mismatch"
+    )
+
+def test_bce_loss_is_finite_and_backpropagates():
+    logits = torch.randn(
+        2,
+        1,
+        32,
+        32,
+        requires_grad=True,
+    )
+
+    targets = torch.randint(
+        0,
+        2,
+        (2, 1, 32, 32),
+    ).float()
+
+    loss = BCELoss()(
+        logits,
+        targets,
+    )
+
+    assert loss.ndim == 0
+    assert torch.isfinite(loss)
+
+    loss.backward()
+
+    assert logits.grad is not None
+    assert torch.isfinite(logits.grad).all()
+
+
+def test_build_loss_variants():
+    assert isinstance(
+        build_loss("bce_dice"),
+        BCEDiceLoss,
+    )
+
+    assert isinstance(
+        build_loss("dice"),
+        DiceLoss,
+    )
+
+    assert isinstance(
+        build_loss("bce"),
+        BCELoss,
+    )
+
+
+def test_build_loss_normalizes_name():
+    assert isinstance(
+        build_loss("  DICE  "),
+        DiceLoss,
+    )
+
+
+def test_build_loss_rejects_unknown_name():
+    try:
+        build_loss("invalid")
+    except ValueError:
+        return
+
+    raise AssertionError(
+        "Expected ValueError for unknown loss"
     )

@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import DataLoader, Subset
 
 from src.segmentation.dataset import ISIC2018SegmentationDataset
-from src.segmentation.losses import BCEDiceLoss
+from src.segmentation.losses import build_loss
 from src.segmentation.model import build_model
 from src.segmentation.training import fit
 
@@ -54,6 +54,13 @@ def parse_args() -> argparse.Namespace:
         "--learning-rate",
         type=float,
         default=1e-4,
+    )
+
+    parser.add_argument(
+        "--loss",
+        type=str,
+        default="bce_dice",
+        choices=("bce_dice", "dice", "bce"),
     )
 
     parser.add_argument(
@@ -206,6 +213,7 @@ def main() -> None:
     print("=" * 80)
     print(f"Device:       {device}")
     print("Model:        UNet")
+    print(f"Loss:         {args.loss}")
     print(f"Image size:   {args.image_size}")
     print(f"Batch size:   {args.batch_size}")
     print(f"Epochs:       {args.epochs}")
@@ -260,7 +268,7 @@ def main() -> None:
 
     model = build_model().to(device)
 
-    criterion = BCEDiceLoss()
+    criterion = build_loss(args.loss)
 
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -284,6 +292,7 @@ def main() -> None:
         "batch_size": args.batch_size,
         "epochs": args.epochs,
         "learning_rate": args.learning_rate,
+        "loss": args.loss,
         "num_workers": args.num_workers,
         "seed": args.seed,
         "device": str(device),
