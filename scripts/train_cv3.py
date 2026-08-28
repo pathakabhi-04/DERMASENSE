@@ -29,7 +29,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("checkpoints/cv2"),
+        default=Path("checkpoints/cv3"),
     )
 
     parser.add_argument(

@@ -1,8 +1,8 @@
-# CV-2 Segmentation Baseline
+# CV-3 Segmentation Baseline
 
 ## 1. Purpose
 
-CV-2 is the lesion segmentation component of DermaSense.
+CV-3 is the lesion segmentation component of DermaSense.
 
 The purpose of this experiment is to establish a reproducible baseline for binary lesion segmentation on the ISIC 2018 Task 1 dataset before conducting further model or training-method experiments.
 
@@ -39,7 +39,7 @@ The model outputs raw segmentation logits. Sigmoid is applied during metric comp
 
 The ISIC 2018 Task 1 segmentation dataset contains 2,594 training images with corresponding binary lesion masks.
 
-The fixed split used for CV-2 is:
+The fixed split used for CV-3 is:
 
 - Train: 2074 images
 - Validation: 259 images
@@ -58,7 +58,7 @@ The reported test results use a probability threshold of 0.5.
 
 ## 4. Why U-Net Was Selected
 
-U-Net was selected as the CV-2 baseline because it provides a straightforward encoder-decoder segmentation architecture with skip connections between corresponding spatial resolutions.
+U-Net was selected as the CV-3 baseline because it provides a straightforward encoder-decoder segmentation architecture with skip connections between corresponding spatial resolutions.
 
 This makes it an appropriate baseline for lesion segmentation because the task requires both:
 
@@ -71,7 +71,7 @@ The implementation is intentionally kept simple so that later experiments can be
 
 ## 5. Loss Function Selection
 
-The initial CV-2 loss was:
+The initial CV-3 loss was:
 
     0.5 BCE + 0.5 Dice
 
@@ -139,7 +139,7 @@ Therefore, the observed +0.0030 mean Dice advantage of BCE-only is not sufficien
 
 ## 8. Baseline Decision
 
-The official CV-2 baseline is therefore retained as:
+The official CV-3 baseline is therefore retained as:
 
 > **U-Net + 0.5 BCE + 0.5 Dice**
 
@@ -156,7 +156,7 @@ The BCE-only result should therefore be recorded as a competitive ablation resul
 
 ---
 
-## 9. Official CV-2 Results
+## 9. Official CV-3 Results
 
 The current official baseline test result is:
 
@@ -169,17 +169,17 @@ The current official baseline test result is:
 
 These values are associated with:
 
-    checkpoints/cv2/best.pt
+    checkpoints/cv3/best.pt
 
 and the corresponding evaluation artifacts in:
 
-    evaluation/cv2/
+    evaluation/cv3/
 
 ---
 
 ## 10. Future Experiments
 
-Future CV-2 experiments should treat this configuration as the reference baseline.
+Future CV-3 experiments should treat this configuration as the reference baseline.
 
 Unless an experiment explicitly changes a particular component, the following should remain fixed:
 

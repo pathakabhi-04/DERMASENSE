@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument(
         "--checkpoint",
         type=Path,
-        default=Path("checkpoints/cv2/best.pt"),
+        default=Path("checkpoints/cv3/best.pt"),
     )
 
     parser.add_argument(
@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("evaluation/cv2"),
+        default=Path("evaluation/cv3"),
     )
 
     parser.add_argument(
