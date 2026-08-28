@@ -1,0 +1,4 @@
+split,images,overlap_isic2019_train,overlap_isic2019_val,overlap_isic2019_test
+train,2074,621,0,0
+val,259,74,0,0
+test,260,76,0,0
