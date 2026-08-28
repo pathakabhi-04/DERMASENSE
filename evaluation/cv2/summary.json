@@ -1,0 +1,14 @@
+{
+  "checkpoint": "checkpoints/cv2/best.pt",
+  "test_split": "data/splits/isic2018_task1/test.csv",
+  "num_images": 260,
+  "threshold": 0.5,
+  "dice_mean": 0.8640105652697527,
+  "dice_std": 0.15473521970567447,
+  "iou_mean": 0.7851390301897692,
+  "iou_std": 0.18462055974383362,
+  "dice_median": 0.913602888584137,
+  "iou_median": 0.8409660756587982,
+  "checkpoint_epoch": 50,
+  "best_val_dice": 0.8652359412903952
+}
