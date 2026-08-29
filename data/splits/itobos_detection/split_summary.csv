@@ -1,0 +1,4 @@
+split,images,boxes,zero_lesion_images,density_0,density_1_3,density_4_9,density_10_plus
+train,6778,23498,1401,1401,3380,1409,588
+val,1695,5905,349,349,846,352,148
+test,8481,,,,,,
