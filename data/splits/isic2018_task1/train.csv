@@ -1,4 +1,4 @@
-dataset,image_id,image_path,mask_path,image_domain,overlaps_isic2019,isic2019_split,isic2019_lesion_id,isic2019_lesion_status,cv2_eligible
+dataset,image_id,image_path,mask_path,image_domain,overlaps_isic2019,isic2019_split,isic2019_lesion_id,isic2019_lesion_status,cv3_eligible
 isic2018_task1,ISIC_0000000,data/raw/isic2018/images/ISIC2018_Task1-2_Training_Input/ISIC_0000000.jpg,data/raw/isic2018/masks/ISIC2018_Task1_Training_GroundTruth/ISIC_0000000_segmentation.png,dermoscopic,True,train,,unknown,True
 isic2018_task1,ISIC_0000001,data/raw/isic2018/images/ISIC2018_Task1-2_Training_Input/ISIC_0000001.jpg,data/raw/isic2018/masks/ISIC2018_Task1_Training_GroundTruth/ISIC_0000001_segmentation.png,dermoscopic,True,train,,unknown,True
 isic2018_task1,ISIC_0000003,data/raw/isic2018/images/ISIC2018_Task1-2_Training_Input/ISIC_0000003.jpg,data/raw/isic2018/masks/ISIC2018_Task1_Training_GroundTruth/ISIC_0000003_segmentation.png,dermoscopic,True,train,,unknown,True

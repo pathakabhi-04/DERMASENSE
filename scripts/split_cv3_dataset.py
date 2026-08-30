@@ -22,7 +22,7 @@ def main() -> None:
     df = pd.read_csv(MANIFEST)
 
     df = df[
-        df["cv2_eligible"] == True
+        df["cv3_eligible"] == True
     ].copy()
 
     if len(df) != 2593:

@@ -38,7 +38,7 @@ class ISIC2018SegmentationDataset(Dataset):
             "image_path",
             "mask_path",
             "image_domain",
-            "cv2_eligible",
+            "cv3_eligible",
         }
 
         missing = required_columns - set(self.df.columns)
@@ -58,7 +58,7 @@ class ISIC2018SegmentationDataset(Dataset):
                 "image_id values must be unique within a split"
             )
 
-        if not self.df["cv2_eligible"].astype(bool).all():
+        if not self.df["cv3_eligible"].astype(bool).all():
             raise ValueError(
                 "CV-2 dataset contains ineligible samples"
             )
