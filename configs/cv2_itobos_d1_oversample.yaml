@@ -1,0 +1,5 @@
+path: /workspace/dermasense
+train: data/splits/itobos_detection/train_oversampled_sundamage.txt
+val: data/splits/itobos_detection/val.txt
+names:
+  0: lesion

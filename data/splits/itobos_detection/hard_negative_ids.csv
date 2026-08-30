@@ -1,0 +1,103 @@
+image_id,age_at_baseline,body_part,sun_damage_level
+image_0060,58.0,Torso,2
+image_0088,58.0,Right Leg - Lower,2
+image_0090,58.0,Left Arm - Lower,2
+image_0094,58.0,Right Leg - Lower,2
+image_0096,74.0,Torso,2
+image_0176,61.0,Unknown,2
+image_0353,74.0,Left Leg - Lower,2
+image_0515,Unknown,Torso,2
+image_0871,58.0,Right Arm - Lower,2
+image_0903,56.0,Right Arm - Upper,2
+image_0975,68.0,Torso,2
+image_0977,68.0,Torso,2
+image_1021,69.0,Left Arm - Lower,2
+image_1116,56.0,Torso,2
+image_1145,56.0,Left Arm - Lower,2
+image_1519,58.0,Right Leg - Lower,2
+image_1626,Unknown,Torso,2
+image_1914,52.0,Torso,2
+image_1919,69.0,Right Leg - Upper,2
+image_1949,51.0,Torso,2
+image_2051,56.0,Torso,2
+image_2213,70.0,Left Leg - Lower,2
+image_2426,75.0,Left Leg - Lower,2
+image_2452,69.0,Right Arm - Lower,2
+image_2646,47.0,Right Arm - Upper,2
+image_2696,68.0,Right Leg - Upper,2
+image_2759,68.0,Left Arm - Upper,2
+image_2814,47.0,Right Arm - Upper,2
+image_3006,61.0,Right Arm - Upper,2
+image_3032,69.0,Left Arm - Lower,2
+image_3062,56.0,Torso,2
+image_3295,47.0,Left Arm - Lower,2
+image_3712,45.0,Torso,2
+image_3754,50.0,Left Arm - Upper,2
+image_3760,47.0,Torso,2
+image_3829,47.0,Right Arm - Lower,2
+image_3981,68.0,Left Arm - Lower,2
+image_3982,68.0,Left Arm - Lower,2
+image_3984,69.0,Right Leg - Lower,2
+image_4052,55.0,Right Leg - Lower,2
+image_4270,69.0,Left Arm - Upper,2
+image_4459,50.0,Right Arm - Upper,2
+image_4585,68.0,Left Leg - Lower,2
+image_4667,65.0,Right Leg - Lower,2
+image_4762,56.0,Left Arm - Lower,2
+image_4819,65.0,Right Arm - Upper,2
+image_4848,47.0,Right Arm - Upper,2
+image_4858,50.0,Torso,2
+image_4974,65.0,Right Arm - Upper,2
+image_5077,69.0,Left Arm - Upper,2
+image_5079,56.0,Torso,2
+image_5105,47.0,Torso,2
+image_5111,56.0,Torso,2
+image_5132,47.0,Right Arm - Lower,2
+image_5214,45.0,Torso,2
+image_5330,68.0,Left Arm - Lower,3
+image_5344,50.0,Left Arm - Lower,2
+image_5356,51.0,Right Arm - Upper,2
+image_5357,51.0,Right Arm - Upper,2
+image_5407,68.0,Right Leg - Upper,2
+image_5472,56.0,Left Arm - Upper,2
+image_5513,68.0,Left Arm,2
+image_5571,72.0,Torso,2
+image_5573,68.0,Right Arm - Upper,2
+image_5595,47.0,Right Arm - Upper,2
+image_5623,52.0,Left Arm - Lower,2
+image_5771,47.0,Right Arm - Lower,2
+image_5884,52.0,Left Arm - Lower,2
+image_5891,72.0,Torso,2
+image_5955,50.0,Torso,3
+image_5985,68.0,Left Arm - Lower,3
+image_6377,47.0,Torso,2
+image_6423,51.0,Right Arm - Lower,2
+image_6444,65.0,Left Arm - Lower,2
+image_6479,51.0,Torso,3
+image_6485,50.0,Torso,2
+image_6530,50.0,Right Arm - Upper,2
+image_6656,50.0,Torso,3
+image_6672,72.0,Right Arm - Upper,2
+image_6693,68.0,Left Leg - Lower,2
+image_6751,56.0,Torso,2
+image_6828,50.0,Right Arm - Upper,2
+image_6976,72.0,Torso,2
+image_7018,43.0,Left Arm - Lower,2
+image_7078,47.0,Right Arm - Upper,2
+image_7252,50.0,Torso,2
+image_7253,50.0,Torso,2
+image_7328,68.0,Torso,2
+image_7464,56.0,Torso,2
+image_7542,47.0,Right Leg - Lower,2
+image_7656,50.0,Torso,2
+image_7657,50.0,Torso,2
+image_7712,51.0,Right Arm - Upper,2
+image_7724,56.0,Right Arm - Lower,2
+image_7757,51.0,Left Leg - Lower,2
+image_7787,68.0,Torso,3
+image_7824,47.0,Right Arm - Upper,2
+image_7929,56.0,Right Arm - Upper,2
+image_7965,50.0,Right Arm - Lower,2
+image_8069,45.0,Right Arm - Upper,2
+image_8190,55.0,Left Arm,2
+image_8307,51.0,Right Arm - Upper,2
