@@ -22,6 +22,7 @@
       "title": "Skin cancer: Everyone's at risk",
       "source": "American Academy of Dermatology",
       "source_url": "https://www.aad.org/public/diseases/skin-cancer/find/at-risk",
+      "status": "unavailable",
       "topic": "skin_cancer",
       "condition": "melanoma",
       "sections": [
@@ -48,7 +49,7 @@
     {
       "document_id": "NCI_MELANOMA_APPEARANCE_001",
       "title": "What Does Melanoma Look Like?",
-      "source": "National Cancer Institute",
+      "source": "National Cancer Institute",  
       "source_url": "https://www.cancer.gov/types/skin/melanoma-photos",
       "topic": "skin_cancer",
       "condition": "melanoma",
@@ -108,6 +109,8 @@
       "title": "First aid",
       "source": "NHS",
       "source_url": "https://www.nhs.uk/tests-and-treatments/first-aid/",
+      "status": "unavailable_redirect",
+      "redirect_url": "https://www.sja.org.uk/first-aid-advice/",
       "topic": "first_aid",
       "condition": "burn",
       "sections": [
