@@ -265,16 +265,41 @@ known, quantified limitation (same category as CV-2's known ~19%
 complete-miss rate: downstream stages already have to tolerate an
 imperfect upstream stage). Not a blocking defect; document and move on.
 
-## Current task (immediate next)
+## In progress: CV-1.5 Domain Router
 
-Not yet chosen. Candidates per the deferred-items table and CV component
-status: CV-1.5 domain router (designed, not implemented — blocks having
-an actual end-to-end pipeline), or continuing CV-4/CV-8 wiring now that
-CV-2→CV-3 interface (geometry: robust; domain: measured, usable-with-caveat)
-is closed out. Decide next based on product priority, not on chasing the
-CV-3 TBP fragmentation finding further (per the anti-rabbit-hole
-discipline — see `[[feedback_bounded_experiments]]` memory / the
-SCC/BCC precedent).
+**Status: Stage 1 (heuristic) FAILED gate. Stage 2 (learned classifier)
+pending user go-ahead — needs a RunPod GPU training run.**
+
+Spec: `docs/cv1_5_router_spec.md` (staged, cheapest-first: classical
+heuristic before any training, escalate only if it fails a >=90%-
+per-class gate). Plan: `~/.claude/plans/squishy-watching-treehouse.md`.
+
+Stage 1 result (`analysis/quality/cv1_5_router/result.md`):
+`src/routing/heuristic.py` (largest-pigmented-blob-fraction of frame,
+calibrated on a train-split sample) scored 80.0% pre_framed / 62.0%
+wide_field on the held-out 150+150 test set — both below the 90% gate,
+wide_field substantially so. A single classical blob-salience feature
+conflates framing (camera distance) with lesion salience and doesn't
+separate the classes reliably — same category of finding as CV-2 needing
+a trained detector rather than classical CV (`docs/cv2_detection_spec.md`
+Section 2.1).
+
+Per the spec's decision rule, this escalates to Stage 2: a ResNet18
+fine-tune on PAD-UFES (label=framed) vs. iToBoS (label=wide-field) train
+splits, evaluated against the same held-out set and gate. **This is the
+first concrete RunPod GPU trigger in the project** (CV-3's UNet alone
+measured ~0.63s/forward-pass on local CPU; a multi-epoch classifier
+training run over iToBoS's ~7k train images would be impractically slow
+locally). Not started without explicit sign-off — flagged, not assumed.
+
+Ground-truth caveat applies to both stages: neither dataset has a
+per-image framing label; supervision/evaluation uses dataset identity
+(PAD-UFES=framed, iToBoS=wide-field) as a proxy — see the spec.
+
+**Explicitly out of scope for this task:** rewiring
+`src/inference/pipeline.py` into a full CV-1→CV-8 orchestrator (it
+currently only wires CV-4→risk). That's a separate follow-on step once
+CV-1.5 itself clears its gate.
 
 ---
 

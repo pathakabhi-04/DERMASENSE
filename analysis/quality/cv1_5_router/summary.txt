@@ -1,0 +1,16 @@
+CV-1.5 Domain Router -- Stage 1 (Heuristic) Validation
+============================================================
+
+Eval set: 300 images (150 pre_framed + 150 wide_field, seed=42)
+
+pre_framed accuracy: 0.800  (gate >= 0.9)
+wide_field accuracy: 0.620  (gate >= 0.9)
+overall accuracy:    0.710
+
+Confusion matrix (rows=true label, cols=predicted):
+predicted   pre_framed  wide_field
+label                             
+pre_framed         120          30
+wide_field          57          93
+
+RESULT: FAIL -- at least one class is below the 90% gate. Per docs/cv1_5_router_spec.md, this means escalating to Stage 2 (learned classifier) -- do not iterate heuristic thresholds further. Flag to the user before starting a Stage 2 training run.
