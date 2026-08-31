@@ -1,0 +1,9 @@
+CV-1.5 Domain Router -- Stage 2 (Classifier) Result
+============================================================
+
+Checkpoint: checkpoints/cv1_5_router/best.pt (re-scored, not retrained)
+
+pre_framed accuracy: 1.000  (gate >= 0.9)
+wide_field accuracy: 1.000  (gate >= 0.9)
+
+RESULT: PASS
