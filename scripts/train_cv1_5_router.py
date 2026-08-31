@@ -217,10 +217,18 @@ def train_one_epoch(
     return total_loss / max(num_batches, 1)
 
 
+@torch.no_grad()
 def run_final_holdout_eval(
     model: nn.Module, device: torch.device
-) -> dict:
-    """Score the trained model against the fixed Stage-1 held-out set."""
+) -> tuple[dict, pd.DataFrame]:
+    """
+    Score the trained model against the fixed Stage-1 held-out set.
+
+    Returns both the aggregate metrics and a per-image predictions table
+    (same schema as Stage 1's analysis/quality/cv1_5_router/predictions.csv,
+    for direct comparison) -- so the pushed result isn't just a summary
+    number, it's auditable the same way Stage 1's was.
+    """
     eval_table = pd.read_csv(HELD_OUT_EVAL_SET)
     transform = build_eval_transform(ImageTransformConfig())
     loader = build_loader(
@@ -231,7 +239,36 @@ def run_final_holdout_eval(
         device=device,
         train=False,
     )
-    return evaluate(model, loader, device)
+
+    model.eval()
+    records = []
+    for batch in loader:
+        images = batch["image"].to(device, non_blocking=True)
+        logits = model(images)
+        preds = torch.argmax(logits, dim=1).cpu().tolist()
+        for image_path, label_index, pred_index in zip(
+            batch["image_path"], batch["label"].tolist(), preds
+        ):
+            label = CLASS_NAMES[label_index]
+            predicted = CLASS_NAMES[pred_index]
+            records.append(
+                {
+                    "image_path": image_path,
+                    "label": label,
+                    "predicted": predicted,
+                    "correct": label == predicted,
+                }
+            )
+
+    predictions = pd.DataFrame(records)
+    per_class_acc = predictions.groupby("label")["correct"].mean().to_dict()
+    balanced_acc = float(np.mean(list(per_class_acc.values())))
+
+    metrics = {
+        "per_class_accuracy": per_class_acc,
+        "balanced_accuracy": balanced_acc,
+    }
+    return metrics, predictions
 
 
 def main() -> None:
@@ -323,7 +360,7 @@ def main() -> None:
     checkpoint = torch.load(best_path, map_location=device)
     model.load_state_dict(checkpoint["model_state_dict"])
 
-    holdout_metrics = run_final_holdout_eval(model, device)
+    holdout_metrics, holdout_predictions = run_final_holdout_eval(model, device)
     per_class = holdout_metrics["per_class_accuracy"]
     pre_framed_acc = per_class["pre_framed"]
     wide_field_acc = per_class["wide_field"]
@@ -349,10 +386,14 @@ def main() -> None:
 
     RESULT_DIR.mkdir(parents=True, exist_ok=True)
     (RESULT_DIR / "stage2_summary.txt").write_text(summary_text + "\n")
+    holdout_predictions.to_csv(
+        RESULT_DIR / "stage2_predictions.csv", index=False
+    )
 
     print()
     print(summary_text)
-    print(f"\nSummary written to: {RESULT_DIR / 'stage2_summary.txt'}")
+    print(f"\nSummary written to:     {RESULT_DIR / 'stage2_summary.txt'}")
+    print(f"Predictions written to: {RESULT_DIR / 'stage2_predictions.csv'}")
 
 
 if __name__ == "__main__":
