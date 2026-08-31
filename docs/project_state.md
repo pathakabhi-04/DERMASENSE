@@ -99,11 +99,12 @@ distribution. Tracked in docs/cv2_detection_spec.md Section 13.
   Flagged as a future validation task, not blocking.
 
 ### CV-1.5 — Domain Router
-**Status: DESIGNED, NOT IMPLEMENTED**
-- Decision: routes on framing (pre-localized vs wide-field), not modality.
-- PAD-UFES-20 is pre-framed (visually confirmed), so it takes the
-  pre-framed path directly to CV-3.
-- Implementation needed before end-to-end pipeline exists.
+**Status: COMPLETE.** See "Completed: CV-1.5 Domain Router" below for
+the full result. ResNet18 classifier, 1.000/1.000 on held-out set.
+`src/routing/classifier.py::route_image`. PAD-UFES-20 is pre-framed
+(visually confirmed), so it takes the pre-framed path directly to CV-3.
+Not yet wired into `src/inference/pipeline.py` — that integration step
+is separate.
 
 ### CV-2 — Lesion Candidate Detection
 **Status: BASELINE ACCEPTED AT FLOOR — refinement deferred**
@@ -265,41 +266,50 @@ known, quantified limitation (same category as CV-2's known ~19%
 complete-miss rate: downstream stages already have to tolerate an
 imperfect upstream stage). Not a blocking defect; document and move on.
 
-## In progress: CV-1.5 Domain Router
+## Completed: CV-1.5 Domain Router
 
-**Status: Stage 1 (heuristic) FAILED gate. Stage 2 (learned classifier)
-pending user go-ahead — needs a RunPod GPU training run.**
+**Status: PASS (Stage 2). CV-1.5 exists.**
+`analysis/quality/cv1_5_router/result.md` (2026-09-01). Spec:
+`docs/cv1_5_router_spec.md` (staged, cheapest-first: classical heuristic
+before any training, escalate only if it fails a >=90%-per-class gate).
 
-Spec: `docs/cv1_5_router_spec.md` (staged, cheapest-first: classical
-heuristic before any training, escalate only if it fails a >=90%-
-per-class gate). Plan: `~/.claude/plans/squishy-watching-treehouse.md`.
+- **Stage 1 (heuristic, `src/routing/heuristic.py`) FAILED:** 80.0%
+  pre_framed / 62.0% wide_field vs. the 90% gate
+  (`analysis/quality/cv1_5_router/stage1_result.md`). A single
+  pigmentation-blob-salience feature conflates framing with lesion
+  salience — same category of limitation as CV-2 needing a trained
+  detector rather than classical CV.
+- **Stage 2 (ResNet18 fine-tune, `src/routing/classifier.py`) PASSED:**
+  1.000 / 1.000 on the same 150+150 held-out set (never resampled).
+  Trained on RunPod GPU — **this was the project's first concrete RunPod
+  trigger.** A perfect score on a proxy-labeled task (dataset identity
+  standing in for verified per-image framing) was sanity-checked before
+  being accepted, not assumed: manually inspected 6 held-out images
+  (3/class), confirmed the classes are genuinely, obviously distinct at
+  the composition level, not a labeling bug or a spurious-artifact
+  shortcut. See the result doc for the full reasoning.
+- Along the way, storage-constrained RunPod volume (100GB, 72% full)
+  meant only iToBoS's train split was uploaded; the held-out eval's 150
+  test-split images were pushed separately via the RunPod S3-compatible
+  bucket rather than syncing the full 8,481-image test split (~10GB) —
+  worth remembering as the pattern for any future "need a small fixed
+  subset of a large remote dataset on a space-constrained pod" situation.
 
-Stage 1 result (`analysis/quality/cv1_5_router/result.md`):
-`src/routing/heuristic.py` (largest-pigmented-blob-fraction of frame,
-calibrated on a train-split sample) scored 80.0% pre_framed / 62.0%
-wide_field on the held-out 150+150 test set — both below the 90% gate,
-wide_field substantially so. A single classical blob-salience feature
-conflates framing (camera distance) with lesion salience and doesn't
-separate the classes reliably — same category of finding as CV-2 needing
-a trained detector rather than classical CV (`docs/cv2_detection_spec.md`
-Section 2.1).
+**Production interface:** `src/routing/classifier.py::route_image` +
+`load_router_checkpoint`. Checkpoint: `checkpoints/cv1_5_router/best.pt`
+(RunPod volume — not in git, matches checkpoint convention).
 
-Per the spec's decision rule, this escalates to Stage 2: a ResNet18
-fine-tune on PAD-UFES (label=framed) vs. iToBoS (label=wide-field) train
-splits, evaluated against the same held-out set and gate. **This is the
-first concrete RunPod GPU trigger in the project** (CV-3's UNet alone
-measured ~0.63s/forward-pass on local CPU; a multi-epoch classifier
-training run over iToBoS's ~7k train images would be impractically slow
-locally). Not started without explicit sign-off — flagged, not assumed.
+**Proxy-label caveat still stands** (not a blocker): evaluation measures
+"PAD-UFES vs. iToBoS," not verified per-image framing. If CV-1.5
+underperforms on real product images later, this gap is the first place
+to look. Same category as CV-1's synthetic-only validation caveat and
+CV-2's iToBoS→phone caveat.
 
-Ground-truth caveat applies to both stages: neither dataset has a
-per-image framing label; supervision/evaluation uses dataset identity
-(PAD-UFES=framed, iToBoS=wide-field) as a proxy — see the spec.
-
-**Explicitly out of scope for this task:** rewiring
-`src/inference/pipeline.py` into a full CV-1→CV-8 orchestrator (it
-currently only wires CV-4→risk). That's a separate follow-on step once
-CV-1.5 itself clears its gate.
+**Explicitly still out of scope:** rewiring `src/inference/pipeline.py`
+into a full CV-1→CV-8 orchestrator (it currently only wires CV-4→risk).
+That's the natural next integration step now that CV-1.5, CV-2, and
+CV-3 all exist and are individually validated — but is a separate task,
+not assumed here.
 
 ---
 
