@@ -32,6 +32,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PRED_FILES = {
     "B1 (1280)": REPO_ROOT
     / "evaluation/cv2/prediction_diagnostics/b1_1280/predictions.csv",
+    "E (YOLO11s)": REPO_ROOT
+    / "evaluation/cv2/prediction_diagnostics/e_yolo11s/predictions.csv",
     "D (oversampled)": REPO_ROOT
     / "evaluation/cv2/prediction_diagnostics/d1_sun_damage_oversample/predictions.csv",
 }
