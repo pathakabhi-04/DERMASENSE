@@ -1,0 +1,51 @@
+image_id,sun_damage_level,body_part,confidence,rating
+image_0051,1,Left Leg - Lower,0.7017418742179871,reasonable
+image_0112,1,Right Leg - Lower,0.3655764460563659,reasonable
+image_0878,1,Torso,0.2774265110492706,fail
+image_0936,1,Left Arm - Upper,0.706831693649292,reasonable
+image_1070,1,Left Arm - Upper,0.0076140072196722,reasonable
+image_1401,1,Right Leg - Lower,0.5020716190338135,reasonable
+image_1613,1,Torso,0.7891091108322144,reasonable
+image_1797,1,Right Leg - Upper,0.0019343125168234,fail
+image_1853,1,Right Arm - Lower,0.1085692346096038,reasonable
+image_1951,1,Right Arm - Lower,0.6247638463973999,reasonable
+image_2181,1,Right Leg - Lower,0.2299303561449051,reasonable
+image_2273,1,Torso,0.7219657301902771,reasonable
+image_2505,1,Torso,0.5891126394271851,reasonable
+image_2727,1,Left Arm - Lower,0.7558408379554749,fail
+image_3064,1,Left Arm - Lower,0.8317009210586548,reasonable
+image_3088,1,Left Leg - Lower,0.0027032180223613,reasonable
+image_3129,1,Right Leg - Lower,0.4045862257480621,reasonable
+image_3146,1,Left Leg - Upper,0.6540851593017578,reasonable
+image_3690,1,Torso,0.3484914004802704,reasonable
+image_3856,1,Torso,0.4521945118904114,fail
+image_4207,1,Torso,0.8075845837593079,reasonable
+image_4311,1,Left Arm - Upper,0.7307174205780029,fail
+image_4636,1,Torso,0.7568426728248596,reasonable
+image_5179,1,Right Leg - Upper,0.7789059281349182,reasonable
+image_5181,1,Torso,0.5831581354141235,reasonable
+image_5283,1,Left Arm - Upper,0.4511984586715698,fail
+image_5457,1,Left Arm - Upper,0.527438223361969,fail
+image_5776,1,Torso,0.7588878273963928,reasonable
+image_5825,1,Right Leg - Upper,0.7954174876213074,reasonable
+image_5834,1,Left Arm - Upper,0.7076961994171143,reasonable
+image_5975,1,Right Leg - Upper,0.2069146931171417,reasonable
+image_6391,1,Torso,0.7442718744277954,reasonable
+image_6429,1,Left Leg - Lower,0.798914909362793,reasonable
+image_6581,1,Right Arm - Lower,0.4603126049041748,reasonable
+image_6894,1,Left Leg - Lower,0.7517570853233337,reasonable
+image_6922,1,Torso,0.7424085736274719,reasonable
+image_6996,1,Left Leg - Lower,0.4426124095916748,reasonable
+image_7088,1,Left Leg - Upper,0.2801141738891601,reasonable
+image_8331,1,Left Leg - Lower,0.3677898943424225,fail
+image_1805,2,Torso,0.8108090162277222,reasonable
+image_1882,2,Left Arm - Upper,0.7468080520629883,reasonable
+image_2600,2,Torso,0.7964664697647095,reasonable
+image_2822,2,Right Arm - Upper,0.2677690684795379,fail
+image_3035,2,Torso,0.6896649599075317,reasonable
+image_4231,2,Left Arm,0.4056484997272491,fail
+image_4519,2,Left Arm - Lower,0.6836641430854797,fail
+image_6401,2,Right Arm - Upper,0.6552131772041321,reasonable
+image_7133,2,Torso,0.6210737228393555,reasonable
+image_8443,2,Right Arm - Upper,0.6626307964324951,reasonable
+image_3833,3,Left Arm,0.6941931843757629,reasonable

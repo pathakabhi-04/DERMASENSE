@@ -1,0 +1,27 @@
+margin=1.0  offset=0.0  n=260  mean_dice=0.8631
+margin=1.0  offset=0.1  n=260  mean_dice=0.8639
+margin=1.0  offset=0.2  n=260  mean_dice=0.8639
+margin=0.5  offset=0.0  n=260  mean_dice=0.8700
+margin=0.5  offset=0.1  n=260  mean_dice=0.8706
+margin=0.5  offset=0.2  n=260  mean_dice=0.8704
+margin=0.25 offset=0.0  n=260  mean_dice=0.8776
+margin=0.25 offset=0.1  n=260  mean_dice=0.8742
+margin=0.25 offset=0.2  n=260  mean_dice=0.8679
+margin=0.1  offset=0.0  n=260  mean_dice=0.8718
+margin=0.1  offset=0.1  n=260  mean_dice=0.8670
+margin=0.1  offset=0.2  n=260  mean_dice=0.8480
+margin=0.0  offset=0.0  n=260  mean_dice=0.8568
+margin=0.0  offset=0.1  n=260  mean_dice=0.8480
+margin=0.0  offset=0.2  n=260  mean_dice=0.8160
+
+Grid saved to: /home/abhinav-pathak/dermasense/analysis/quality/cv2_cv3_interface/interface_dice_grid.csv
+
+INTERPRETATION GUIDE:
+  - Large margin (1.0) ~ CV-3's full-frame training input.
+    Should recover close to the ~0.86 baseline. If it does NOT,
+    the harness itself is suspect -- investigate before trusting
+    the tight-margin rows.
+  - Tight margin (0.0) + offset ~ aggressive CV-2 crop.
+    This is the interface risk case.
+  - Compare against the pre-committed Dice floor in the spec
+    BEFORE deciding pass/fail.

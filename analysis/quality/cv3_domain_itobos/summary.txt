@@ -1,0 +1,15 @@
+CV-3 Domain Validation on iToBoS (TBP) Crops -- Proxy Metrics
+============================================================
+
+iToBoS TP crops: 1000 (from 581 images)
+ISIC control crops: 260
+
+metric                            iToBoS    ISIC control
+degenerate-mask rate               0.018           0.000
+border-touch rate                  0.026           0.062
+fg_frac median                     0.279           0.334
+fg_frac IQR                        0.195           0.112
+
+These proxies are a sanity net, NOT the decision signal. Compare against the pre-committed criteria in docs/cv3_domain_validation_spec.md, and treat the visual audit sample (audit_sample.csv + audit_contact_sheet.jpg) as the real decision signal: rate each row 'reasonable' or 'fail' by eye, then apply the >=80% gate.
+
+Do not sweep additional proxy metrics or enlarge the sample -- one run, one decision, per the spec's anti-rabbit-hole clause.

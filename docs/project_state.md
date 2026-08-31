@@ -216,46 +216,65 @@ tests/                  central test suite (CV-3 tests; CV-2 detection
 
 ---
 
+## Completed: CV-2 → CV-3 Interface Validation (geometry)
+
+**Result: ROBUST.** `analysis/quality/cv2_cv3_interface/validation_run.txt`
+(2026-08-31). Harness self-check passed (margin=1.0/offset=0.0 Dice
+0.8631, recovers ~baseline 0.8640). Realistic crop (margin=0.25/offset=0.1)
+Dice 0.8742 ≥ 0.75 gate. Worst cell in the whole 15-cell grid
+(margin=0.0/offset=0.2) still 0.8160 — no collapse anywhere swept.
+`src/inference/crop_normalize.py`'s existing `margin=0.25` default is
+confirmed as the (near-)best-performing value in the grid — no code
+change needed. Per `docs/cv2_cv3_interface_spec.md` decision rule: robust
+→ adopt best margin → move on. Geometry axis of the CV-2→CV-3 interface
+is closed. (Domain axis was explicitly out of scope for this experiment
+— see next task.)
+
+## Completed: CV-3 Domain Validation on iToBoS (TBP) crops
+
+**Result: BORDERLINE FAIL (78% vs 80% gate).**
+`analysis/quality/cv3_domain_itobos/result.md` (2026-09-01). Script:
+`scripts/validate_cv3_domain_itobos.py`. Real CV-2 B1 true-positive
+detections on real iToBoS images, through the real `crop_and_normalize()`
+at margin=0.25, through CV-3. No iToBoS masks exist, so this used proxy
+metrics (sanity net, inconclusive on their own — no proxy showed a clean
+collapse) plus a stratified n=50 manual visual audit (the actual decision
+signal): 39/50 (78%) rated "reasonable," just under the pre-committed
+≥80% gate.
+
+Failure breakdown: 6/11 fails are mask **fragmentation** (scattered
+disconnected blobs instead of one coherent region — the dominant mode),
+3/11 near-empty/miss, 2/11 blocky border artifacts. Per the spec's
+fail-branch diagnostic, checked whether this is a fixable scale/framing
+issue (retry margin) vs. a genuine appearance-domain gap: box-size
+analysis showed **no clean scale cutoff** (failed vs. passed crop-area
+distributions heavily overlap) — this rules out "just retry with a
+different margin" and points at a genuine, if partial, dermoscopic→TBP
+appearance gap (texture/hair/lighting), not a geometry problem.
+
+**Per the pre-committed spec, this does NOT auto-trigger fine-tuning.**
+The fail branch explicitly stops here: fine-tuning CV-3 on TBP data would
+need real TBP mask signal (none exists — no iToBoS segmentation ground
+truth), and deciding to invest in collecting/generating that is its own
+scoped decision with its own spec, not an automatic next step.
+
+**Practical read:** CV-3 is usable on TBP crops as-is for continued
+pipeline wiring — 78% of real CV-2 detections still get a reasonable
+segmentation, and the ~22% fragmentation-dominated failure rate is now a
+known, quantified limitation (same category as CV-2's known ~19%
+complete-miss rate: downstream stages already have to tolerate an
+imperfect upstream stage). Not a blocking defect; document and move on.
+
 ## Current task (immediate next)
 
-### CV-2 → CV-3 Interface Validation
-
-**What:** validate that CV-3 (segmentation) tolerates CV-2-style crop
-geometry rather than only working on the clean centered ISIC frames it
-trained on.
-
-**Why now:** build on this join before extending the pipeline further, so
-domain-shift problems don't compound silently across multiple phases.
-
-**Implementation:** `src/inference/crop_normalize.py` (the interface
-function, committed), `scripts/validate_cv2_cv3_interface.py` (the
-experiment), `docs/cv2_cv3_interface_spec.md` (pre-committed criteria).
-
-**Method:** geometry-perturbation experiment on ISIC test set (260
-images, masks available). Sweep (margin, centering-offset) grid
-simulating what CV-2 realistically produces. Compute Dice (via
-`src.segmentation.metrics.segmentation_dice` — identical to baseline).
-
-**Pre-committed acceptance (read BEFORE looking at results):**
-- Harness self-check: margin=1.0/offset=0.0 must show Dice ≥ 0.80
-  (recovers near baseline; if not, the harness is broken, stop).
-- Realistic crop (margin=0.25/offset=0.1): Dice ≥ 0.75 = ROBUST, proceed.
-  Dice < 0.75 = FRAGILE, intervention needed.
-
-**Run command (local, CPU, no pod needed):**
-```bash
-cd ~/dermasense
-python scripts/validate_cv2_cv3_interface.py \
-  --weights checkpoints/cv3_512/best.pt \
-  --device cpu
-```
-
-**Decision by outcome (`docs/cv2_cv3_interface_spec.md`):**
-- Robust → adopt the margin with best Dice as pipeline default. Move on.
-- Fragile → fine-tune CV-3 on detector-style crops (one scoped run). Then
-  stop.
-- Do NOT sweep dozens of margins chasing marginal Dice. One grid, one
-  decision.
+Not yet chosen. Candidates per the deferred-items table and CV component
+status: CV-1.5 domain router (designed, not implemented — blocks having
+an actual end-to-end pipeline), or continuing CV-4/CV-8 wiring now that
+CV-2→CV-3 interface (geometry: robust; domain: measured, usable-with-caveat)
+is closed out. Decide next based on product priority, not on chasing the
+CV-3 TBP fragmentation finding further (per the anti-rabbit-hole
+discipline — see `[[feedback_bounded_experiments]]` memory / the
+SCC/BCC precedent).
 
 ---
 
