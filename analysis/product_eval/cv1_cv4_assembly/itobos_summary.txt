@@ -1,0 +1,27 @@
+CV-1 -> CV-4 Assembly -- Wide-field branch (iToBoS test)
+==============================================================
+
+NO ACCURACY CLAIM IS MADE. iToBoS carries no diagnosis labels,
+so nothing here is scored against ground truth. These are
+structural propagation counts only.
+
+Images: 1000
+
+Outcomes:
+  ASSESSED             655  (65.5%)
+  NO_CANDIDATES        130  (13.0%)
+  QUALITY_REJECTED     215  (21.5%)
+
+Silent-miss rate (routed wide_field, zero candidates): 13.0%
+
+Routing distribution:
+  nan                215
+  wide_field         785
+
+Candidates per assessed image: mean 4.71, max 27
+
+Image-level action distribution:
+  EVALUATE_SOON        55
+  MONITOR              386
+  UNKNOWN              345
+  URGENT_EVALUATION    214

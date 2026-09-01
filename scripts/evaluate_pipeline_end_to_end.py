@@ -91,8 +91,13 @@ def parse_args() -> argparse.Namespace:
         "--limit",
         type=int,
         default=0,
-        help="cap images processed (0 = all). iToBoS test is 8481 images.",
+        help=(
+            "cap images processed (0 = all). iToBoS test is 8481 images. "
+            "Sampled at random with --seed rather than taken from the "
+            "head, so the subset is not correlated with acquisition order."
+        ),
     )
+    p.add_argument("--seed", type=int, default=42)
     p.add_argument("--output", type=Path, default=OUTPUT_DIR)
     return p.parse_args()
 
@@ -358,8 +363,10 @@ def main() -> None:
     table = pd.read_csv(PAD_UFES_TEST if is_pad_ufes else ITOBOS_TEST)
     if not is_pad_ufes:
         table = table.drop_duplicates("image_id")
-    if args.limit:
-        table = table.head(args.limit)
+    if args.limit and args.limit < len(table):
+        # Random, seeded -- a head() slice could track acquisition order
+        # (site, batch, body region) and bias the structural rates.
+        table = table.sample(n=args.limit, random_state=args.seed)
 
     # The detector is only needed for the wide-field branch.
     detector_weights = None if is_pad_ufes else DETECTOR_WEIGHTS

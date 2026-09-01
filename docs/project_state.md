@@ -1,6 +1,6 @@
 # DermaSense — Project State Document
 
-**Last updated:** end of CV-2 baseline freeze session (Aug 2026).
+**Last updated:** CV-1 -> CV-4 pipeline assembly session (2026-09-01).
 **Purpose:** bootstrap context for any new session. Read this before
 touching any code. All decisions referenced here are committed in git
 with rationale; this document is a navigation index, not a substitute
@@ -103,8 +103,9 @@ distribution. Tracked in docs/cv2_detection_spec.md Section 13.
 the full result. ResNet18 classifier, 1.000/1.000 on held-out set.
 `src/routing/classifier.py::route_image`. PAD-UFES-20 is pre-framed
 (visually confirmed), so it takes the pre-framed path directly to CV-3.
-Not yet wired into `src/inference/pipeline.py` — that integration step
-is separate.
+Wired into the assembled pipeline
+(`src/inference/orchestrator.py`); `src/inference/pipeline.py` remains
+the separate CV-4-only path.
 
 ### CV-2 — Lesion Candidate Detection
 **Status: BASELINE ACCEPTED AT FLOOR — refinement deferred**
@@ -126,13 +127,20 @@ same performance).
 3. D — sun-damage hard-negative oversampling (8x) → no effect.
 4. E — YOLO11s capacity → no effect (image-level recall +0.0009).
 
-**Deferred refinement:** tiling/SAHI (one experiment permitted).
-Re-entry gate: run ONLY IF end-to-end evaluation (through CV-8) shows
-CV-2 miss rate is the dominant pipeline failure. See `docs/cv2_status.md`.
+**Deferred refinement:** tiling/SAHI — **effectively CLOSED** (gate
+re-scoped 2026-09-01). The original gate asked for an end-to-end risk
+measurement iToBoS cannot support (no diagnosis labels), and never
+needed to: a CV-2 miss costs structurally (the lesion is invisible
+downstream), which was already measured. Wide-field is not the primary
+input path, and an incidental user wide frame is a phone photo rather
+than TBP imagery — so tiling would tune against a domain the product may
+never see. The operative CV-2 question is now the iToBoS→phone domain
+gap. Full reasoning in `docs/cv2_status.md`.
 
 **Constraint on downstream development:** do NOT develop CV-3 on CV-2's
 real detection crops. CV-3 develops on ISIC ground-truth crops. The
-CV-2→CV-3 interface is validated separately (see current task below).
+CV-2→CV-3 interface was validated separately — geometry robust, domain
+measured (see the completed sections below).
 
 ### CV-3 — Lesion Segmentation
 **Status: BASELINE COMPLETE**
@@ -143,8 +151,11 @@ CV-2→CV-3 interface is validated separately (see current task below).
 - Input: 512×512, BGR→RGB, /255, CHW. Squash resize (NO aspect ratio
   preservation). Loads via:
   `build_model()` + `torch.load(...)["model_state_dict"]`.
-- Known domain limitation: trained on dermoscopic (ISIC). TBP/smartphone
-  domain gap not yet evaluated.
+- Domain limitation MEASURED (2026-09-01): on real CV-2 detection crops
+  from iToBoS TBP, 78% of masks rated reasonable — ~22% fail, dominated
+  by fragmentation (`analysis/quality/cv3_domain_itobos/result.md`).
+  Note the assembled-pipeline run saw only 1.0% degenerate masks on
+  wide-field candidates; different crop populations, both recorded.
 
 ### CV-4 — Classification (Native Diagnosis)
 **Status: SUBSTANTIALLY ESTABLISHED**
@@ -305,11 +316,70 @@ underperforms on real product images later, this gap is the first place
 to look. Same category as CV-1's synthetic-only validation caveat and
 CV-2's iToBoS→phone caveat.
 
-**Explicitly still out of scope:** rewiring `src/inference/pipeline.py`
-into a full CV-1→CV-8 orchestrator (it currently only wires CV-4→risk).
-That's the natural next integration step now that CV-1.5, CV-2, and
-CV-3 all exist and are individually validated — but is a separate task,
-not assumed here.
+## Completed: CV-1 → CV-4 Pipeline Assembly
+
+**Status: assembled, measured, regression check passes.**
+`analysis/product_eval/cv1_cv4_assembly/result.md` (2026-09-01).
+Spec: `docs/cv1_cv4_assembly_spec.md`. Code:
+`src/inference/orchestrator.py::DermaSensePipeline`. Eval:
+`scripts/evaluate_pipeline_end_to_end.py`.
+
+First time the components ran as one pipeline. `src/inference/pipeline.py`
+is deliberately untouched (still the CV-4-only path, three tests depend
+on its `predict(tensor)` contract); the assembly is a new class taking a
+raw BGR image.
+
+**Regression check (pre-framed, PAD-UFES 352): PASSES.** 100% per-image
+agreement with CV-4 standalone on the 303 images assessed; Macro-F1
+0.6351 and 31 Tier-1 errors, identical both sides when computed on the
+same subset. The cv2-vs-PIL preprocessing risk did not materialize.
+
+**Three findings pairwise validation could not have shown:**
+
+1. **CV-1 rejects 13.6% of real clinical images** (48/352 PAD-UFES,
+   plus 21.5% of wide-field iToBoS). The known "validated on synthetic
+   degradation only" caveat, now measured. Not biased toward high-risk
+   (38.8% of drops vs 50.9% base rate), but it is the population the
+   capture-guidance layer exists to serve.
+2. **34.5% of wide-field submissions produce no assessment at all** —
+   CV-1 drops 21.5%, then CV-2 finds nothing in a further 13.0%.
+   Compounding attrition; neither rate alarming alone. (The 13.0% is NOT
+   comparable to CV-2's documented ~19% miss: different denominator,
+   measured after CV-1 already removed a fifth of the images.)
+3. **Alarm fatigue on the wide-field branch** — 32.7% of assessed images
+   escalate to URGENT_EVALUATION, 85% require review, driven by a 12.9%
+   per-candidate high-risk rate (357 BCC in a screening population — not
+   clinically plausible) amplified by most-severe aggregation over a
+   mean 4.71 candidates/image. This is CV-4 running out of domain on TBP
+   crops, not a reason to weaken the (correctly conservative)
+   aggregation rule.
+
+**Design decisions committed:** CV-3's mask is evidence only and never
+touches CV-4's input (dependency direction — CV-4 drives risk, so a bad
+mask must not be able to crop away the tissue it needed); non-assessment
+is a first-class `PipelineOutcome` so "never looked" cannot read as
+"looked and it's fine" (verified: the UNKNOWN count exactly equals
+quality-rejected + no-candidates); multi-candidate aggregation takes the
+most severe action.
+
+**Also added:** `src/quality/capture_guidance.py` — the structured
+signal layer for the suggestion engine (CV-1 quality issues first, then
+CV-1.5 framing). Warns rather than blocks: a user cannot photograph a
+mole on their own back, and hard-blocking wide-field would exclude the
+anatomy where melanoma is most often missed in men. UI/copy decisions
+remain out of scope.
+
+**Still out of scope:** CV-5/6/7 and the convergent CV-8. The mask is
+*recorded* for CV-5, not consumed by it.
+
+## Open product question
+
+**No user capture protocol exists yet.** Intended primary input is a
+zoomed-in photo of a lesion the user is already worried about
+(pre-framed); wide frames occur incidentally. This matters because the
+two branches behave materially differently — see findings 2 and 3 above
+— so "what we tell users to photograph" is a product decision with
+direct CV consequences. Tracked here rather than left implicit.
 
 ---
 
@@ -317,10 +387,11 @@ not assumed here.
 
 | Item | Reason deferred | Re-entry condition |
 |---|---|---|
-| CV-2 tiling/SAHI refinement | 0.81 floor acceptable for MVP | End-to-end eval shows CV-2 miss rate is dominant failure |
-| CV-2 domain validation (iToBoS→phone) | Needs real phone-image test set | After CV-1.5 domain router exists |
-| CV-3 domain validation (TBP crops) | No iToBoS masks for Dice | After geometry validation passes; scoped separately |
-| CV-1 real-artifact robustness | Validated on synthetic only | Before any clinical deployment claim |
+| CV-2 tiling/SAHI refinement | **Effectively CLOSED** — gate re-scoped 2026-09-01, see `docs/cv2_status.md` | Only if wide-field becomes a primary input path AND the phone-domain gap is closed first |
+| CV-2 domain validation (iToBoS→phone) | Needs real phone-image test set | **Now the operative CV-2 question** — must precede any further CV-2 refinement |
+| CV-3 domain validation (TBP crops) | DONE 2026-09-01 | — (`analysis/quality/cv3_domain_itobos/result.md`) |
+| CV-1 real-artifact robustness | Validated on synthetic only | **Priority raised** — measured 13.6% rejection on real PAD-UFES, 21.5% on iToBoS (`analysis/product_eval/cv1_cv4_assembly/result.md`) |
+| CV-4 domain gap on TBP crops | Validated on PAD-UFES close-ups only | Quantified end-to-end: 12.9% per-candidate high-risk rate on wide-field, driving 32.7% URGENT escalation |
 | src/detection/ tests inside package | Inconsistency vs tests/ convention | Low priority cleanup |
 | .venv torch mismatch on RunPod | System python works | Before next long pod session: pin requirements |
 | `build_detector` pretrained flag no-op | Harmless for now | Before any from-scratch training attempt |
@@ -335,7 +406,7 @@ not assumed here.
 2. **ISIC 2019 vs HAM10000:** use ISIC 2019 as the superset. Never add HAM10000 separately.
 3. **CV-2 recall metric:** image-level (≥1 TP per lesion-containing image), not box-level. Rationale in `docs/cv2_section22_finalized.md`.
 4. **CV-2 FPR metric:** per-image false-candidate burden (median/p90), not binary. Rationale ibid.
-5. **CV-2 stopping rule:** max 2 further experiments (YOLO11s + optionally tiling). YOLO11s already run (negative). Tiling is the last permitted attempt.
+5. **CV-2 stopping rule:** max 2 further experiments (YOLO11s + optionally tiling). YOLO11s run (negative). Tiling was the last permitted attempt and is now closed unresolved-but-deprioritised (gate re-scoped 2026-09-01) — the iToBoS→phone domain gap must be answered before any further CV-2 refinement.
 6. **CV-3 preprocessing:** squash resize (NOT aspect-ratio-preserving) to 512×512. The crop-normalize function MUST match this.
 7. **No "loosening thresholds because experiments failed":** any metric revision must be justified by role/product reasoning independent of experiment outcomes.
 8. **Leakage prevention:** patient/lesion-disjoint splits everywhere. Never split on image when lesion IDs are available.

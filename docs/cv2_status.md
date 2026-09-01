@@ -52,13 +52,55 @@ merging, and it changes the CV-2 -> CV-3 crop interface). That cost is only
 justified if CV-2's miss rate turns out to be a dominant pipeline failure —
 which cannot be known until the full pipeline exists.
 
-**Re-entry gate (specific, not "someday"):** When the end-to-end pipeline
-(through CV-8) is built, the mandatory end-to-end evaluation must include an
-explicit measurement of how much CV-2's ~19% complete-miss rate degrades the
-final risk output. IF that evaluation shows CV-2 miss rate is a dominant
-contributor to end-to-end failure, THEN run the tiling experiment (one run,
-per the standing stopping rule). If it is not dominant, CV-2 stays at floor
-and the tiling lever is formally closed.
+**Re-entry gate — RE-SCOPED 2026-09-01.** The original wording is kept
+below for the record, but it was unsatisfiable as written and did not
+need to be satisfiable.
+
+*Original:* "When the end-to-end pipeline (through CV-8) is built, the
+mandatory end-to-end evaluation must include an explicit measurement of
+how much CV-2's ~19% complete-miss rate degrades the final risk output.
+IF that evaluation shows CV-2 miss rate is a dominant contributor to
+end-to-end failure, THEN run the tiling experiment."
+
+*Why it was unsatisfiable:* CV-2 runs only on the wide-field branch, and
+iToBoS carries no diagnosis labels — confirmed, its splits hold only
+`body_part`, `sun_damage_level`, `pixel_spacing`. There is no ground
+truth to score a final risk decision against on that branch. The only
+branch with diagnosis labels (PAD-UFES, pre-framed) skips CV-2 entirely
+by design. So "how much does CV-2's miss rate degrade the final risk
+output" cannot be measured with available data.
+
+*Why it never needed to be:* the cost of a CV-2 miss is **structural,
+not diagnostic**. A lesion CV-2 does not detect is never segmented,
+classified, or risk-assessed — it is invisible to the entire downstream
+pipeline. That cost is already measured (~19% of lesion-containing
+images surface nothing) and requires no end-to-end risk score.
+
+*Re-scoped gate:* the real question is whether that miss rate is
+acceptable given the product's deployment model, which is a product
+judgement, not a measurement. Current answer: **tiling stays deferred on
+priority grounds, and is effectively closed.** The intended primary
+input is a zoomed-in photo of a lesion the user is already concerned
+about (pre-framed branch); wide frames occur incidentally. Two
+consequences:
+
+1. Wide-field is not the primary path, so a TBP-imagery miss rate is not
+   a primary-path product risk.
+2. More decisively, an incidental wide frame from a user is a **phone**
+   photo, not TBP-rig imagery. CV-2 is trained and validated exclusively
+   on iToBoS TBP images, so its real-world number on wide-field phone
+   photos is *unmeasured*. Tiling would tune the detector against a
+   domain the product may never see.
+
+**Therefore: do not run tiling.** The operative open question is the
+already-tracked "CV-2 domain validation (iToBoS→phone)" deferred item,
+which must be answered before any further CV-2 refinement is
+justifiable. Re-open tiling only if the deployment model changes to make
+wide-field a primary input path AND the phone-domain gap is closed
+first.
+
+End-to-end assembly measurements that informed this:
+`analysis/product_eval/cv1_cv4_assembly/result.md`.
 
 ## Constraints on building downstream components on this baseline
 
