@@ -66,17 +66,17 @@ def resolution_signal(
     minimum_dimension: int = 256,
 ) -> QualitySignal:
     """
-    Assess effective spatial detail rather than only image dimensions.
+    Assess physical image dimensions.
 
-    An image can have large pixel dimensions while still containing very
-    little usable detail because of downsampling, compression, or other
-    capture degradation. This signal therefore combines:
+    This signal measures pixel dimensions ONLY. It previously also folded
+    in a Laplacian-variance "effective detail" term, which duplicated
+    ``blur_signal`` -- the two derived from the same measurement (r=0.58,
+    with near-identical effective cutoffs), so a single soft image was
+    penalized twice and counted as two independent quality issues. That
+    double-penalty was a direct cause of CV-1 rejecting 13.6% of real
+    PAD-UFES clinical images. See docs/cv1_recalibration_spec.md.
 
-      - physical image dimensions
-      - effective high-frequency detail
-
-    The raw detail measurement is retained in ``value`` so that the
-    operating range can be calibrated against real DermaSense images.
+    Sharpness is now measured once, by ``blur_signal``.
     """
 
     image = _validate_image(image)
@@ -89,44 +89,17 @@ def resolution_signal(
             "minimum_dimension must be positive"
         )
 
-    dimension_score = min(
-        1.0,
-        minimum / float(minimum_dimension),
-    )
-
-    gray = _grayscale(image)
-
-    laplacian_variance = float(
-        cv2.Laplacian(
-            gray,
-            cv2.CV_64F,
-        ).var()
-    )
-
-    # Effective-detail reference derived from the current engineering
-    # calibration experiments. This is intentionally not a clinical
-    # threshold.
-    detail_reference = 25.0
-
-    detail_score = float(
-        np.clip(
-            laplacian_variance / detail_reference,
-            0.0,
-            1.0,
-        )
-    )
-
     score = float(
         min(
-            dimension_score,
-            detail_score,
+            1.0,
+            minimum / float(minimum_dimension),
         )
     )
 
     return QualitySignal(
         name="resolution",
         score=score,
-        value=laplacian_variance,
+        value=float(minimum),
         severity=1.0 - score,
     )
 

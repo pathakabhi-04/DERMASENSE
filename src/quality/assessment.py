@@ -88,18 +88,40 @@ def assess_image(
     image: np.ndarray,
     *,
     minimum_dimension: int = 256,
-    minimum_quality_score: float = 0.50,
+    minimum_quality_score: float = 0.35,
     resolution_threshold: float = 0.50,
     brightness_threshold: float = 0.40,
     contrast_threshold: float = 0.25,
     blur_threshold: float = 0.15,
+    unusable_resolution: float = 0.50,
+    unusable_brightness: float = 0.30,
+    unusable_contrast: float = 0.20,
+    unusable_blur: float = 0.05,
 ) -> QualityResult:
     """
     Assess whether an image is suitable for downstream CV.
 
-    Thresholds are initial engineering defaults. They are not clinical
-    thresholds and must be validated against representative product
-    images before deployment.
+    Two tiers, deliberately separated (docs/cv1_recalibration_spec.md):
+
+    - The ``*_threshold`` values flag ADVISORY issues. These populate
+      ``issues`` so the capture-guidance layer can suggest a better
+      retake, but on their own they do not block the image.
+    - The ``unusable_*`` values are the BLOCKING tier. An image is
+      rejected only when a signal falls into genuinely-unusable
+      territory, or the composite score collapses.
+
+    Previously any single advisory issue rejected the image
+    (``usable = score >= 0.50 and not issues``). Measured against real
+    data that gate rejected 13.6% of PAD-UFES clinical images -- images
+    CV-4 then classified MORE accurately than the ones that passed
+    (85.4% vs 67.8%), with no CV-1 signal predicting CV-4 success. The
+    thresholds had been calibrated on synthetic degradation, a range
+    real clinical images do not occupy, so the gate fired on normal
+    variation instead of genuine unusability.
+
+    Blocking thresholds are calibrated to catch severe synthetic
+    degradation while admitting real clinical images -- see the spec for
+    the two-sided acceptance criteria.
     """
 
     signals: list[QualitySignal] = [
@@ -177,9 +199,25 @@ def assess_image(
             )
         )
 
+    # Blocking tier: reject only on genuine unusability, not on any
+    # advisory issue. Advisory issues still populate `issues` so the
+    # capture-guidance layer can suggest a better retake.
+    unusable_limits = {
+        "resolution": unusable_resolution,
+        "brightness": unusable_brightness,
+        "contrast": unusable_contrast,
+        "blur": unusable_blur,
+    }
+
+    blocking = [
+        name
+        for name, limit in unusable_limits.items()
+        if signal_map[name] < limit
+    ]
+
     usable = (
         quality_score >= minimum_quality_score
-        and not issues
+        and not blocking
     )
 
     recommended_action = (

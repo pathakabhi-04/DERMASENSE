@@ -91,12 +91,33 @@ distribution. Tracked in docs/cv2_detection_spec.md Section 13.
 ## CV component status
 
 ### CV-1 — Image Quality Gate
-**Status: COMPLETE (baseline)**
-- Quality assessment and guidance implemented in `src/quality/`.
-- Robustness validation done (`analysis/quality/cv1_robustness/`).
-- Known limitation: validated against synthetic degradation; not yet
-  tested against real PAD-UFES-20 artifacts (marker ink, hair, glare).
-  Flagged as a future validation task, not blocking.
+**Status: RECALIBRATED (2026-09-01).** Real-image rejection on PAD-UFES
+was **13.6% → 1.42%** after recalibration; genuine severe synthetic
+degradation still caught ≥95% (all types). Full result:
+`analysis/quality/cv1_recalibration/result.md`, spec:
+`docs/cv1_recalibration_spec.md`.
+
+The prior "validated on synthetic degradation only" caveat turned out to
+hide a real defect, not just an untested gap: `resolution` and `blur`
+both derived from Laplacian variance (r=0.58), double-penalizing one
+soft image as two issues, and thresholds calibrated on synthetic data
+did not transfer to real clinical images. Measured impact before the
+fix: no CV-1 signal predicted CV-4 success (resolution r=−0.131,
+p=0.014 — significant but inverted; others n.s.), and CV-4 was actually
+MORE accurate on CV-1-rejected images than accepted ones (85.4% vs
+67.8%, p=0.018 after controlling for class mix).
+
+Fix: `resolution_signal` now measures dimensions only (`src/quality/signals.py`);
+`assess_image` uses a two-tier design — advisory issues feed capture
+guidance without blocking, a separate `unusable_*` tier blocks on
+genuine unusability (`src/quality/assessment.py`). One threshold
+(`unusable_contrast`) was adjusted post-hoc to close a gap the first
+pass left open; both real-rejection and severe-degradation criteria
+hold simultaneously. Downstream regression check: 100% agreement with
+prior CV-4 predictions on the images already being assessed.
+
+Quality assessment and guidance: `src/quality/`. Robustness harness:
+`analysis/quality/cv1_robustness/` (re-run against the new thresholds).
 
 ### CV-1.5 — Domain Router
 **Status: COMPLETE.** See "Completed: CV-1.5 Domain Router" below for
@@ -338,7 +359,8 @@ same subset. The cv2-vs-PIL preprocessing risk did not materialize.
 
 1. **CV-1 rejects 13.6% of real clinical images** (48/352 PAD-UFES,
    plus 21.5% of wide-field iToBoS). The known "validated on synthetic
-   degradation only" caveat, now measured. Not biased toward high-risk
+   degradation only" caveat, now measured. **Fixed the same session —
+   see "CV-1 — Image Quality Gate" above; PAD-UFES now 1.42%.** Not biased toward high-risk
    (38.8% of drops vs 50.9% base rate), but it is the population the
    capture-guidance layer exists to serve.
 2. **34.5% of wide-field submissions produce no assessment at all** —
@@ -390,7 +412,7 @@ direct CV consequences. Tracked here rather than left implicit.
 | CV-2 tiling/SAHI refinement | **Effectively CLOSED** — gate re-scoped 2026-09-01, see `docs/cv2_status.md` | Only if wide-field becomes a primary input path AND the phone-domain gap is closed first |
 | CV-2 domain validation (iToBoS→phone) | Needs real phone-image test set | **Now the operative CV-2 question** — must precede any further CV-2 refinement |
 | CV-3 domain validation (TBP crops) | DONE 2026-09-01 | — (`analysis/quality/cv3_domain_itobos/result.md`) |
-| CV-1 real-artifact robustness | Validated on synthetic only | **Priority raised** — measured 13.6% rejection on real PAD-UFES, 21.5% on iToBoS (`analysis/product_eval/cv1_cv4_assembly/result.md`) |
+| CV-1 real-artifact robustness | **RESOLVED for PAD-UFES 2026-09-01** — recalibrated, rejection 13.6%→1.42% (`analysis/quality/cv1_recalibration/result.md`). iToBoS also improved (21.5%→12.4%, same recalibration) but not to near-zero — not chased further; may reflect genuine wide-field composition differences (hair, TBP-rig equipment in frame) rather than the same defect, unconfirmed | If iToBoS wide-field rejection still matters, investigate separately — was not part of criterion A's calibration set |
 | CV-4 domain gap on TBP crops | Validated on PAD-UFES close-ups only | Quantified end-to-end: 12.9% per-candidate high-risk rate on wide-field, driving 32.7% URGENT escalation |
 | src/detection/ tests inside package | Inconsistency vs tests/ convention | Low priority cleanup |
 | .venv torch mismatch on RunPod | System python works | Before next long pod session: pin requirements |

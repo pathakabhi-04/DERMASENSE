@@ -78,11 +78,19 @@ def test_effective_detail_rejects_detail_loss_even_at_large_dimensions():
         minimum_dimension=256,
     )
 
+    # Still rejected -- that is the safety-relevant assertion.
     assert result.usable is False
-    assert "resolution" in {
-        issue.type
-        for issue in result.issues
-    }
+
+    # Attribution changed deliberately (docs/cv1_recalibration_spec.md):
+    # sharpness is now measured ONCE, by blur. `resolution` covers pixel
+    # dimensions only. Previously both derived from Laplacian variance,
+    # so one soft image raised two "independent" issues -- a
+    # double-penalty that caused CV-1 to reject 13.6% of real clinical
+    # images. This image has legitimate 512x512 dimensions and destroyed
+    # detail, so blur is the correct attribution.
+    issue_types = {issue.type for issue in result.issues}
+    assert "motion_blur" in issue_types
+    assert "resolution" not in issue_types
 
 def test_dark_image_is_rejected():
     image = good_image()
