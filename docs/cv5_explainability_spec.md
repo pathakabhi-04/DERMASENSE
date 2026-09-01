@@ -1,8 +1,10 @@
 # CV-5 Explainability — Spec
 
-**Status:** Committed before implementation, per the same discipline as
-prior specs. Implementation deferred to the next focused session (see
-"Why not now" below) — this is the design, not yet the code.
+**Status:** Implemented (2026-09-01). Result:
+`analysis/product_eval/cv5_explainability/result.md`. This document is
+kept as-written (committed before implementation) — the "Why not now"
+section below described the state at spec-writing time; the deferred
+implementation happened later the same day.
 
 ## What CV-5 is
 

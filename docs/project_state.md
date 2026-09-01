@@ -215,17 +215,30 @@ measured (see the completed sections below).
   baseline), `checkpoints/pad_ufes_c1_partial_finetune_best.pt` (transfer).
 
 ### CV-5 — Explainability
-**Status: SPEC'D, NOT IMPLEMENTED (2026-09-01).**
-`docs/cv5_explainability_spec.md`. Design: mask-contour overlay (direct
-reuse of `scripts/validate_cv3_domain_itobos.py::draw_overlay`) +
-Grad-CAM heatmap (new — needs a small, additive method on
-`src/models/native_classifier.py` to expose pre-pool conv features,
-since the current `SharedResNetXXBackbone` collapses avgpool into one
-opaque `nn.Sequential`; `NativePredictor.predict()` is
-`@torch.no_grad()` so Grad-CAM must bypass it). Deliberately not
-implemented this session — touching CV-4's model class deserves its own
-focused pass, not one folded into CV-6's implementation turn.
-`src/explainability/__init__.py` still empty.
+**Status: COMPLETE (v1) — 2026-09-01.**
+`analysis/product_eval/cv5_explainability/result.md`, spec:
+`docs/cv5_explainability_spec.md`. Mask-contour overlay (reused from
+`scripts/validate_cv3_domain_itobos.py::draw_overlay`) + Grad-CAM
+heatmap (`src/explainability/gradcam.py`, bypassing
+`NativePredictor.predict()`'s `@torch.no_grad()` to reach the model
+directly). Required one additive method,
+`SharedResNetXXBackbone.forward_conv_features()`
+(`src/models/native_classifier.py`) — verified to exactly reconstruct
+the existing `forward()` output via `F.adaptive_avg_pool2d`, and all
+existing CV-4 regression tests (7) pass unmodified.
+
+New cross-check evidence: `gradcam_mask_iou` — does CV-4's attention
+overlap with CV-3's independently-computed mask? First time these two
+components have been compared to each other at all. Visual audit (3
+crops, MEL/BCC/NEV) confirms the heatmap lands on the lesion, not
+background/hair, in every case.
+
+**Deliberately not wired into `DermaSensePipeline.predict()`'s hot
+path** — `explain_candidate()` is invoked on demand (needs a backward
+pass, costlier than CV-3/CV-6's forward-only evidence; produces overlay
+images, which don't fit `CandidateResult`'s scalar-evidence CSV
+pattern). Same evidence-not-decision principle as CV-3/CV-6 — no
+policy built around `gradcam_mask_iou`, reserved for CV-8.
 
 ### CV-6 — Uncertainty
 **Status: COMPLETE (v1, evidence layer) — 2026-09-01.**

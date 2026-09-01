@@ -109,6 +109,22 @@ class SharedResNet18Backbone(nn.Module):
             start_dim=1,
         )
 
+    def forward_conv_features(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Return the pre-pool conv feature map [B, 512, H', W'] (H'=W'=7
+        for a 224x224 input).
+
+        Additive only (docs/cv5_explainability_spec.md) -- `self.features`
+        is `Sequential(conv1, bn1, relu, maxpool, layer1..layer4, avgpool)`
+        as one block, so the pooled `forward()` output alone cannot
+        recover the spatial feature map Grad-CAM needs. Slicing
+        `self.features[:-1]` (drop the trailing AdaptiveAvgPool2d) is an
+        `nn.Sequential` operation, not positional-index hooking from
+        outside the class -- it is named, encapsulated, and does not
+        change `forward()`'s existing behavior.
+        """
+        return self.features[:-1](x)
+
 
 class SharedResNet50Backbone(nn.Module):
     """
@@ -154,6 +170,14 @@ class SharedResNet50Backbone(nn.Module):
             features,
             start_dim=1,
         )
+
+    def forward_conv_features(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Return the pre-pool conv feature map [B, 2048, H', W'] (H'=W'=7
+        for a 224x224 input). See SharedResNet18Backbone's identical
+        method for the full rationale.
+        """
+        return self.features[:-1](x)
 
 
 class NativeDiagnosisHead(nn.Module):
