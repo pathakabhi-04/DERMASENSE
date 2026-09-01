@@ -272,17 +272,38 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: NOT STARTED — blocked, not merely unscheduled.**
-`docs/cv7_temporal_blockers.md` (2026-09-01). Two blockers, confirmed by
-direct investigation rather than assumed: (1) no task definition exists
-anywhere in the docs — a genuine product question (changed/stable
-classification? growth-rate? new-lesion detection?), not an ML-design
-gap; (2) UQ Longitudinal has zero local footprint (full filesystem
-search confirmed — not even a metadata CSV), so a pod/volume session is
-needed just to inspect the schema before any spec is writable — one
-level more blocked than CV-1.5's Stage 2 was. `src/temporal/__init__.py`
-still empty. Dataset: UQ Longitudinal (35,909 dermoscopic images, 7,038
-lesions, 340 participants, 2–7 time points). On network volume.
+**Status: TASK + INTEGRATION BOUNDARY LOCKED (2026-09-01); data
+acquisition in progress; not yet implemented.**
+`docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
+spec, decided by the user, covers two things:
+
+1. **What CV-7 computes**: a structured, numeric temporal verdict per
+   lesion pair (`STABLE | GROWING | SHRINKING | CHANGED_COLOR |
+   NO_PRIOR_DATA`, magnitude, per-feature deltas for size/border/color,
+   confidence), consumed by CV-8 alongside CV-4's diagnosis and CV-6's
+   uncertainty — same convergence pattern as the rest of the pipeline.
+2. **The CV↔RAG chatbot boundary** (the user is separately building a
+   RAG-based explainable-AI chatbot alongside this CV pipeline): the
+   chatbot is strictly downstream, reading CV-8's structured JSON output
+   to narrate it in natural language — it never generates the temporal-
+   change or risk claim itself. Rejected alternative: letting an LLM
+   narrate "what changed" directly from images, which would make a
+   safety-relevant claim generated rather than computed/verified — same
+   dependency-direction principle used for CV-3's mask and every CV-5/6
+   evidence signal (`docs/cv5_cv6_evidence_architecture.md`). The
+   handoff contract (JSON schema) is locked in the spec; two
+   discrepancies against the current codebase (`risk_category` vs.
+   `ProductAction`; PAD-UFES vs. ISIC2019 class taxonomy) are flagged
+   there for CV-8 to reconcile, not resolved yet.
+
+**Data acquisition (blocker 2) — plan decided, not yet executed:**
+download UQ Longitudinal locally → upload to the RunPod S3 bucket as a
+zip → extract on the pod → train (same pattern as CV-1.5 Stage 2).
+`src/temporal/__init__.py` still empty; the technical CV-7 spec (model,
+feature extraction, training plan) is written once the data is on the
+pod and inspectable. Dataset: UQ Longitudinal (35,909 dermoscopic
+images, 7,038 lesions, 340 participants, 2–7 time points). History of
+how these blockers were investigated: `docs/cv7_temporal_blockers.md`.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**

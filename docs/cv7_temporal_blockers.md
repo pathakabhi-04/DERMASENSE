@@ -1,37 +1,36 @@
 # CV-7 Temporal ("What Changed?") — Blockers
 
-**Status:** Not spec'd. This document records what's blocking a spec,
-not a spec itself — there isn't enough locked to pre-commit criteria
-against yet.
+**Status:** Blocker 1 RESOLVED (2026-09-01) — see
+`docs/cv7_temporal_rag_integration_spec.md` for the task definition and
+the locked CV↔RAG-chatbot integration boundary, decided by the user.
+Blocker 2 is in progress (plan decided, not yet executed). This
+document is kept for the historical record of why CV-7 was blocked and
+what unblocked it; the current design lives in the spec above.
 
-## Why this isn't a spec
+## Why this wasn't a spec (historical)
 
 Every other CV-phase spec in this project (`docs/cv1_5_router_spec.md`,
 `docs/cv1_cv4_assembly_spec.md`, `docs/cv4_domain_evidence_spec.md`,
 `docs/cv6_uncertainty_spec.md`) was written against two things already
 in hand: a defined task (what does the component output?) and inspectable
-data (what does the input actually look like?). CV-7 has neither.
+data (what does the input actually look like?). CV-7 had neither at the
+time this document was first written.
 
-## Blocker 1: no task definition exists
+## Blocker 1: no task definition existed — RESOLVED
 
-`docs/project_state.md` names the dataset ("UQ Longitudinal, 35,909
+`docs/project_state.md` named the dataset ("UQ Longitudinal, 35,909
 dermoscopic images, 7,038 lesions, 340 participants, 2–7 time points")
 and the label "What Changed?", but nowhere in `docs/CV_MODEL_ARCHITECTURE_v1.0.md`,
-`docs/CV_DATASET_SPEC_v1.0.md`, or anywhere else does an actual output
-definition exist. This is a genuine open product question, not a
-technical gap — candidates include:
+`docs/CV_DATASET_SPEC_v1.0.md`, or anywhere else did an actual output
+definition exist. Candidates considered at the time: a changed/stable
+classification, a growth-rate estimate, new-lesion detection, or some
+combination.
 
-- A binary/multi-class **changed vs. stable** classification per lesion
-  pair.
-- A continuous **growth-rate estimate** (area/diameter change over
-  time).
-- **New-lesion detection** — did a lesion appear that wasn't there at
-  the prior visit?
-- Some combination of the above.
-
-Each implies a different label structure, a different model shape, and
-a different evaluation metric. None can be chosen from the codebase
-alone — this needs a product decision.
+**Resolved 2026-09-01**: CV-7 produces a structured, numeric temporal
+verdict (`STABLE | GROWING | SHRINKING | CHANGED_COLOR | NO_PRIOR_DATA`
++ magnitude + per-feature deltas + confidence), feeding CV-8 alongside
+CV-4/CV-6. Full definition and the exact output contract:
+`docs/cv7_temporal_rag_integration_spec.md`.
 
 ## Blocker 2: the data itself is not locally inspectable
 
@@ -60,15 +59,13 @@ resolved." Whatever CV-7 becomes, that caveat applies to it.
 
 ## Re-entry condition
 
-Both of the following, in either order:
+1. ~~Task definition decided by the user~~ — **done**, see
+   `docs/cv7_temporal_rag_integration_spec.md`.
+2. **Data access** — plan decided (download UQ Longitudinal locally →
+   upload to the RunPod S3 bucket as a zip → extract on the pod →
+   train, same pattern as CV-1.5 Stage 2), **not yet executed**.
 
-1. **Task definition decided by the user** — which output CV-7 should
-   produce (see the candidates above).
-2. **Data access** — a pod/volume session (or a volume-to-S3 metadata
-   sync, following the pattern already used for CV-1.5's held-out
-   iToBoS test subset) to inspect UQ Longitudinal's actual schema,
-   image format, and pairing structure.
-
-Once both are available, this becomes a normal spec-writing task,
-following the same committed-before-running discipline as every other
-component.
+Once data access completes, the technical CV-7 spec (model, feature
+extraction, training/eval plan) gets written against UQ Longitudinal's
+actual schema, following the same committed-before-running discipline
+as every other component in this project.
