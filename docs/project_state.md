@@ -272,8 +272,8 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: TASK + INTEGRATION BOUNDARY LOCKED (2026-09-01); data
-acquisition in progress; not yet implemented.**
+**Status: TASK, INTEGRATION BOUNDARY, AND TECHNICAL SPEC LOCKED
+(2026-09-02); implementation is next.**
 `docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
 spec, decided by the user, covers two things:
 
@@ -318,12 +318,40 @@ bytes both sides). Local copy also kept at `data/raw/uq_longitudinal/`
 (gitignored); source zip retained at `data/raw/UQ_zip/` in case more
 participants are sampled later.
 
-`src/temporal/__init__.py` still empty. Full-dataset training (rest of
-the 331 participants) needs a volume resize (~70-80GB, ~$5-6/month) or
-freed space — deferred until this bounded sample validates the CV-7
-approach. The technical CV-7 spec (model, feature extraction, training
-plan) is next, written against this staged sample. History of how the
-original two blockers were investigated: `docs/cv7_temporal_blockers.md`.
+`src/temporal/__init__.py` still empty. History of how the original two
+blockers were investigated: `docs/cv7_temporal_blockers.md`.
+
+**Technical spec written (2026-09-02):** `docs/cv7_temporal_technical_spec.md`,
+after actually inspecting the staged sample's images and metadata:
+
+- **Real ground truth exists**: a `Diagnosis` field per lesion (96.5%
+  benign dataset-wide; melanoma/BCC/SCC/AK/nevus/etc. otherwise),
+  constant across all of that lesion's visits — a final outcome label,
+  not a per-visit-in-time one (verified: 0/9,382 lesions have
+  conflicting diagnoses across visits). This makes CV-7's measured
+  change and the diagnosis label independent, testable signals.
+- **A physical mm ruler is baked into every image frame**, and multiple
+  cameras were used (Canon T6i 82%, Veos SLR 17%, minor others) — so
+  real-world-unit size measurement is possible via classical image
+  processing, calibrated **per image**, not a fixed constant.
+- **Design: Stage 1 is classical/deterministic, no training** — reuses
+  CV-3 directly for segmentation (this is real dermoscopic imagery,
+  CV-3's actual training domain, unlike iToBoS), computes size/color/
+  border deltas from ruler-calibrated measurements, assigns the
+  verdict via calibrated thresholds. Mirrors CV-1.5's Stage-1-before-
+  training discipline exactly. A learned Stage 2 is explicitly deferred
+  unless Stage 1 proves specifically insufficient.
+- **Storage answer**: the current 30-participant sample is enough to
+  build and validate the pipeline's *correctness* (643 lesions, no
+  malignant examples needed for that). It is NOT enough to validate
+  *clinical* validity — only 4 malignant-outcome lesions landed in the
+  sample. Rather than a full resize, the efficient fix is a second,
+  targeted pull: the 57 participants dataset-wide who carry a
+  longitudinal malignant-outcome lesion (11.74GB, 99 malignant lesions
+  with visit pairs) — combined ~16-17GB, still fits in current free
+  space on both local disk and the RunPod volume, no resize needed. A
+  full resize (~70-80GB, ~$5-6/month) stays deferred until a learned
+  Stage 2 is actually justified.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**

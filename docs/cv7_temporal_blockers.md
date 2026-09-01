@@ -72,3 +72,14 @@ The technical CV-7 spec (model, feature extraction, training/eval plan)
 gets written next, against this staged sample, following the same
 committed-before-running discipline
 as every other component in this project.
+
+## Update (2026-09-02): technical spec written, both blockers now closed
+
+`docs/cv7_temporal_technical_spec.md`. Written after actually inspecting
+the staged sample (not assumed): the images carry a physical mm ruler
+enabling classical size measurement, multiple cameras were used (so
+calibration must be per-image), and real clinical `Diagnosis` ground
+truth exists per lesion (constant across that lesion's visits — an
+outcome label, not a per-visit-in-time one). All CV-7 blockers are
+closed; implementation is the next step, not further data/task
+clarification.
