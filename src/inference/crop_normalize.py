@@ -101,6 +101,28 @@ def expand_and_clip_box(
     return x1, y1, x2, y2
 
 
+def pixel_box_to_norm(
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    img_w: int,
+    img_h: int,
+) -> tuple[float, float, float, float]:
+    """
+    Convert pixel xyxy to normalized YOLO xywh.
+
+    CV-2 emits pixel xyxy (``result.boxes.xyxy``) while
+    ``crop_and_normalize`` takes normalized xywh, so the pipeline needs
+    this conversion at the CV-2 -> CV-3 boundary.
+    """
+    xc = (x1 + x2) / 2.0 / img_w
+    yc = (y1 + y2) / 2.0 / img_h
+    w = (x2 - x1) / img_w
+    h = (y2 - y1) / img_h
+    return (xc, yc, w, h)
+
+
 def preprocess_crop_for_cv3(
     crop_rgb: np.ndarray,
 ) -> torch.Tensor:

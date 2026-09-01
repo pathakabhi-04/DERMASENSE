@@ -1,0 +1,32 @@
+CV-1 -> CV-4 Assembly -- Pre-framed branch (PAD-UFES test)
+==============================================================
+
+Images: 352
+Assessed: 303   Not assessed: 49
+
+REGRESSION CHECK vs CV-4 standalone, same images only
+(comparing against a whole-set baseline number would be
+ survivorship-biased -- the assembly can drop images at CV-1)
+
+                      assembly   CV-4 alone
+  Macro-F1              0.6351       0.6351
+  Tier-1 errors             31           31
+
+  Per-image agreement: 100.0%
+  Verdict: NO DEGRADATION
+
+Error tiers (Tier-1 = high-risk predicted as non-high-risk):
+  CORRECT        205
+  NOT_ASSESSED   49
+  TIER_1         31
+  TIER_2         28
+  TIER_3         24
+  TIER_4         15
+
+Not assessed: 49/352 (13.9%)
+  by outcome: {'QUALITY_REJECTED': 48, 'NO_CANDIDATES': 1}
+  high-risk among dropped: 19 (38.8%; base rate 50.9%)
+
+Note: the pre-framed branch does not exercise CV-2. It routes
+straight to CV-3 -> CV-4, which is why this is a regression
+check on CV-4's known behaviour rather than a new claim.

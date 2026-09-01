@@ -51,8 +51,12 @@ import numpy as np
 import pandas as pd
 import torch
 
-from src.segmentation.model import build_model
-from src.inference.crop_normalize import crop_and_normalize, CV3_INPUT_SIZE
+from src.inference.crop_normalize import (
+    crop_and_normalize,
+    pixel_box_to_norm,
+    CV3_INPUT_SIZE,
+)
+from src.segmentation.inference import load_segmentation_model, predict_mask
 from scripts.validate_cv2_cv3_interface import tight_box_from_mask
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -117,34 +121,11 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def load_model(weights: Path, device: torch.device):
-    if not weights.exists():
-        raise FileNotFoundError(f"Checkpoint not found: {weights}")
-    model = build_model().to(device)
-    checkpoint = torch.load(weights, map_location=device)
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.eval()
-    return model
-
-
-def pixel_box_to_norm(
-    x1: float, y1: float, x2: float, y2: float, img_w: int, img_h: int
-) -> tuple[float, float, float, float]:
-    xc = (x1 + x2) / 2.0 / img_w
-    yc = (y1 + y2) / 2.0 / img_h
-    w = (x2 - x1) / img_w
-    h = (y2 - y1) / img_h
-    return (xc, yc, w, h)
-
-
-@torch.no_grad()
-def predict_mask(
-    model, tensor: torch.Tensor, device: torch.device, threshold: float = 0.5
-) -> np.ndarray:
-    logits = model(tensor.to(device))
-    probs = torch.sigmoid(logits)
-    mask = (probs > threshold).float().squeeze(0).squeeze(0).cpu().numpy()
-    return mask  # HxW, {0.0, 1.0}
+# load_model / predict_mask / pixel_box_to_norm now live in src/ so the
+# inference pipeline and this script share one definition:
+#   src.segmentation.inference.{load_segmentation_model, predict_mask}
+#   src.inference.crop_normalize.pixel_box_to_norm
+load_model = load_segmentation_model
 
 
 def proxy_metrics_for_mask(mask: np.ndarray) -> dict:
