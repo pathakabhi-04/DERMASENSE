@@ -40,6 +40,10 @@ CLASSIFIER_CHECKPOINT = (
     REPO_ROOT
     / "checkpoints/archive/pad_ufes_c1_partial_finetune_seed42_best.pt"
 )
+SECOND_CLASSIFIER_CHECKPOINT = (
+    REPO_ROOT
+    / "checkpoints/archive/pad_ufes_c1_partial_finetune_seed123_best.pt"
+)
 PAD_UFES_TEST = REPO_ROOT / "data/splits/pad_ufes/test.csv"
 
 CHECKPOINTS_PRESENT = all(
@@ -49,6 +53,9 @@ CHECKPOINTS_PRESENT = all(
         SEGMENTATION_CHECKPOINT,
         CLASSIFIER_CHECKPOINT,
     )
+)
+ENSEMBLE_CHECKPOINTS_PRESENT = (
+    CHECKPOINTS_PRESENT and SECOND_CLASSIFIER_CHECKPOINT.exists()
 )
 
 
@@ -76,6 +83,7 @@ def _candidate(
         mask_touches_border=False,
         crop_blur=0.5,
         crop_contrast=0.5,
+        calibrated_confidence=0.9,
     )
 
 
@@ -219,6 +227,36 @@ def test_pipeline_runs_end_to_end_on_real_pad_ufes_images():
                 assert 0.0 <= candidate.mask_area_fraction <= 1.0
                 assert 0.0 <= candidate.crop_blur <= 1.0
                 assert 0.0 <= candidate.crop_contrast <= 1.0
+                assert 0.0 <= candidate.calibrated_confidence <= 1.0
+                # Ensemble not requested for this pipeline instance.
+                assert candidate.ensemble_agree is None
+
+
+@pytest.mark.skipif(
+    not ENSEMBLE_CHECKPOINTS_PRESENT,
+    reason="ensemble checkpoints not available",
+)
+def test_ensemble_evidence_populated_when_requested():
+    """CV-6 evidence appears only when explicitly requested (opt-in)."""
+    pipeline = DermaSensePipeline.from_checkpoints(
+        router_checkpoint=ROUTER_CHECKPOINT,
+        segmentation_checkpoint=SEGMENTATION_CHECKPOINT,
+        classifier_checkpoint=CLASSIFIER_CHECKPOINT,
+        additional_ensemble_checkpoints=(SECOND_CLASSIFIER_CHECKPOINT,),
+        detector_weights=None,
+        device="cpu",
+    )
+
+    rows = pd.read_csv(PAD_UFES_TEST).head(2)
+    for _, row in rows.iterrows():
+        image_bgr = cv2.imread(str(REPO_ROOT / row["image_path"]))
+        result = pipeline.predict(image_bgr)
+        if not result.assessed:
+            continue
+        for candidate in result.candidates:
+            assert candidate.ensemble_agree in (True, False)
+            assert candidate.ensemble_probability_distance >= 0.0
+            assert candidate.ensemble_confidence_spread >= 0.0
 
 
 @pytest.mark.skipif(

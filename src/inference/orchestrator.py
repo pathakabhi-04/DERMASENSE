@@ -63,6 +63,8 @@ from src.segmentation.inference import (
     mask_evidence,
     predict_mask,
 )
+from src.uncertainty.calibration import DEFAULT_TEMPERATURE, apply_temperature
+from src.uncertainty.ensemble import ensemble_evidence, load_ensemble
 
 # CV-2 inference settings, matching the locked values in
 # scripts/evaluate_cv2.py so pipeline detections are identical to the
@@ -130,6 +132,15 @@ class CandidateResult:
     crop_blur: float
     crop_contrast: float
 
+    # CV-6 evidence (docs/cv6_uncertainty_spec.md). Evidence only -- see
+    # that spec's "evidence, not a decision" principle. None when the
+    # pipeline was built without ensemble members (opt-in, since it
+    # roughly doubles CV-4 inference cost per candidate).
+    calibrated_confidence: float
+    ensemble_agree: bool | None = None
+    ensemble_probability_distance: float | None = None
+    ensemble_confidence_spread: float | None = None
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "candidate_index": self.candidate_index,
@@ -148,6 +159,10 @@ class CandidateResult:
             "mask_touches_border": self.mask_touches_border,
             "crop_blur": self.crop_blur,
             "crop_contrast": self.crop_contrast,
+            "calibrated_confidence": self.calibrated_confidence,
+            "ensemble_agree": self.ensemble_agree,
+            "ensemble_probability_distance": self.ensemble_probability_distance,
+            "ensemble_confidence_spread": self.ensemble_confidence_spread,
         }
 
 
@@ -227,15 +242,23 @@ class DermaSensePipeline:
         segmenter: torch.nn.Module,
         classifier: NativePredictor,
         detector: Any | None = None,
+        ensemble_classifiers: list[NativePredictor] | None = None,
         device: str | torch.device = "cpu",
         crop_margin: float = CROP_MARGIN,
+        calibration_temperature: float = DEFAULT_TEMPERATURE,
     ):
         self.device = torch.device(device)
         self.router = router
         self.segmenter = segmenter
         self.classifier = classifier
         self.detector = detector
+        # CV-6 evidence (docs/cv6_uncertainty_spec.md). Opt-in: None
+        # unless additional_ensemble_checkpoints was passed to
+        # from_checkpoints, since running extra classifiers roughly
+        # doubles CV-4 inference cost per candidate.
+        self.ensemble_classifiers = ensemble_classifiers
         self.crop_margin = crop_margin
+        self.calibration_temperature = calibration_temperature
         self._cv4_transform = build_eval_transform(ImageTransformConfig())
 
     @classmethod
@@ -246,8 +269,10 @@ class DermaSensePipeline:
         segmentation_checkpoint: str | Path,
         classifier_checkpoint: str | Path,
         detector_weights: str | Path | None = None,
+        additional_ensemble_checkpoints: tuple[str | Path, ...] | None = None,
         device: str | torch.device = "cpu",
         crop_margin: float = CROP_MARGIN,
+        calibration_temperature: float = DEFAULT_TEMPERATURE,
     ) -> "DermaSensePipeline":
         """
         Build a pipeline from component checkpoints.
@@ -256,6 +281,12 @@ class DermaSensePipeline:
         pipeline; a wide_field image then terminates as NO_CANDIDATES
         rather than raising, since the wide-field branch is unavailable
         by configuration.
+
+        `additional_ensemble_checkpoints` are CV-4 checkpoints run
+        ALONGSIDE `classifier_checkpoint` (not instead of it) to produce
+        CV-6 ensemble-disagreement evidence -- e.g. pass the seed123
+        checkpoint when `classifier_checkpoint` is seed42. Omitted by
+        default (opt-in, doubles CV-4 inference cost per candidate).
         """
         device = torch.device(device)
 
@@ -265,9 +296,17 @@ class DermaSensePipeline:
 
             detector = YOLO(str(detector_weights))
 
+        ensemble_classifiers = None
+        if additional_ensemble_checkpoints is not None:
+            ensemble_classifiers = load_ensemble(
+                additional_ensemble_checkpoints, device=device
+            )
+
         return cls(
             router=load_router_checkpoint(str(router_checkpoint), device),
             segmenter=load_segmentation_model(segmentation_checkpoint, device),
+            ensemble_classifiers=ensemble_classifiers,
+            calibration_temperature=calibration_temperature,
             classifier=NativePredictor.from_checkpoint(
                 classifier_checkpoint, device=device
             ),
@@ -306,18 +345,23 @@ class DermaSensePipeline:
             for b, c in zip(boxes, confidences)
         ]
 
-    def _classify_crop(self, crop_rgb: np.ndarray):
+    def _cv4_tensor(self, crop_rgb: np.ndarray) -> torch.Tensor:
         """
-        Run CV-4 on an RGB crop.
+        Build CV-4's input tensor from an RGB crop.
 
         CV-4 expects a 224x224 ImageNet-normalized tensor built from a
         PIL image, which is a different preprocessing path from CV-3's
         512x512 squashed /255 tensor -- hence the separate transform
-        rather than reusing CV-3's input.
+        rather than reusing CV-3's input. Shared by the primary
+        classifier and any CV-6 ensemble members so every classifier
+        sees the identical input.
         """
         pil_image = Image.fromarray(crop_rgb)
-        tensor = self._cv4_transform(pil_image)
-        return self.classifier.predict(tensor)
+        return self._cv4_transform(pil_image)
+
+    def _classify_crop(self, crop_rgb: np.ndarray):
+        """Run the primary CV-4 classifier on an RGB crop."""
+        return self.classifier.predict(self._cv4_tensor(crop_rgb))
 
     def _run_candidate(
         self,
@@ -346,6 +390,31 @@ class DermaSensePipeline:
         crop_blur = blur_signal(crop_rgb).score
         crop_contrast = contrast_signal(crop_rgb).score
 
+        # CV-6 calibration evidence (docs/cv6_uncertainty_spec.md):
+        # post-hoc temperature scaling on probabilities only, no logits
+        # needed. Class order must match PAD_CLASSES for apply_temperature
+        # to scale the right entries -- prediction.probabilities is a
+        # dict, so re-derive an ordered vector from it.
+        class_names = sorted(prediction.probabilities.keys())
+        prob_vector = np.array(
+            [[prediction.probabilities[name] for name in class_names]]
+        )
+        calibrated = apply_temperature(prob_vector, self.calibration_temperature)
+        calibrated_confidence = float(calibrated.max())
+
+        # CV-6 ensemble evidence, opt-in (see __init__/from_checkpoints).
+        ensemble_fields: dict[str, Any] = {
+            "ensemble_agree": None,
+            "ensemble_probability_distance": None,
+            "ensemble_confidence_spread": None,
+        }
+        if self.ensemble_classifiers:
+            cv4_tensor = self._cv4_tensor(crop_rgb)
+            ensemble_predictions = [prediction] + [
+                member.predict(cv4_tensor) for member in self.ensemble_classifiers
+            ]
+            ensemble_fields = ensemble_evidence(ensemble_predictions)
+
         return CandidateResult(
             candidate_index=candidate_index,
             box_pixels=px_box,
@@ -359,6 +428,8 @@ class DermaSensePipeline:
             gate_reason=prediction.safety_gate.reason,
             crop_blur=crop_blur,
             crop_contrast=crop_contrast,
+            calibrated_confidence=calibrated_confidence,
+            **ensemble_fields,
             **evidence,
         )
 

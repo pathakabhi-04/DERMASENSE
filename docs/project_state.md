@@ -215,18 +215,58 @@ measured (see the completed sections below).
   baseline), `checkpoints/pad_ufes_c1_partial_finetune_best.pt` (transfer).
 
 ### CV-5 — Explainability
-**Status: NOT STARTED**
-- `src/explainability/__init__.py` exists (empty).
+**Status: SPEC'D, NOT IMPLEMENTED (2026-09-01).**
+`docs/cv5_explainability_spec.md`. Design: mask-contour overlay (direct
+reuse of `scripts/validate_cv3_domain_itobos.py::draw_overlay`) +
+Grad-CAM heatmap (new — needs a small, additive method on
+`src/models/native_classifier.py` to expose pre-pool conv features,
+since the current `SharedResNetXXBackbone` collapses avgpool into one
+opaque `nn.Sequential`; `NativePredictor.predict()` is
+`@torch.no_grad()` so Grad-CAM must bypass it). Deliberately not
+implemented this session — touching CV-4's model class deserves its own
+focused pass, not one folded into CV-6's implementation turn.
+`src/explainability/__init__.py` still empty.
 
 ### CV-6 — Uncertainty
-**Status: NOT STARTED**
-- `src/uncertainty/__init__.py` exists (empty).
+**Status: COMPLETE (v1, evidence layer) — 2026-09-01.**
+`analysis/product_eval/cv6_uncertainty/result.md`, spec:
+`docs/cv6_uncertainty_spec.md`. Three zero-new-training evidence signals
+on every candidate: ensemble disagreement (seed42 vs seed123, opt-in via
+`--ensemble`, off by default — doubles CV-4 inference cost),
+temperature-calibrated confidence (T=1.25, fit on PAD-UFES val, ECE
+0.0596→0.0401; post-hoc on probabilities only, no change to
+`NativePredictor`), and `crop_contrast`/`crop_blur` (already existed,
+now documented as CV-6 evidence). **Does NOT modify
+`src/risk/safety_gate.py`** — evidence only, per the same
+dependency-direction principle as the CV-3-mask and `crop_contrast`
+decisions.
+
+Pre-committed corroboration check against the CV-4 domain-evidence
+finding (does ensemble disagreement independently spike on BCC/ACK, the
+classes `crop_contrast` flagged?) came back **partial, and the
+exceptions are the useful part**: BCC replicates (moderate disagreement,
+consistent with the already-documented SCC/BCC overlap), but ACK does
+NOT (both ensemble members confidently agree on ACK's low-information
+crops — a "confidently wrong together" failure mode `crop_contrast`
+alone catches but disagreement can't), and MEL shows the HIGHEST
+disagreement of any class despite being visually coherent (a genuine
+MEL/NEV boundary-ambiguity signal, present in-domain as much as out,
+that `crop_contrast` alone would never catch). The two signals are
+complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
+as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: NOT STARTED**
-- `src/temporal/__init__.py` exists (empty).
-- Dataset: UQ Longitudinal (35,909 dermoscopic images, 7,038 lesions,
-  340 participants, 2–7 time points). On network volume.
+**Status: NOT STARTED — blocked, not merely unscheduled.**
+`docs/cv7_temporal_blockers.md` (2026-09-01). Two blockers, confirmed by
+direct investigation rather than assumed: (1) no task definition exists
+anywhere in the docs — a genuine product question (changed/stable
+classification? growth-rate? new-lesion detection?), not an ML-design
+gap; (2) UQ Longitudinal has zero local footprint (full filesystem
+search confirmed — not even a metadata CSV), so a pod/volume session is
+needed just to inspect the schema before any spec is writable — one
+level more blocked than CV-1.5's Stage 2 was. `src/temporal/__init__.py`
+still empty. Dataset: UQ Longitudinal (35,909 dermoscopic images, 7,038
+lesions, 340 participants, 2–7 time points). On network volume.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**

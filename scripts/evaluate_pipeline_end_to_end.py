@@ -46,6 +46,10 @@ CLASSIFIER_CHECKPOINT = (
     REPO_ROOT
     / "checkpoints/archive/pad_ufes_c1_partial_finetune_seed42_best.pt"
 )
+SECOND_CLASSIFIER_CHECKPOINT = (
+    REPO_ROOT
+    / "checkpoints/archive/pad_ufes_c1_partial_finetune_seed123_best.pt"
+)
 DETECTOR_WEIGHTS = REPO_ROOT / "runs/cv2/b1_1280/weights/best.pt"
 
 OUTPUT_DIR = REPO_ROOT / "analysis/product_eval/cv1_cv4_assembly"
@@ -99,6 +103,15 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--output", type=Path, default=OUTPUT_DIR)
+    p.add_argument(
+        "--ensemble",
+        action="store_true",
+        help=(
+            "run the seed123 checkpoint alongside seed42 for CV-6 "
+            "ensemble-disagreement evidence (docs/cv6_uncertainty_spec.md). "
+            "Off by default -- roughly doubles CV-4 inference cost."
+        ),
+    )
     return p.parse_args()
 
 
@@ -381,6 +394,9 @@ def main() -> None:
         router_checkpoint=ROUTER_CHECKPOINT,
         segmentation_checkpoint=SEGMENTATION_CHECKPOINT,
         classifier_checkpoint=CLASSIFIER_CHECKPOINT,
+        additional_ensemble_checkpoints=(
+            (SECOND_CLASSIFIER_CHECKPOINT,) if args.ensemble else None
+        ),
         detector_weights=detector_weights,
         device=device,
     )
