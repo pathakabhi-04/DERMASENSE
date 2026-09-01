@@ -53,6 +53,7 @@ from src.quality.capture_guidance import (
     CaptureSuggestion,
     build_capture_suggestions,
 )
+from src.quality.signals import blur_signal, contrast_signal
 from src.risk.action_mapping import ProductAction
 from src.risk.safety_gate import GateDecision
 from src.routing.classifier import load_router_checkpoint
@@ -119,6 +120,16 @@ class CandidateResult:
     mask_degenerate: bool
     mask_touches_border: bool
 
+    # Crop-quality evidence (docs/cv4_domain_evidence_spec.md). Computed
+    # on the exact RGB crop CV-4 receives, general-purpose (recorded for
+    # every candidate, not conditioned on predicted class). A disclosure
+    # signal, not a gate: low crop_contrast correlates with unreliable
+    # out-of-domain BCC/ACK predictions, but a low-contrast crop can
+    # still be a genuine faint lesion, so it is never used to drop or
+    # reclassify a candidate.
+    crop_blur: float
+    crop_contrast: float
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "candidate_index": self.candidate_index,
@@ -135,6 +146,8 @@ class CandidateResult:
             "mask_area_fraction": self.mask_area_fraction,
             "mask_degenerate": self.mask_degenerate,
             "mask_touches_border": self.mask_touches_border,
+            "crop_blur": self.crop_blur,
+            "crop_contrast": self.crop_contrast,
         }
 
 
@@ -326,6 +339,13 @@ class DermaSensePipeline:
         crop_rgb = cv2.cvtColor(image_bgr[y1:y2, x1:x2], cv2.COLOR_BGR2RGB)
         prediction = self._classify_crop(crop_rgb)
 
+        # Crop-quality evidence (docs/cv4_domain_evidence_spec.md):
+        # computed on the exact crop CV-4 saw, using CV-1's existing
+        # blur/contrast measurements applied at candidate scale rather
+        # than whole-image scale. Disclosure only -- never gates.
+        crop_blur = blur_signal(crop_rgb).score
+        crop_contrast = contrast_signal(crop_rgb).score
+
         return CandidateResult(
             candidate_index=candidate_index,
             box_pixels=px_box,
@@ -337,6 +357,8 @@ class DermaSensePipeline:
             gate_decision=prediction.safety_gate.decision,
             requires_review=prediction.requires_review,
             gate_reason=prediction.safety_gate.reason,
+            crop_blur=crop_blur,
+            crop_contrast=crop_contrast,
             **evidence,
         )
 

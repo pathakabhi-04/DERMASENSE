@@ -74,6 +74,8 @@ def _candidate(
         mask_area_fraction=0.2,
         mask_degenerate=False,
         mask_touches_border=False,
+        crop_blur=0.5,
+        crop_contrast=0.5,
     )
 
 
@@ -215,6 +217,8 @@ def test_pipeline_runs_end_to_end_on_real_pad_ufes_images():
                     candidate.gate_decision is GateDecision.REVIEW
                 )
                 assert 0.0 <= candidate.mask_area_fraction <= 1.0
+                assert 0.0 <= candidate.crop_blur <= 1.0
+                assert 0.0 <= candidate.crop_contrast <= 1.0
 
 
 @pytest.mark.skipif(

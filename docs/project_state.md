@@ -192,6 +192,25 @@ measured (see the completed sections below).
   as a known limitation.
 - Safety bottleneck (Phase 4): 32 Tier-1 errors (high-risk→non-high-risk)
   dominated by BCC→ACK. Documented in `analysis/product_eval/`.
+- **Out-of-domain behavior INVESTIGATED (2026-09-01).** The 32.7% URGENT
+  rate / 12.9% high-risk-per-candidate rate on wide-field TBP crops
+  (`analysis/product_eval/cv1_cv4_assembly/result.md`) is NOT a general
+  miscalibration — confidence in/out of domain is similar overall
+  (0.733 vs 0.760). It IS concentrated in BCC and ACK specifically
+  (confidence 0.578/0.590 out-of-domain vs 0.743/0.773 in-domain),
+  consistent with — not a new instance separate from — the already-
+  documented SCC/BCC embedding overlap above. Visual audit + a new
+  crop-level contrast signal confirm why: BCC/ACK predictions are
+  disproportionately diffuse, low-contrast, hair-dominated crops (BCC
+  52.1% / ACK 88.1% below contrast 0.20 at n=3336, vs MEL 2.4%), not
+  coherent lesion shapes. **No retraining attempted** (SCC/BCC question
+  already closed) and **no filtering added** (would recreate the
+  silent-miss failure mode). Fix: `crop_blur`/`crop_contrast` evidence
+  fields added to every candidate (`src/inference/orchestrator.py`,
+  reusing `src/quality/signals.py`) — disclosure, not a gate, matching
+  the CV-3-mask precedent. Full result:
+  `analysis/product_eval/cv4_domain_evidence/result.md`, spec:
+  `docs/cv4_domain_evidence_spec.md`.
 - Checkpoints: `checkpoints/isic2019_resnet50_weighted_best.pt` (ISIC
   baseline), `checkpoints/pad_ufes_c1_partial_finetune_best.pt` (transfer).
 
@@ -413,7 +432,7 @@ direct CV consequences. Tracked here rather than left implicit.
 | CV-2 domain validation (iToBoS→phone) | Needs real phone-image test set | **Now the operative CV-2 question** — must precede any further CV-2 refinement |
 | CV-3 domain validation (TBP crops) | DONE 2026-09-01 | — (`analysis/quality/cv3_domain_itobos/result.md`) |
 | CV-1 real-artifact robustness | **RESOLVED for PAD-UFES 2026-09-01** — recalibrated, rejection 13.6%→1.42% (`analysis/quality/cv1_recalibration/result.md`). iToBoS also improved (21.5%→12.4%, same recalibration) but not to near-zero — not chased further; may reflect genuine wide-field composition differences (hair, TBP-rig equipment in frame) rather than the same defect, unconfirmed | If iToBoS wide-field rejection still matters, investigate separately — was not part of criterion A's calibration set |
-| CV-4 domain gap on TBP crops | Validated on PAD-UFES close-ups only | Quantified end-to-end: 12.9% per-candidate high-risk rate on wide-field, driving 32.7% URGENT escalation |
+| CV-4 domain gap on TBP crops | **INVESTIGATED 2026-09-01** — root cause identified (crop-quality-correlated BCC/ACK confidence collapse, not general miscalibration); disclosure evidence added, no retraining/filtering (`analysis/product_eval/cv4_domain_evidence/result.md`) | If acting on the evidence is wanted (e.g. CV-6-style abstention policy), that is a separately-scoped future task |
 | src/detection/ tests inside package | Inconsistency vs tests/ convention | Low priority cleanup |
 | .venv torch mismatch on RunPod | System python works | Before next long pod session: pin requirements |
 | `build_detector` pretrained flag no-op | Harmless for now | Before any from-scratch training attempt |

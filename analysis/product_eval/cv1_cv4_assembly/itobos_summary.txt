@@ -8,20 +8,20 @@ structural propagation counts only.
 Images: 1000
 
 Outcomes:
-  ASSESSED             655  (65.5%)
-  NO_CANDIDATES        130  (13.0%)
-  QUALITY_REJECTED     215  (21.5%)
+  ASSESSED             726  (72.6%)
+  NO_CANDIDATES        150  (15.0%)
+  QUALITY_REJECTED     124  (12.4%)
 
-Silent-miss rate (routed wide_field, zero candidates): 13.0%
+Silent-miss rate (routed wide_field, zero candidates): 15.0%
 
 Routing distribution:
-  nan                215
-  wide_field         785
+  nan                124
+  wide_field         876
 
-Candidates per assessed image: mean 4.71, max 27
+Candidates per assessed image: mean 4.60, max 27
 
 Image-level action distribution:
-  EVALUATE_SOON        55
-  MONITOR              386
-  UNKNOWN              345
-  URGENT_EVALUATION    214
+  EVALUATE_SOON        69
+  MONITOR              413
+  UNKNOWN              274
+  URGENT_EVALUATION    244
