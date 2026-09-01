@@ -2,7 +2,10 @@
 
 **Status:** Investigation complete (see findings below); fix
 pre-committed before implementation, per the same discipline as prior
-specs.
+specs. `crop_contrast`/`crop_blur` added here were later reused by CV-6
+as one of its three evidence signals — see
+`docs/cv5_cv6_evidence_architecture.md` for how this and the CV-3-mask
+decision below became one repeated pattern.
 
 ## Why
 

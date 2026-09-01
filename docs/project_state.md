@@ -217,7 +217,9 @@ measured (see the completed sections below).
 ### CV-5 — Explainability
 **Status: COMPLETE (v1) — 2026-09-01.**
 `analysis/product_eval/cv5_explainability/result.md`, spec:
-`docs/cv5_explainability_spec.md`. Mask-contour overlay (reused from
+`docs/cv5_explainability_spec.md`. **How this was built and how it fits
+CV-3/CV-4/CV-6 architecturally: `docs/cv5_cv6_evidence_architecture.md`**
+(has the full pipeline ASCII diagram). Mask-contour overlay (reused from
 `scripts/validate_cv3_domain_itobos.py::draw_overlay`) + Grad-CAM
 heatmap (`src/explainability/gradcam.py`, bypassing
 `NativePredictor.predict()`'s `@torch.no_grad()` to reach the model
@@ -243,7 +245,8 @@ policy built around `gradcam_mask_iou`, reserved for CV-8.
 ### CV-6 — Uncertainty
 **Status: COMPLETE (v1, evidence layer) — 2026-09-01.**
 `analysis/product_eval/cv6_uncertainty/result.md`, spec:
-`docs/cv6_uncertainty_spec.md`. Three zero-new-training evidence signals
+`docs/cv6_uncertainty_spec.md`. Same cross-cutting doc as CV-5:
+`docs/cv5_cv6_evidence_architecture.md`. Three zero-new-training evidence signals
 on every candidate: ensemble disagreement (seed42 vs seed123, opt-in via
 `--ensemble`, off by default — doubles CV-4 inference cost),
 temperature-calibrated confidence (T=1.25, fit on PAD-UFES val, ECE

@@ -1,7 +1,9 @@
 # CV-6 Uncertainty — Spec
 
 **Status:** Committed before implementation, per the same discipline as
-prior specs.
+prior specs. Result: `analysis/product_eval/cv6_uncertainty/result.md`.
+Cross-cutting build notes and architecture coherence with CV-3/CV-4/CV-5:
+`docs/cv5_cv6_evidence_architecture.md`.
 
 ## What CV-6 is
 

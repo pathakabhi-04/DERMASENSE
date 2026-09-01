@@ -1,7 +1,9 @@
 # CV-5 Explainability — Spec
 
 **Status:** Implemented (2026-09-01). Result:
-`analysis/product_eval/cv5_explainability/result.md`. This document is
+`analysis/product_eval/cv5_explainability/result.md`. Cross-cutting
+build notes and architecture coherence with CV-3/CV-4/CV-6:
+`docs/cv5_cv6_evidence_architecture.md`. This document is
 kept as-written (committed before implementation) — the "Why not now"
 section below described the state at spec-writing time; the deferred
 implementation happened later the same day.

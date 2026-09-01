@@ -1,7 +1,9 @@
 # CV-1 → CV-4 Pipeline Assembly — Spec
 
 **Status:** Committed before running, per the same discipline as the
-CV-2/CV-3/CV-1.5 specs.
+CV-2/CV-3/CV-1.5 specs. The "CV-3's mask is evidence, never a gate"
+decision below was reused verbatim as the design principle for CV-5 and
+CV-6 — see `docs/cv5_cv6_evidence_architecture.md`.
 
 ## What this is
 
