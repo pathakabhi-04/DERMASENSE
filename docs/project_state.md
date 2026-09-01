@@ -296,14 +296,34 @@ spec, decided by the user, covers two things:
    `ProductAction`; PAD-UFES vs. ISIC2019 class taxonomy) are flagged
    there for CV-8 to reconcile, not resolved yet.
 
-**Data acquisition (blocker 2) — plan decided, not yet executed:**
-download UQ Longitudinal locally → upload to the RunPod S3 bucket as a
-zip → extract on the pod → train (same pattern as CV-1.5 Stage 2).
-`src/temporal/__init__.py` still empty; the technical CV-7 spec (model,
-feature extraction, training plan) is written once the data is on the
-pod and inspectable. Dataset: UQ Longitudinal (35,909 dermoscopic
-images, 7,038 lesions, 340 participants, 2–7 time points). History of
-how these blockers were investigated: `docs/cv7_temporal_blockers.md`.
+**Data acquisition (blocker 2) — bounded sample staged (2026-09-02),
+full dataset deferred.** Full result:
+`analysis/quality/cv7_temporal_data/result.md`. Downloaded UQ
+Longitudinal (62GB zip) locally, inspected without full extraction
+(`zipfile`/`unzip -l`): the Dermoscopic Images folder (63.77GB, 35,914
+files) essentially *is* the documented longitudinal subset — unlike
+iToBoS, there was no large non-longitudinal portion to trim away.
+Filtered to true longitudinal (≥2-visit) participants: 331 / 57.7GB /
+7,672 lesions, closely matching the paper's 340/7,038 figures.
+
+Two independent storage constraints (local ~23GB free, RunPod volume
+~25-30GB free) made the full 58GB set unstageable immediately, so —
+same discipline as CV-1.5's 150-image held-out set and CV-3's 1,000-crop
+sample — staged a **bounded, seeded, stratified sample first**: 30
+participants (16 General, 14 HighRisk, seed 42), 2,772 images + 3
+metadata files, 5.12GB. Uploaded to
+`s3://4tlwcuo1xg/dermasense/data/raw/uq_longitudinal/` and verified
+byte-for-byte against the local extraction (2,775 objects, 5,116,534,902
+bytes both sides). Local copy also kept at `data/raw/uq_longitudinal/`
+(gitignored); source zip retained at `data/raw/UQ_zip/` in case more
+participants are sampled later.
+
+`src/temporal/__init__.py` still empty. Full-dataset training (rest of
+the 331 participants) needs a volume resize (~70-80GB, ~$5-6/month) or
+freed space — deferred until this bounded sample validates the CV-7
+approach. The technical CV-7 spec (model, feature extraction, training
+plan) is next, written against this staged sample. History of how the
+original two blockers were investigated: `docs/cv7_temporal_blockers.md`.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**

@@ -61,11 +61,14 @@ resolved." Whatever CV-7 becomes, that caveat applies to it.
 
 1. ~~Task definition decided by the user~~ — **done**, see
    `docs/cv7_temporal_rag_integration_spec.md`.
-2. **Data access** — plan decided (download UQ Longitudinal locally →
-   upload to the RunPod S3 bucket as a zip → extract on the pod →
-   train, same pattern as CV-1.5 Stage 2), **not yet executed**.
+2. ~~Data access~~ — **done, bounded** (2026-09-02): a 30-participant,
+   5.12GB stratified sample is staged locally and on the RunPod volume.
+   See `analysis/quality/cv7_temporal_data/result.md`. The full 331-
+   participant/57.7GB longitudinal set is deferred pending a volume
+   resize, not blocking — the sample is sufficient to write and
+   prototype the technical spec against.
 
-Once data access completes, the technical CV-7 spec (model, feature
-extraction, training/eval plan) gets written against UQ Longitudinal's
-actual schema, following the same committed-before-running discipline
+The technical CV-7 spec (model, feature extraction, training/eval plan)
+gets written next, against this staged sample, following the same
+committed-before-running discipline
 as every other component in this project.
