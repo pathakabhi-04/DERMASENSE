@@ -341,17 +341,23 @@ after actually inspecting the staged sample's images and metadata:
   verdict via calibrated thresholds. Mirrors CV-1.5's Stage-1-before-
   training discipline exactly. A learned Stage 2 is explicitly deferred
   unless Stage 1 proves specifically insufficient.
-- **Storage answer**: the current 30-participant sample is enough to
-  build and validate the pipeline's *correctness* (643 lesions, no
-  malignant examples needed for that). It is NOT enough to validate
-  *clinical* validity — only 4 malignant-outcome lesions landed in the
-  sample. Rather than a full resize, the efficient fix is a second,
-  targeted pull: the 57 participants dataset-wide who carry a
-  longitudinal malignant-outcome lesion (11.74GB, 99 malignant lesions
-  with visit pairs) — combined ~16-17GB, still fits in current free
-  space on both local disk and the RunPod volume, no resize needed. A
-  full resize (~70-80GB, ~$5-6/month) stays deferred until a learned
-  Stage 2 is actually justified.
+- **Malignant-enrichment pull DONE (2026-09-02).** The 30-participant
+  sample only had 4 malignant-outcome lesions — not enough for clinical
+  validation. Pulled the 54 new participants (of 57 dataset-wide, 3
+  already in the sample) carrying a longitudinal malignant lesion
+  instead of resizing: 10.96GB, 5,979 files. **Combined total verified
+  byte-for-byte against the RunPod bucket: 8,754 objects,
+  16,081,485,217 bytes** — both batches' file counts and sizes sum
+  exactly. Staged dataset now has **99 malignant-outcome lesions with
+  visit pairs** (up from 4). Full record:
+  `analysis/quality/cv7_temporal_data/result.md`.
+- **No resize was needed.** Local disk got tight mid-extraction (97%
+  used, 7GB free) — both extracted batches were deleted after
+  byte-for-byte bucket verification (re-extractable from the retained
+  source zip any time), restoring ~25GB free locally. RunPod volume
+  likewise took the full 16.08GB without a resize. A full resize
+  (~70-80GB, ~$5-6/month, for the remaining ~274 participants) stays
+  deferred until a learned Stage 2 is actually justified.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**
