@@ -232,8 +232,23 @@ source of the claim.
   taking a `CandidateResult` (CV-4+CV-6 evidence) and an optional
   `TemporalResult` (CV-7). `src/risk/action_mapping.py` and
   `src/risk/safety_gate.py` are unchanged and still used internally.
-  **Not yet wired**: the real pairing logic that finds a user's prior
-  visit image and produces the `TemporalResult` to pass in
-  (`TemporalPipeline.assess_pair` takes two already-selected images);
-  `assess_risk()` is called per-candidate manually for now, not
-  threaded through `DermaSensePipeline.predict()` itself.
+- **Threaded through `DermaSensePipeline.predict()` (2026-09-02).**
+  `predict()` now accepts `lesion_id`, `prior_image_bgr`,
+  `prior_timestamp`, `current_timestamp`. Finding *which* prior image
+  belongs to which lesion remains explicitly the caller's job (a
+  lesion-history store this pipeline doesn't own and was never asked
+  to build) — this only decides whether to APPLY a given prior image:
+  temporal pairing runs only when the current image has exactly one
+  candidate (`src/inference/orchestrator.py::_resolve_temporal_pairing`);
+  with more than one, which detected lesion the prior photo belongs to
+  is genuinely ambiguous, so pairing is skipped and flagged
+  (`PRIOR_IMAGE_PAIRING_AMBIGUOUS`) rather than guessed. Verified
+  end-to-end on real checkpoints and real (if clinically unrelated)
+  images: a prior+current image pair produced a real `CHANGED_COLOR`
+  verdict that escalated `EVALUATE_SOON` to `HIGH`
+  (`tests/test_pipeline_assembly.py::test_prior_image_wires_real_cv7_comparison`).
+  `CandidateResult.risk_assessment` is now always populated, with or
+  without a prior image (CV-8 degrades to `temporal=None` gracefully).
+  **Still not built**: the lesion-history store itself (which prior
+  image to supply) — a product/backend concern, out of this pipeline's
+  scope by design.

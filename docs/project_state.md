@@ -468,8 +468,8 @@ change — the result is significant, not a definitive clinical claim.
 CV-7 proceeds to CV-8 integration as a classical component.
 
 ### CV-8 — Risk Engine / Severity
-**Status: CV-4+CV-7 CONVERGENCE IMPLEMENTED (2026-09-02); CV-5/CV-6
-convergence and real pairing logic still open.**
+**Status: CV-4+CV-7 CONVERGENCE IMPLEMENTED AND THREADED INTO THE
+PIPELINE (2026-09-02); CV-5/CV-6-specific convergence still open.**
 - `src/risk/action_mapping.py` and `src/risk/safety_gate.py`: unchanged,
   still the internal `ProductAction`/gate logic.
 - `src/risk/convergence.py::assess_risk()` — NEW. Converges a
@@ -496,14 +496,52 @@ convergence and real pairing logic still open.**
   found predictive (`stage1_evaluation_result.md`: p=0.0135 non-STABLE
   rate, p=8.2e-8 magnitude), not an untested assumption. 15 new tests,
   full suite 138/138 passing.
+- **Wired into `DermaSensePipeline.predict()` (2026-09-02).**
+  `predict()` gained `lesion_id`, `prior_image_bgr`, `prior_timestamp`,
+  `current_timestamp` params. `TemporalPipeline` is now constructed
+  once in `__init__`, reusing the SAME CV-3 segmenter already loaded
+  (no extra checkpoint, no extra memory). `_run_candidate` now always
+  calls `assess_risk()` and attaches the result as
+  `CandidateResult.risk_assessment` — populated for every candidate,
+  with or without a prior image (CV-8 degrades to `temporal=None`
+  gracefully).
+
+  **Pairing rule** (`_resolve_temporal_pairing`, a pure/unit-testable
+  function): temporal comparison only runs when the current image has
+  exactly one candidate. With more than one, which detected lesion a
+  supplied prior image corresponds to is genuinely ambiguous — this
+  pipeline has no cross-image lesion re-identification and was never
+  asked to build one, so it skips and flags
+  (`PRIOR_IMAGE_PAIRING_AMBIGUOUS`) rather than guessing, the same
+  fail-loud discipline as calibration.py's confidence gate.
+  `lesion_id` resolution (`_candidate_lesion_id`) follows the same
+  logic: a caller-supplied id applies directly only when unambiguous
+  (one candidate); otherwise each candidate gets its own suffixed id.
+
+  **Verified end-to-end on real checkpoints**: two real (clinically
+  unrelated, since no true visit-pair images were used for this
+  smoke test) PAD-UFES images produced a genuine `CHANGED_COLOR`
+  verdict (confidence 2/3, border+color only — no ruler in these
+  photos, exactly as expected for real product images with no
+  physical scale reference) that escalated `EVALUATE_SOON` to `HIGH`
+  and forced `requires_review=True`
+  (`tests/test_pipeline_assembly.py::test_prior_image_wires_real_cv7_comparison`).
+  9 new pure unit tests + 2 new integration tests, full suite
+  147/147 passing.
+
+  **Finding worth noting**: this confirms CV-7's border/color signal
+  (already shown predictive in `stage1_evaluation_result.md`) works
+  through the full pipeline even with ZERO ruler coverage — the
+  realistic case for actual DermaSense users, who will essentially
+  never have a physical mm ruler in their photos. Size-based escalation
+  will be correspondingly rare in production, by design, not a bug.
+
 - **Not yet done**: CV-5 (explainability) and CV-6 ensemble-specific
   evidence aren't threaded into `assess_risk()` beyond the calibrated
-  confidence already on `CandidateResult`; the real pairing logic that
-  finds a user's prior-visit image and produces a `TemporalResult` to
-  pass in (`assess_risk()` currently takes one manually, it isn't
-  threaded through `DermaSensePipeline.predict()` itself); a full
-  CV-1→CV-8 orchestrator that calls `assess_risk()` per candidate
-  automatically.
+  confidence already on `CandidateResult`; the lesion-history store
+  itself (which prior image to supply for a given lesion_id) — a
+  product/backend persistence concern, out of this pipeline's scope by
+  design, not attempted here.
 
 ---
 

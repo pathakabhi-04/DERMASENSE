@@ -81,12 +81,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from src.inference.orchestrator import CandidateResult
 from src.risk.action_mapping import ProductAction
 from src.temporal.delta import TemporalVerdict
 from src.temporal.pipeline import TemporalResult
+
+if TYPE_CHECKING:
+    # Import deferred to type-checking only: src.inference.orchestrator
+    # imports assess_risk/RiskAssessment from this module, so a runtime
+    # import here would be circular.
+    from src.inference.orchestrator import CandidateResult
 
 
 class RiskCategory(str, Enum):
@@ -182,15 +187,22 @@ def assess_risk(
     *,
     lesion_id: str,
     temporal: TemporalResult | None = None,
+    extra_quality_flags: tuple[str, ...] = (),
 ) -> RiskAssessment:
     """
     Converge CV-4 (via `candidate`) and CV-7 (via `temporal`) into one
     risk assessment. `temporal=None` means no prior-visit image was
-    available to compare against at all.
+    available to compare against at all -- or, per the orchestrator's
+    own ambiguity rule, one was available but not applied (see
+    `extra_quality_flags`, e.g. `PRIOR_IMAGE_PAIRING_AMBIGUOUS` from
+    `src/inference/orchestrator.py::_resolve_temporal_pairing`).
+    `extra_quality_flags` lets a caller record why, without this
+    module needing to know about orchestrator-level concerns like
+    multi-candidate ambiguity.
     """
     base_category = _BASE_RISK_CATEGORY[candidate.product_action]
 
-    quality_flags: list[str] = []
+    quality_flags: list[str] = list(extra_quality_flags)
     if temporal is None:
         temporal_dict = dict(_NO_COMPARISON_TEMPORAL)
         quality_flags.append("NO_TEMPORAL_COMPARISON")

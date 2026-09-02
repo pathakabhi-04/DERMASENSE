@@ -28,10 +28,33 @@ This class deliberately does NOT replace DermaSenseInferencePipeline in
 src/inference/pipeline.py, which remains the CV-4-only path with a
 predict(tensor) contract that existing tests depend on. This one takes a
 raw BGR image.
+
+## CV-7/CV-8 wiring (2026-09-02)
+
+`predict()` optionally accepts `prior_image_bgr` -- a previous visit's
+photo of the SAME lesion, if the caller has one. Finding *which* prior
+image belongs to which lesion is explicitly the caller's job (a
+lesion-tracking/history store), not this pipeline's: this class has no
+persistence and does not attempt cross-image lesion re-identification.
+
+Given a prior image, temporal pairing (CV-7, via
+`src.temporal.pipeline.TemporalPipeline`) only runs when the CURRENT
+image has exactly one candidate. With more than one candidate, which
+detected lesion the prior photo corresponds to is genuinely ambiguous,
+and this pipeline never guesses at an identity match the same way
+calibration.py never guesses at a scale it can't confirm -- pairing is
+skipped and flagged (`PRIOR_IMAGE_PAIRING_AMBIGUOUS`), not applied to
+an arbitrary candidate. See `_resolve_temporal_pairing`.
+
+CV-8 (`src.risk.convergence.assess_risk`) runs for EVERY candidate
+regardless -- it degrades to `temporal=None` gracefully (already part
+of its own design), so `CandidateResult.risk_assessment` is always
+populated, not just when a prior image was supplied.
 """
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -55,6 +78,7 @@ from src.quality.capture_guidance import (
 )
 from src.quality.signals import blur_signal, contrast_signal
 from src.risk.action_mapping import ProductAction
+from src.risk.convergence import RiskAssessment, assess_risk
 from src.risk.safety_gate import GateDecision
 from src.routing.classifier import load_router_checkpoint
 from src.routing.classifier import route_image as route_image_classifier
@@ -63,6 +87,7 @@ from src.segmentation.inference import (
     mask_evidence,
     predict_mask,
 )
+from src.temporal.pipeline import TemporalPipeline, TemporalResult
 from src.uncertainty.calibration import DEFAULT_TEMPERATURE, apply_temperature
 from src.uncertainty.ensemble import ensemble_evidence, load_ensemble
 
@@ -141,6 +166,11 @@ class CandidateResult:
     ensemble_probability_distance: float | None = None
     ensemble_confidence_spread: float | None = None
 
+    # CV-8 convergence (src/risk/convergence.py). Always populated --
+    # assess_risk() degrades to temporal=None gracefully, so this is
+    # never absent just because no prior image was available.
+    risk_assessment: RiskAssessment | None = None
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "candidate_index": self.candidate_index,
@@ -163,6 +193,7 @@ class CandidateResult:
             "ensemble_agree": self.ensemble_agree,
             "ensemble_probability_distance": self.ensemble_probability_distance,
             "ensemble_confidence_spread": self.ensemble_confidence_spread,
+            "risk_assessment": self.risk_assessment.to_dict() if self.risk_assessment else None,
         }
 
 
@@ -227,6 +258,44 @@ class PipelineResult:
         }
 
 
+def _resolve_temporal_pairing(
+    num_candidates: int, prior_image_bgr: np.ndarray | None
+) -> tuple[bool, str | None]:
+    """
+    Decide whether CV-7 temporal pairing should run for this predict()
+    call. Pure function, no model access, so this is unit-testable
+    without checkpoints -- see module docstring's "CV-7/CV-8 wiring"
+    section for the reasoning.
+
+    Returns (should_pair, skip_reason). skip_reason is None whenever
+    should_pair is True OR no prior image was supplied at all (nothing
+    to explain); it is set only when a prior image WAS supplied but
+    pairing couldn't be applied, so CV-8 can record why.
+    """
+    if prior_image_bgr is None:
+        return False, None
+    if num_candidates != 1:
+        return False, "PRIOR_IMAGE_PAIRING_AMBIGUOUS"
+    return True, None
+
+
+def _candidate_lesion_id(lesion_id: str | None, index: int, num_candidates: int) -> str:
+    """
+    Resolve the lesion_id CV-8 records for one candidate.
+
+    A caller-supplied lesion_id applies directly only when it's
+    unambiguous (exactly one candidate); with multiple candidates in
+    one image, a single caller-supplied id can't identify which
+    detected lesion it names, so each gets its own suffixed id instead
+    of all silently sharing the caller's one id.
+    """
+    if lesion_id is not None and num_candidates == 1:
+        return lesion_id
+    if lesion_id is not None:
+        return f"{lesion_id}-{index}"
+    return f"candidate-{index}"
+
+
 class DermaSensePipeline:
     """
     The assembled CV-1 -> CV-4 pipeline.
@@ -260,6 +329,12 @@ class DermaSensePipeline:
         self.crop_margin = crop_margin
         self.calibration_temperature = calibration_temperature
         self._cv4_transform = build_eval_transform(ImageTransformConfig())
+        # CV-7 (src/temporal/pipeline.py). Reuses the same CV-3
+        # segmenter already loaded above -- no extra checkpoint, no
+        # extra memory. Always constructed (cost-free until called);
+        # whether it actually runs per predict() call depends on
+        # whether the caller supplied a prior_image_bgr.
+        self.temporal_pipeline = TemporalPipeline(segmenter=self.segmenter, device=self.device)
 
     @classmethod
     def from_checkpoints(
@@ -369,6 +444,10 @@ class DermaSensePipeline:
         box_norm: tuple[float, float, float, float],
         candidate_index: int,
         detection_confidence: float | None,
+        *,
+        lesion_id: str,
+        temporal: TemporalResult | None = None,
+        temporal_skip_reason: str | None = None,
     ) -> CandidateResult:
         cv3_tensor, px_box = crop_and_normalize(
             image_bgr, box_norm, margin=self.crop_margin
@@ -415,7 +494,7 @@ class DermaSensePipeline:
             ]
             ensemble_fields = ensemble_evidence(ensemble_predictions)
 
-        return CandidateResult(
+        candidate = CandidateResult(
             candidate_index=candidate_index,
             box_pixels=px_box,
             detection_confidence=detection_confidence,
@@ -433,10 +512,40 @@ class DermaSensePipeline:
             **evidence,
         )
 
+        # CV-8 convergence (src/risk/convergence.py). Always run, even
+        # with temporal=None -- assess_risk() degrades gracefully, so
+        # risk_assessment is populated for every candidate regardless
+        # of whether a prior image was available or usable.
+        risk_assessment = assess_risk(
+            candidate,
+            lesion_id=lesion_id,
+            temporal=temporal,
+            extra_quality_flags=(temporal_skip_reason,) if temporal_skip_reason else (),
+        )
+        return dataclasses.replace(candidate, risk_assessment=risk_assessment)
+
     # ---- entry point --------------------------------------------
 
-    def predict(self, image_bgr: np.ndarray) -> PipelineResult:
-        """Run the full pipeline on one BGR image (as cv2.imread returns)."""
+    def predict(
+        self,
+        image_bgr: np.ndarray,
+        *,
+        lesion_id: str | None = None,
+        prior_image_bgr: np.ndarray | None = None,
+        prior_timestamp: str | None = None,
+        current_timestamp: str | None = None,
+    ) -> PipelineResult:
+        """
+        Run the full pipeline on one BGR image (as cv2.imread returns).
+
+        `prior_image_bgr`, if given, is a previous visit's photo of the
+        SAME lesion -- finding it is the caller's job (a lesion-history
+        store this pipeline doesn't own), not this method's. It is only
+        actually compared (CV-7) when this image has exactly one
+        candidate; see `_resolve_temporal_pairing`. `lesion_id`
+        identifies that lesion for CV-8's output and for pairing; with
+        no lesion_id and no ambiguity, one is synthesized per candidate.
+        """
         if not isinstance(image_bgr, np.ndarray):
             raise TypeError("image_bgr must be a numpy.ndarray")
         if image_bgr.ndim != 3 or image_bgr.shape[2] != 3:
@@ -474,8 +583,28 @@ class DermaSensePipeline:
                 for box, conf in detections
             ]
 
+        should_pair, skip_reason = _resolve_temporal_pairing(
+            len(candidate_boxes), prior_image_bgr
+        )
+        temporal_result = None
+        if should_pair:
+            temporal_result = self.temporal_pipeline.assess_pair(
+                prior_image_bgr,
+                image_bgr,
+                earlier_timestamp=prior_timestamp,
+                later_timestamp=current_timestamp,
+            )
+
         candidates = tuple(
-            self._run_candidate(image_bgr, box_norm, index, confidence)
+            self._run_candidate(
+                image_bgr,
+                box_norm,
+                index,
+                confidence,
+                lesion_id=_candidate_lesion_id(lesion_id, index, len(candidate_boxes)),
+                temporal=temporal_result if should_pair else None,
+                temporal_skip_reason=skip_reason,
+            )
             for index, (box_norm, confidence) in enumerate(candidate_boxes)
         )
 
