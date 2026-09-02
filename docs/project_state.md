@@ -468,8 +468,9 @@ change — the result is significant, not a definitive clinical claim.
 CV-7 proceeds to CV-8 integration as a classical component.
 
 ### CV-8 — Risk Engine / Severity
-**Status: CV-4+CV-7 CONVERGENCE IMPLEMENTED AND THREADED INTO THE
-PIPELINE (2026-09-02); CV-5/CV-6-specific convergence still open.**
+**Status: CV-4+CV-6+CV-7 CONVERGENCE IMPLEMENTED AND THREADED INTO THE
+PIPELINE (2026-09-02). CV-5 (Grad-CAM) evidence is the one signal not
+yet surfaced into `quality_flags` — see below.**
 - `src/risk/action_mapping.py` and `src/risk/safety_gate.py`: unchanged,
   still the internal `ProductAction`/gate logic.
 - `src/risk/convergence.py::assess_risk()` — NEW. Converges a
@@ -536,12 +537,30 @@ PIPELINE (2026-09-02); CV-5/CV-6-specific convergence still open.**
   never have a physical mm ruler in their photos. Size-based escalation
   will be correspondingly rare in production, by design, not a bug.
 
-- **Not yet done**: CV-5 (explainability) and CV-6 ensemble-specific
-  evidence aren't threaded into `assess_risk()` beyond the calibrated
-  confidence already on `CandidateResult`; the lesion-history store
-  itself (which prior image to supply for a given lesion_id) — a
-  product/backend persistence concern, out of this pipeline's scope by
-  design, not attempted here.
+- **`quality_flags` now surfaces CV-1/CV-3/CV-6 evidence too
+  (2026-09-02).** `assess_risk()` previously only used CV-4's diagnosis
+  and CV-6's *calibrated confidence* — the mask/crop/ensemble evidence
+  fields already computed on `CandidateResult` never reached the JSON
+  contract. Now they do, as disclosure-only flags (never affect
+  `risk_category` or `requires_review` — verified by a dedicated test):
+  `DEGENERATE_MASK`/`MASK_TOUCHES_BORDER` (CV-3, direct booleans),
+  `LOW_CROP_CONTRAST` (`crop_contrast < 0.20`, the cutoff independently
+  validated in `docs/cv4_domain_evidence_spec.md` — BCC/ACK crops fall
+  below it 58.7%/similarly vs. MEL's 5.1%), `LOW_CROP_BLUR`
+  (`crop_blur < 0.15`, borrowed from CV-1's whole-image advisory
+  threshold — honestly flagged as weaker evidence than
+  `LOW_CROP_CONTRAST` since blur was never independently validated at
+  crop scale), `ENSEMBLE_DISAGREEMENT` (`ensemble_agree is False`).
+  `ensemble_probability_distance`/`ensemble_confidence_spread` got no
+  flag — no calibrated cutoff exists for either anywhere in this
+  project, so none was invented. 10 new tests, full suite 157/157.
+- **Not yet done**: CV-5 (Grad-CAM/explainability) evidence isn't
+  threaded into `assess_risk()` at all yet — `CandidateResult` doesn't
+  currently carry a CV-5 field the way it carries CV-3/CV-6 evidence,
+  so this needs that plumbing first, not just a new flag; the
+  lesion-history store itself (which prior image to supply for a given
+  lesion_id) — a product/backend persistence concern, out of this
+  pipeline's scope by design, not attempted here.
 
 ---
 

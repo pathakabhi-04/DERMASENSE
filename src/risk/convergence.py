@@ -38,6 +38,39 @@ verdict. This module's only new logic is how they combine.
    taxonomy question, orthogonal to wiring CV-7's signal into risk
    convergence, and stays open per the spec's own note.
 
+## `quality_flags`: surfacing evidence CV-1/CV-3/CV-6 already compute
+
+`CandidateResult` already carries mask evidence (CV-3), crop-quality
+evidence (CV-1's signals, applied to the crop -- CV-4 domain evidence
+work), and ensemble evidence (CV-6) -- none of it reached this
+contract's `quality_flags` before now. Disclosure only, same as every
+other evidence field in this project: none of these ever change
+`risk_category` or `requires_review` (only CV-7's escalation rule does
+that, deliberately, per the section above).
+
+- `DEGENERATE_MASK` / `MASK_TOUCHES_BORDER` -- direct passthrough of
+  `candidate.mask_degenerate` / `mask_touches_border` (already boolean,
+  no threshold to invent).
+- `LOW_CROP_CONTRAST` -- `crop_contrast < 0.20`, reusing the cutoff
+  independently validated in `docs/cv4_domain_evidence_spec.md` (BCC/ACK
+  crops: 58.7%/5.1% fall below it vs. MEL's 5.1%/0.337 mean) -- a real,
+  evidence-grounded discriminator, not a guess.
+- `LOW_CROP_BLUR` -- `crop_blur < 0.15`, reusing
+  `src/quality/assessment.py`'s whole-image advisory `blur_threshold`.
+  Unlike contrast, blur was never independently calibrated at CROP
+  scale (the CV-4 investigation implicated contrast, not blur) -- this
+  is a borrowed threshold, flagged here as weaker evidence than
+  `LOW_CROP_CONTRAST`, not claimed as equally validated.
+- `ENSEMBLE_DISAGREEMENT` -- `ensemble_agree is False` (only meaningful
+  when the ensemble ran at all; `None` means it didn't, and stays
+  silent rather than treated as agreement or disagreement).
+  `ensemble_probability_distance`/`ensemble_confidence_spread` are
+  continuous and have no calibrated cutoff anywhere in this project
+  (`docs/cv6_uncertainty_spec.md`), so no flag is invented for them --
+  they remain on `CandidateResult.to_dict()` for a consumer who wants
+  the raw numbers, without this module fabricating a threshold to
+  summarize them into the JSON contract's `quality_flags`.
+
 ## The one real design decision: how CV-7 affects risk_category
 
 A **one-way escalation ratchet**, never a de-escalation:
@@ -122,6 +155,13 @@ _ESCALATING_VERDICTS = frozenset({TemporalVerdict.GROWING, TemporalVerdict.CHANG
 # delta_calibration_result.md). See module docstring.
 MIN_TEMPORAL_CONFIDENCE_FOR_ESCALATION = 2.0 / 3.0
 
+# See module docstring's "quality_flags" section for provenance of
+# both thresholds -- LOW_CROP_CONTRAST is independently validated at
+# crop scale (docs/cv4_domain_evidence_spec.md); LOW_CROP_BLUR is
+# borrowed from CV-1's whole-image advisory threshold, weaker evidence.
+LOW_CROP_CONTRAST_THRESHOLD = 0.20
+LOW_CROP_BLUR_THRESHOLD = 0.15
+
 # Shape used when there is no second image to compare at all (a first
 # upload, no visit history) -- semantically identical to LesionDelta's
 # own NO_PRIOR_DATA case (compute_delta returns this same shape when a
@@ -182,6 +222,27 @@ def _temporal_escalates(temporal: TemporalResult | None) -> bool:
     return True
 
 
+def _evidence_quality_flags(candidate: CandidateResult) -> list[str]:
+    """
+    Surface CV-1/CV-3/CV-6 evidence already on `candidate` as
+    disclosure flags. Never affects risk_category or requires_review --
+    see module docstring's "quality_flags" section for provenance of
+    each threshold used here.
+    """
+    flags: list[str] = []
+    if candidate.mask_degenerate:
+        flags.append("DEGENERATE_MASK")
+    if candidate.mask_touches_border:
+        flags.append("MASK_TOUCHES_BORDER")
+    if candidate.crop_contrast < LOW_CROP_CONTRAST_THRESHOLD:
+        flags.append("LOW_CROP_CONTRAST")
+    if candidate.crop_blur < LOW_CROP_BLUR_THRESHOLD:
+        flags.append("LOW_CROP_BLUR")
+    if candidate.ensemble_agree is False:
+        flags.append("ENSEMBLE_DISAGREEMENT")
+    return flags
+
+
 def assess_risk(
     candidate: CandidateResult,
     *,
@@ -202,7 +263,7 @@ def assess_risk(
     """
     base_category = _BASE_RISK_CATEGORY[candidate.product_action]
 
-    quality_flags: list[str] = list(extra_quality_flags)
+    quality_flags: list[str] = list(extra_quality_flags) + _evidence_quality_flags(candidate)
     if temporal is None:
         temporal_dict = dict(_NO_COMPARISON_TEMPORAL)
         quality_flags.append("NO_TEMPORAL_COMPARISON")
