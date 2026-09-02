@@ -128,11 +128,27 @@ Stage 2 is not attempted preemptively — only if Stage 1's own
 evaluation shows a genuine, specific insufficiency, not a general sense
 that a learned model "would probably do better."
 
-## Files (implementation, next step after this spec)
+## Update (2026-09-02): calibration implemented, coverage measured
 
-- `src/temporal/calibration.py` — ruler detection, per-image
-  pixel-to-mm scale factor
-- `src/temporal/measurement.py` — per-visit size/color/border
+`src/temporal/calibration.py` is built and gated
+(`analysis/quality/cv7_temporal_data/calibration_result.md`). Real,
+measured confident-calibration rate on a 200-image random sample:
+**4.0%** — low, but the confident results are tight and consistent
+(262.2–269.0 px/mm, corroborated by an independent manufacturer spec),
+confirming the gap is detection *sensitivity* (mostly "ruler not found
+at all," from hair/lesion-curve occlusion and non-fixed handheld
+framing), not a wrong assumption or a miscalibrated one. Decision: ship
+as designed — a failed calibration returns `NO_PRIOR_DATA` for the size
+dimension only (color/border deltas don't need the ruler), never a
+guessed value. Improving detection sensitivity (e.g. template matching
+against the ruler's visual pattern) is a separately-scoped follow-up,
+not attempted now, per this spec's own anti-rabbit-hole boundary.
+
+## Files
+
+- `src/temporal/calibration.py` — DONE. Ruler detection, per-image
+  pixel-to-mm scale factor, confidence-gated (see above).
+- `src/temporal/measurement.py` — next. Per-visit size/color/border
   measurement from a CV-3 mask + calibration
 - `src/temporal/delta.py` — pairwise delta computation + verdict
   assignment against calibrated thresholds

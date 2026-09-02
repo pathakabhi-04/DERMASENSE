@@ -272,8 +272,8 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: TASK, INTEGRATION BOUNDARY, AND TECHNICAL SPEC LOCKED
-(2026-09-02); implementation is next.**
+**Status: IMPLEMENTATION STARTED (2026-09-02) — ruler calibration
+done and gated; measurement/delta/verdict modules next.**
 `docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
 spec, decided by the user, covers two things:
 
@@ -358,6 +358,23 @@ after actually inspecting the staged sample's images and metadata:
   likewise took the full 16.08GB without a resize. A full resize
   (~70-80GB, ~$5-6/month, for the remaining ~274 participants) stays
   deferred until a learned Stage 2 is actually justified.
+
+**Ruler calibration implemented and gated (2026-09-02).**
+`src/temporal/calibration.py`, full result:
+`analysis/quality/cv7_temporal_data/calibration_result.md`. Detects the
+per-image mm ruler via a probabilistic Hough transform (two other
+approaches — darkness/shape blob heuristics, then the same with HSV
+saturation filtering — were tried and rejected first, each on real
+images, not assumed). **Measured confident-calibration rate: 4.0%** on
+a 200-image random sample — low, but the confident results are tight
+(262.2–269.0 px/mm) and match the manufacturer-corroborated ~265px/mm
+almost exactly, confirming the gap is detection sensitivity (mostly
+"ruler not found at all" — hair, lesion-curve occlusion, non-fixed
+handheld framing), not a wrong assumption. **Decision: ship the gate as
+designed** — a failed calibration returns `NO_PRIOR_DATA` for size only
+(color/border deltas are unaffected); improving detection sensitivity
+is a separately-scoped follow-up, not attempted now. `src/temporal/measurement.py`,
+`delta.py`, and the verdict-assignment logic are next.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**
