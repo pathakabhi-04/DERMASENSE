@@ -186,27 +186,30 @@ justification inside the verified, testable system, with the RAG layer
 free to elaborate on it in natural language without ever being the
 source of the claim.
 
-## Two discrepancies against the current codebase, flagged not resolved
+## Two discrepancies against the current codebase — one resolved
 
-Neither blocks this document's purpose (locking the product-level
-design); both need reconciling before CV-8 actually implements this
-contract, and are recorded here so they aren't silently lost:
-
-1. **`risk_category: LOW | MEDIUM | HIGH`** doesn't match the existing
-   `ProductAction` enum (`src/risk/action_mapping.py`:
-   `URGENT_EVALUATION`, `EVALUATE_SOON`, `MONITOR`, `UNKNOWN`). Either
-   the contract's `risk_category` is a new, coarser field CV-8 derives
-   from `ProductAction` for external consumption, or the two need to be
-   unified. Not decided here — a CV-8 design question.
-2. **`native_class` enum** (`MEL | BCC | SCC | AK | NV | BKL | DF |
-   VASC`) is the ISIC2019 8-class taxonomy
-   (`src/models/native_classifier.py::ISIC2019_CLASSES`). The pipeline
-   built this session (`src/inference/orchestrator.py`) uses the
-   PAD-UFES 6-class head exclusively (`NativePredictor` hardcodes
-   `dataset_id="pad_ufes"`, per `src/inference/native.py`). Which
-   taxonomy CV-8's contract actually emits — PAD-UFES's 6 classes,
-   ISIC's 8, or a mapping between them — needs to be decided when CV-8
-   is built, not assumed from this contract.
+1. **RESOLVED (2026-09-02) in `src/risk/convergence.py`.**
+   `risk_category` is kept as a NEW field, separate from
+   `ProductAction` — not unified with it. `ProductAction` remains the
+   internal, authoritative action, used unchanged by the existing
+   safety gate. `risk_category` is derived from it for this external
+   contract only: `URGENT_EVALUATION -> HIGH`, `EVALUATE_SOON ->
+   MEDIUM`, `MONITOR -> LOW`, `UNKNOWN -> HIGH` (fail-safe, mirroring
+   `safety_gate.py`'s own fail-to-REVIEW handling of UNKNOWN). See
+   `src/risk/convergence.py`'s module docstring for the full reasoning,
+   including how CV-7's verdict is allowed to escalate this category
+   (a one-way ratchet, never a de-escalation).
+2. **Still open, deliberately left unresolved by the CV-8 work above.**
+   `native_class` enum (`MEL | BCC | SCC | AK | NV | BKL | DF | VASC`)
+   is the ISIC2019 8-class taxonomy
+   (`src/models/native_classifier.py::ISIC2019_CLASSES`), while the
+   assembled pipeline (`src/inference/orchestrator.py`) uses the
+   PAD-UFES 6-class head exclusively. `src/risk/convergence.py` passes
+   through whatever `CandidateResult.predicted_class` actually is
+   (PAD-UFES) rather than fabricating a mapping to the contract's
+   8-class example — reconciling the taxonomies is a CV-4/data
+   question, orthogonal to wiring CV-7's signal into risk convergence,
+   and is not resolved here.
 
 ## What's still open
 
@@ -224,8 +227,13 @@ contract, and are recorded here so they aren't silently lost:
   `docs/cv7_temporal_blockers.md`). Gets written once the data is on
   the pod and inspectable, following the same committed-before-running
   discipline as every other spec in this project.
-- **CV-8's convergence implementation** (currently
-  `src/risk/action_mapping.py` + `src/risk/safety_gate.py`, "PARTIALLY
-  IMPLEMENTED" per `docs/project_state.md`) does not yet emit this
-  contract or accept CV-7 input. That implementation work, and the two
-  discrepancies above, are scoped for when CV-8 itself is built.
+- **CV-8's convergence implementation is DONE for CV-4+CV-7** (2026-09-02):
+  `src/risk/convergence.py::assess_risk()` emits this exact contract,
+  taking a `CandidateResult` (CV-4+CV-6 evidence) and an optional
+  `TemporalResult` (CV-7). `src/risk/action_mapping.py` and
+  `src/risk/safety_gate.py` are unchanged and still used internally.
+  **Not yet wired**: the real pairing logic that finds a user's prior
+  visit image and produces the `TemporalResult` to pass in
+  (`TemporalPipeline.assess_pair` takes two already-selected images);
+  `assess_risk()` is called per-candidate manually for now, not
+  threaded through `DermaSensePipeline.predict()` itself.

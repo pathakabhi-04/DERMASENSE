@@ -468,12 +468,42 @@ change — the result is significant, not a definitive clinical claim.
 CV-7 proceeds to CV-8 integration as a classical component.
 
 ### CV-8 — Risk Engine / Severity
-**Status: PARTIALLY IMPLEMENTED**
-- `src/risk/action_mapping.py` and `src/risk/safety_gate.py` exist.
-- `src/inference/pipeline.py` wires CV-4 → risk engine (Phase 4 safety
-  gate). This is the CV-4-only pipeline, not the full CV-1→CV-8 pipeline.
-- The full convergent CV-8 (CV-5 + CV-6 + CV-7 all feeding it) is not
-  yet implemented — it's the eventual target.
+**Status: CV-4+CV-7 CONVERGENCE IMPLEMENTED (2026-09-02); CV-5/CV-6
+convergence and real pairing logic still open.**
+- `src/risk/action_mapping.py` and `src/risk/safety_gate.py`: unchanged,
+  still the internal `ProductAction`/gate logic.
+- `src/risk/convergence.py::assess_risk()` — NEW. Converges a
+  `CandidateResult` (CV-4 diagnosis + CV-6 calibrated confidence) and
+  an optional `TemporalResult` (CV-7) into the exact JSON contract
+  locked in `docs/cv7_temporal_rag_integration_spec.md`
+  (`lesion_id/diagnosis/risk_category/risk_reason/temporal/uncertainty/quality_flags`).
+  Resolves discrepancy 1 from that spec: `risk_category`
+  (LOW/MEDIUM/HIGH) is a new field derived from `ProductAction`
+  (`URGENT_EVALUATION→HIGH, EVALUATE_SOON→MEDIUM, MONITOR→LOW,
+  UNKNOWN→HIGH` fail-safe), not a replacement for it. Discrepancy 2
+  (ISIC 8-class vs. PAD-UFES 6-class `native_class` taxonomy) stays
+  open, deliberately — orthogonal to this work, passes through
+  whatever `CandidateResult.predicted_class` actually is.
+  **The one real design decision**: CV-7's verdict can escalate
+  `risk_category` by one step (never de-escalate) — only for
+  `GROWING`/`CHANGED_COLOR`, only when `magnitude >= 1.0` and
+  `confidence >= 2/3`. `SHRINKING`/`STABLE`/`NO_PRIOR_DATA` never
+  affect risk in either direction, since an absent signal is equally
+  consistent with "not changing" and "couldn't measure" (calibration's
+  4% size-coverage, measurement's 5% mask-miss rate). Escalation also
+  forces `requires_review=True` regardless of CV-4/CV-6's own
+  decision. This rule acts on a signal Stage 1's own evaluation already
+  found predictive (`stage1_evaluation_result.md`: p=0.0135 non-STABLE
+  rate, p=8.2e-8 magnitude), not an untested assumption. 15 new tests,
+  full suite 138/138 passing.
+- **Not yet done**: CV-5 (explainability) and CV-6 ensemble-specific
+  evidence aren't threaded into `assess_risk()` beyond the calibrated
+  confidence already on `CandidateResult`; the real pairing logic that
+  finds a user's prior-visit image and produces a `TemporalResult` to
+  pass in (`assess_risk()` currently takes one manually, it isn't
+  threaded through `DermaSensePipeline.predict()` itself); a full
+  CV-1→CV-8 orchestrator that calls `assess_risk()` per candidate
+  automatically.
 
 ---
 
