@@ -618,6 +618,25 @@ does not mean every signal fires on every image — most won't (no
 ruler, no ensemble/Grad-CAM by default, no prior image) — by design,
 per each component's own documented, measured coverage.
 
+**Delivered to the RAG collaborator (2026-09-02):**
+`docs/cv8_sample_outputs/sample_outputs.json` — 5 real
+`RiskAssessment.to_dict()` payloads (real checkpoints, real images: 4
+from the staged UQ Longitudinal sample, 1 from PAD-UFES), covering
+first-visit/no-history, a stable returning visit, a real CV-7
+escalation (`NEV`→`MONITOR` base pushed to `MEDIUM` by `CHANGED_COLOR`),
+a "prior image supplied but unmeasurable" case, and a disclosed
+quality flag alongside a normal result — picked to show the range of
+real shapes, not a curated narrative. `docs/cv8_sample_outputs/README.md`
+documents the schema and calls out the two things a parser MUST
+handle: `per_feature_deltas.size` is frequently `null` (not `0.0` —
+real users have no ruler, so this is the common case, not an edge
+case), and `native_class` is currently PAD-UFES's 6-class taxonomy,
+not the contract's own 8-class ISIC example (the still-open
+discrepancy). Regenerable via
+`python -m scripts.generate_cv8_sample_outputs`. This is a static
+example set, not a live delivery mechanism — no API/queue/file-drop
+integration was built or decided; that remains open.
+
 ---
 
 ## Repo structure conventions
