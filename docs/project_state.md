@@ -272,10 +272,10 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: IMPLEMENTATION STARTED (2026-09-02) — ruler calibration,
-per-visit measurement, and delta/verdict assignment all done. CV-7's
-own module chain is complete; wiring into an orchestrator alongside
-CV-1→CV-6 is the remaining integration work.**
+**Status: MODULE CHAIN COMPLETE (2026-09-02) — ruler calibration,
+per-visit measurement, delta/verdict assignment, and the assembled
+`TemporalPipeline` all done. Wiring into CV-8 and real pairing logic
+for a user's upload history is the remaining integration work.**
 `docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
 spec, decided by the user, covers two things:
 
@@ -417,10 +417,27 @@ secondary finding (n=19, not validated): malignant-outcome lesions
 showed a notably larger mean border-shape delta (3.08) than benign
 (0.89) in this sample.
 
-CV-7's module chain (`calibration.py` → `measurement.py` → `delta.py`)
-is now complete on its own; wiring these into a per-pair pipeline
-function (mirroring `src/inference/orchestrator.py`'s pattern) and
-integrating with CV-8 is the remaining work.
+**Assembled into a pipeline (2026-09-02).** `src/temporal/pipeline.py::TemporalPipeline`
+wires `calibration.py` → `measurement.py` → `delta.py` into one entry
+point, `assess_pair(earlier_image, later_image)`, mirroring
+`src/inference/orchestrator.py`'s shape (`from_checkpoint` loads CV-3
+once; one validated entry point; an immutable result with `to_dict()`).
+Kept as a separate class rather than folded into `DermaSensePipeline`,
+since CV-7 takes a PAIR of same-lesion images, a different contract
+shape from CV-1→CV-4's one-image input. `TemporalResult.to_dict()`
+matches the locked JSON contract's `temporal` sub-object exactly
+(`verdict`, `magnitude`, `confidence`, `per_feature_deltas`,
+`compared_timestamps`), with one flagged deviation: `per_feature_deltas.size`
+serializes as `None` (not `0.0`) when either visit lacks confident
+calibration, since a `0.0` there would misrepresent "not measured" as
+"no change" — the exact failure mode this project's fail-loud pattern
+exists to prevent. Full suite: 123/123 passing.
+
+CV-7's module chain is now complete end-to-end. Remaining work is
+integration, not CV-7 itself: pairing logic for a real user's upload
+history (this module takes two already-selected images), wiring into
+CV-8, and reconciling the two discrepancies already flagged in
+`docs/cv7_temporal_rag_integration_spec.md`.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**

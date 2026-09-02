@@ -190,6 +190,29 @@ threshold would have used, so the calibrated threshold is set high
 (conservative toward missed real change over false alarms on lighting
 noise), not treated as a solved problem.
 
+## Update (2026-09-02): assembled into a pipeline
+
+`src/temporal/pipeline.py::TemporalPipeline` wires calibration +
+measurement + delta into one entry point, `assess_pair(earlier_image,
+later_image)`, mirroring `src/inference/orchestrator.py`'s shape
+(`from_checkpoint` loads CV-3 once; one validated entry point; an
+immutable result with `to_dict()`). Not folded into
+`DermaSensePipeline` itself, since CV-7 takes a PAIR of images of the
+same lesion, a different contract shape from CV-1→CV-4's one-image
+input.
+
+`TemporalResult.to_dict()` matches the `temporal` sub-object of the
+locked JSON contract exactly: `{verdict, magnitude, confidence,
+per_feature_deltas, compared_timestamps}`. One deviation flagged
+explicitly (not silently resolved), matching this document's existing
+flagged-discrepancies practice: `per_feature_deltas.size` is `None`
+whenever either visit lacks confident calibration, rather than a `0.0`
+standing in for "unmeasurable" — the JSON contract's own example
+shows floats, but a `0.0` there would misrepresent "not measured" as
+"no change," the exact failure mode the module's fail-loud design
+exists to prevent. How this serializes into CV-8's actual JSON output
+is left for whoever implements CV-8.
+
 ## Files
 
 - `src/temporal/calibration.py` — DONE. Ruler detection, per-image
@@ -198,10 +221,24 @@ noise), not treated as a solved problem.
   measurement from a CV-3 mask + calibration (see update above).
 - `src/temporal/delta.py` — DONE. Pairwise delta computation + verdict
   assignment (see update above).
+- `src/temporal/pipeline.py` — DONE. Assembles the three modules above
+  into one `TemporalPipeline.assess_pair()` entry point (see update
+  above).
 - `scripts/calibrate_cv7_thresholds.py` — DONE. One-time threshold
   calibration against the staged sample, following the same pattern as
   `scripts/calibrate_cv1_resolution.py` and
   `scripts/calibrate_cv6_temperature.py`.
 - `tests/test_temporal.py`, `tests/test_measurement.py`,
-  `tests/test_delta.py` — unit tests on synthetic data (no data
-  needed) + integration tests against the staged sample.
+  `tests/test_delta.py`, `tests/test_temporal_pipeline.py` — unit
+  tests on synthetic data (no data needed) + integration tests against
+  the staged sample.
+
+## Remaining integration work (not yet done)
+
+`TemporalPipeline` is CV-7's complete module chain but is not yet
+wired into anything that finds visit pairs on its own (it takes two
+already-selected images) or into CV-8. Left for CV-8's own
+implementation: pairing logic for a real user's upload history,
+reconciling the two discrepancies already flagged in
+`docs/cv7_temporal_rag_integration_spec.md`, and the `None`-serialization
+decision flagged above.
