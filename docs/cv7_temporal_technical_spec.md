@@ -233,6 +233,29 @@ is left for whoever implements CV-8.
   tests on synthetic data (no data needed) + integration tests against
   the staged sample.
 
+## Update (2026-09-02): Stage 1 evaluated — sufficient, no Stage 2/training needed
+
+Question 2 of the evaluation plan above (clinical signal validity) is
+now answered: `scripts/evaluate_cv7_stage1.py`, full result
+`analysis/quality/cv7_temporal_data/stage1_evaluation_result.md`. A
+pre-registered test (Fisher's exact on non-STABLE rate, Mann-Whitney U
+on magnitude; p<0.05 fixed in advance; NO_PRIOR_DATA pairs excluded)
+run over ALL 101 malignant-outcome lesion pairs vs. a bounded random
+300-pair benign sample (seed=17) found **both tests significant in the
+expected direction**: malignant pairs non-STABLE at 25.8% vs. 13.7% for
+benign (Fisher p=0.0135), and a significantly higher magnitude
+distribution (Mann-Whitney p=8.2×10⁻⁸).
+
+**Decision: Stage 1 is sufficient. No Stage 2 (learned model) and
+therefore no RunPod GPU training is needed for CV-7**, per this
+document's own anti-rabbit-hole boundary — Stage 2 was only ever
+justified by a genuine, specific insufficiency in Stage 1, and this
+evaluation didn't find one. CV-7 proceeds to CV-8 integration as a
+classical, deterministic component. See the result doc for caveats
+(n=89 scored malignant pairs, one visit pair per lesion, a plausible
+photography-condition confound not distinguished from real biological
+change) — the result is significant, not a definitive clinical claim.
+
 ## Remaining integration work (not yet done)
 
 `TemporalPipeline` is CV-7's complete module chain but is not yet

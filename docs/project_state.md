@@ -272,10 +272,13 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: MODULE CHAIN COMPLETE (2026-09-02) — ruler calibration,
-per-visit measurement, delta/verdict assignment, and the assembled
-`TemporalPipeline` all done. Wiring into CV-8 and real pairing logic
-for a user's upload history is the remaining integration work.**
+**Status: STAGE 1 COMPLETE AND EVALUATED (2026-09-02) — ruler
+calibration, per-visit measurement, delta/verdict assignment, the
+assembled `TemporalPipeline`, and the clinical-signal-validity
+evaluation are all done. Decision: Stage 1 (classical, deterministic —
+no learned model) is sufficient. No Stage 2 and therefore no RunPod
+GPU training is needed for CV-7. Wiring into CV-8 and real pairing
+logic for a user's upload history is the remaining integration work.**
 `docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
 spec, decided by the user, covers two things:
 
@@ -438,6 +441,31 @@ integration, not CV-7 itself: pairing logic for a real user's upload
 history (this module takes two already-selected images), wiring into
 CV-8, and reconciling the two discrepancies already flagged in
 `docs/cv7_temporal_rag_integration_spec.md`.
+
+**Stage 1 clinical-signal evaluation DONE — no training needed
+(2026-09-02).** `scripts/evaluate_cv7_stage1.py`, full result:
+`analysis/quality/cv7_temporal_data/stage1_evaluation_result.md`. This
+answers the question left open when the technical spec was written
+("does measured change actually correlate with malignant outcome?"),
+now that the malignant-enrichment data is staged. Pre-registered before
+running: Fisher's exact test on non-STABLE verdict rate + Mann-Whitney
+U on delta magnitude, p<0.05 fixed in advance, run over ALL 101
+malignant-outcome lesion pairs vs. a bounded random 300-pair benign
+sample (seed=17). **Both tests came back significant in the expected
+direction**: malignant pairs non-STABLE at 25.8% vs. 13.7% benign
+(p=0.0135); magnitude distribution significantly higher (p=8.2×10⁻⁸).
+
+**Decision: Stage 1 (the classical pipeline — no learned model, no
+training) is sufficient. No Stage 2 and therefore no RunPod GPU
+training is needed for CV-7**, per the technical spec's own
+anti-rabbit-hole boundary (Stage 2 only if Stage 1 shows a genuine,
+specific insufficiency — this evaluation didn't find one). Caveats
+documented in the result doc: n=89 scored malignant pairs, one visit
+pair per lesion, and a plausible photography-condition confound (more
+closely monitored/biopsied lesions may simply be photographed under
+more variable conditions) not distinguished from real biological
+change — the result is significant, not a definitive clinical claim.
+CV-7 proceeds to CV-8 integration as a classical component.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**
