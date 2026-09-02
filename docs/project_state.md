@@ -272,8 +272,10 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: IMPLEMENTATION STARTED (2026-09-02) — ruler calibration and
-per-visit measurement done; delta/verdict modules next.**
+**Status: IMPLEMENTATION STARTED (2026-09-02) — ruler calibration,
+per-visit measurement, and delta/verdict assignment all done. CV-7's
+own module chain is complete; wiring into an orchestrator alongside
+CV-1→CV-6 is the remaining integration work.**
 `docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
 spec, decided by the user, covers two things:
 
@@ -388,8 +390,37 @@ mask found at all) and calibration-confidence (whether `diameter_mm`/
 `compactness` are scale-invariant and always available when valid). A
 real multi-blob case found during validation (two separate lesions in
 one frame) is resolved by keeping only the largest connected
-component, since the dataset names one lesion per image. `delta.py`
-and the verdict-assignment logic are next.
+component, since the dataset names one lesion per image.
+
+**Delta/verdict implemented, thresholds calibrated (2026-09-02).**
+`src/temporal/delta.py`, full result:
+`analysis/quality/cv7_temporal_data/delta_calibration_result.md`.
+Produces the locked verdict (`STABLE | GROWING | SHRINKING |
+CHANGED_COLOR | NO_PRIOR_DATA`) plus per-feature size/border/color
+deltas and a confidence, matching
+`docs/cv7_temporal_rag_integration_spec.md`'s JSON contract exactly.
+`scripts/calibrate_cv7_thresholds.py` measured real deltas on a
+300-pair bounded sample (seed=11): border/color thresholds were set
+from real percentiles (280 pairs with valid masks). **The size/growth
+threshold could not be calibrated the same way** — only 1/300 pairs
+(0.3%) had confident ruler calibration on both visits, the expected
+compounding result of calibration's 4.0% single-image rate (0.04²≈
+0.16%). Rather than process most of the 8,751-image corpus chasing
+double-confident pairs for a feature that stays structurally rare
+regardless, the growth threshold ships as an explicitly-flagged
+provisional placeholder — not silently treated as equally well-founded
+as border/color. Also found and documented as a known limitation:
+color-delta is confounded by cross-visit lighting/camera variation
+(median observed delta already exceeded a naive threshold), so the
+calibrated color threshold is set conservatively high. Descriptive-only
+secondary finding (n=19, not validated): malignant-outcome lesions
+showed a notably larger mean border-shape delta (3.08) than benign
+(0.89) in this sample.
+
+CV-7's module chain (`calibration.py` → `measurement.py` → `delta.py`)
+is now complete on its own; wiring these into a per-pair pipeline
+function (mirroring `src/inference/orchestrator.py`'s pattern) and
+integrating with CV-8 is the remaining work.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**

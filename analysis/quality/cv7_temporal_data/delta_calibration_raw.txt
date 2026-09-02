@@ -1,0 +1,11 @@
+n pairs sampled: 300 (seed=11, max_pairs=300)
+both masks valid (border/color computable): 280 (93.3%)
+both calibrated (size computable): 1 (0.3%)
+malignant-outcome lesions in sample: 19
+
+abs(border_delta) percentiles [n=280]: {50: 0.15226737339382612, 75: 0.8646625775500489, 90: 3.1610182346714777, 95: 4.861751296921914}
+color_delta (Lab CIE76) percentiles [n=280]: {50: 8.88254532920557, 75: 16.865541227498138, 90: 23.97679944540297, 95: 31.628902992976816}
+abs(size_pct_change) percentiles [n=1]: {50: 6.1313741335179195, 75: 6.1313741335179195, 90: 6.1313741335179195, 95: 6.1313741335179195}
+
+border_delta mean -- malignant: 3.0752995965887164, benign: 0.8900186027746457
+color_delta mean -- malignant: 13.693337930488516, benign: 12.157760810466572

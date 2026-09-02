@@ -161,17 +161,47 @@ multi-blob mask (a real case found during validation) is resolved by
 keeping only the largest connected component, since the dataset names
 one lesion per image.
 
+## Update (2026-09-02): delta/verdict implemented, thresholds calibrated
+
+`src/temporal/delta.py` and `scripts/calibrate_cv7_thresholds.py` are
+built. Full result:
+`analysis/quality/cv7_temporal_data/delta_calibration_result.md`. A
+300-pair bounded sample (seed=11) of the staged data measured real
+deltas: border and color thresholds were set from this (p90 of 280
+pairs with both masks valid: border ≈3.16, color ≈23.98 CIE76). The
+**size (growth) threshold could not be calibrated the same way** — only
+1/300 pairs (0.3%) had confident ruler calibration on BOTH visits, the
+direct compounding consequence of calibration's own 4.0% single-image
+rate (0.04² ≈ 0.16%, consistent with what was observed). Rather than
+chase enough double-confident data to calibrate it properly (would mean
+processing most of the 8,751-image staged corpus for a feature that
+stays structurally rare regardless), `GROWTH_PCT_THRESHOLD` ships as an
+explicitly-flagged provisional placeholder, not silently presented as
+equally well-founded as the other two. A secondary finding, descriptive
+only (n=19 malignant lesions, not a validated result): malignant-outcome
+lesions showed notably larger mean border-shape delta (3.08) than
+benign (0.89) in this sample.
+
+Also discovered and documented as a known limitation: color-delta
+comparison is confounded by capture conditions (camera/lighting/
+white-balance differ across visits, taken on different days) — the
+median observed color delta (8.88) already exceeded what a naive
+threshold would have used, so the calibrated threshold is set high
+(conservative toward missed real change over false alarms on lighting
+noise), not treated as a solved problem.
+
 ## Files
 
 - `src/temporal/calibration.py` — DONE. Ruler detection, per-image
   pixel-to-mm scale factor, confidence-gated (see above).
 - `src/temporal/measurement.py` — DONE. Per-visit size/color/border
   measurement from a CV-3 mask + calibration (see update above).
-- `src/temporal/delta.py` — next. Pairwise delta computation + verdict
-  assignment against calibrated thresholds
-- `scripts/calibrate_cv7_thresholds.py` — one-time threshold
+- `src/temporal/delta.py` — DONE. Pairwise delta computation + verdict
+  assignment (see update above).
+- `scripts/calibrate_cv7_thresholds.py` — DONE. One-time threshold
   calibration against the staged sample, following the same pattern as
   `scripts/calibrate_cv1_resolution.py` and
-  `scripts/calibrate_cv6_temperature.py`
-- `tests/test_temporal.py` — unit tests on synthetic masks/rulers (no
-  data needed) + an integration test against the staged sample
+  `scripts/calibrate_cv6_temperature.py`.
+- `tests/test_temporal.py`, `tests/test_measurement.py`,
+  `tests/test_delta.py` — unit tests on synthetic data (no data
+  needed) + integration tests against the staged sample.
