@@ -50,6 +50,25 @@ CV-8 (`src.risk.convergence.assess_risk`) runs for EVERY candidate
 regardless -- it degrades to `temporal=None` gracefully (already part
 of its own design), so `CandidateResult.risk_assessment` is always
 populated, not just when a prior image was supplied.
+
+## CV-5 wiring (2026-09-02)
+
+`compute_gradcam` (src/explainability/gradcam.py) needs a real
+backward pass through the classifier (`torch.enable_grad()`), unlike
+CV-6's ensemble evidence which is just extra forward passes -- a
+materially different cost. Opt-in via `compute_gradcam=True`
+(`__init__`/`from_checkpoints`), same pattern as
+`additional_ensemble_checkpoints`: off by default, so existing
+behavior and tests are unaffected unless requested.
+
+`gradcam_mask_iou` (src/explainability/evidence.py) has no calibrated
+threshold anywhere in this project (docs/cv5_cv6_evidence_architecture.md
+records it as a raw cross-check, not a gated signal) -- so, like
+`ensemble_probability_distance`/`ensemble_confidence_spread`, it is
+recorded on `CandidateResult` as a number for a future consumer, and
+does NOT get a fabricated `quality_flags` entry the way
+`LOW_CROP_CONTRAST` could (that one reuses an independently validated
+cutoff; this one has none to reuse).
 """
 
 from __future__ import annotations
@@ -66,6 +85,8 @@ import torch
 from PIL import Image
 
 from src.data.transforms import ImageTransformConfig, build_eval_transform
+from src.explainability.evidence import gradcam_mask_iou
+from src.explainability.gradcam import compute_gradcam
 from src.inference.crop_normalize import (
     crop_and_normalize,
     pixel_box_to_norm,
@@ -166,6 +187,15 @@ class CandidateResult:
     ensemble_probability_distance: float | None = None
     ensemble_confidence_spread: float | None = None
 
+    # CV-5 evidence (docs/cv5_cv6_evidence_architecture.md): IoU between
+    # CV-3's segmented region and CV-4's Grad-CAM high-activation region
+    # -- does the classifier's attention agree with the segmenter's
+    # lesion boundary? No calibrated threshold exists for this anywhere
+    # in this project, so it is recorded raw, not gated into a flag.
+    # None unless the pipeline was built with compute_gradcam=True
+    # (opt-in, since it needs a real backward pass).
+    gradcam_mask_iou: float | None = None
+
     # CV-8 convergence (src/risk/convergence.py). Always populated --
     # assess_risk() degrades to temporal=None gracefully, so this is
     # never absent just because no prior image was available.
@@ -193,6 +223,7 @@ class CandidateResult:
             "ensemble_agree": self.ensemble_agree,
             "ensemble_probability_distance": self.ensemble_probability_distance,
             "ensemble_confidence_spread": self.ensemble_confidence_spread,
+            "gradcam_mask_iou": self.gradcam_mask_iou,
             "risk_assessment": self.risk_assessment.to_dict() if self.risk_assessment else None,
         }
 
@@ -312,6 +343,7 @@ class DermaSensePipeline:
         classifier: NativePredictor,
         detector: Any | None = None,
         ensemble_classifiers: list[NativePredictor] | None = None,
+        compute_gradcam: bool = False,
         device: str | torch.device = "cpu",
         crop_margin: float = CROP_MARGIN,
         calibration_temperature: float = DEFAULT_TEMPERATURE,
@@ -326,6 +358,11 @@ class DermaSensePipeline:
         # from_checkpoints, since running extra classifiers roughly
         # doubles CV-4 inference cost per candidate.
         self.ensemble_classifiers = ensemble_classifiers
+        # CV-5 evidence (docs/cv5_cv6_evidence_architecture.md). Opt-in:
+        # off by default, since Grad-CAM needs a real backward pass
+        # through the classifier (torch.enable_grad()), a materially
+        # different cost from a forward-only prediction.
+        self.compute_gradcam_evidence = compute_gradcam
         self.crop_margin = crop_margin
         self.calibration_temperature = calibration_temperature
         self._cv4_transform = build_eval_transform(ImageTransformConfig())
@@ -345,6 +382,7 @@ class DermaSensePipeline:
         classifier_checkpoint: str | Path,
         detector_weights: str | Path | None = None,
         additional_ensemble_checkpoints: tuple[str | Path, ...] | None = None,
+        compute_gradcam: bool = False,
         device: str | torch.device = "cpu",
         crop_margin: float = CROP_MARGIN,
         calibration_temperature: float = DEFAULT_TEMPERATURE,
@@ -362,6 +400,11 @@ class DermaSensePipeline:
         CV-6 ensemble-disagreement evidence -- e.g. pass the seed123
         checkpoint when `classifier_checkpoint` is seed42. Omitted by
         default (opt-in, doubles CV-4 inference cost per candidate).
+
+        `compute_gradcam` opts into CV-5 evidence (`gradcam_mask_iou`)
+        per candidate. Omitted by default -- it needs a real backward
+        pass through the classifier, a materially different cost from
+        a forward-only prediction.
         """
         device = torch.device(device)
 
@@ -381,6 +424,7 @@ class DermaSensePipeline:
             router=load_router_checkpoint(str(router_checkpoint), device),
             segmenter=load_segmentation_model(segmentation_checkpoint, device),
             ensemble_classifiers=ensemble_classifiers,
+            compute_gradcam=compute_gradcam,
             calibration_temperature=calibration_temperature,
             classifier=NativePredictor.from_checkpoint(
                 classifier_checkpoint, device=device
@@ -494,6 +538,15 @@ class DermaSensePipeline:
             ]
             ensemble_fields = ensemble_evidence(ensemble_predictions)
 
+        # CV-5 evidence, opt-in (see __init__/from_checkpoints): does
+        # CV-4's Grad-CAM attention agree with CV-3's segmented region?
+        # No calibrated threshold exists for this anywhere in this
+        # project, so the raw IoU is recorded, not gated into a flag.
+        gradcam_iou = None
+        if self.compute_gradcam_evidence:
+            cam, _ = compute_gradcam(self.classifier, self._cv4_tensor(crop_rgb))
+            gradcam_iou = gradcam_mask_iou(mask, cam)
+
         candidate = CandidateResult(
             candidate_index=candidate_index,
             box_pixels=px_box,
@@ -508,6 +561,7 @@ class DermaSensePipeline:
             crop_blur=crop_blur,
             crop_contrast=crop_contrast,
             calibrated_confidence=calibrated_confidence,
+            gradcam_mask_iou=gradcam_iou,
             **ensemble_fields,
             **evidence,
         )

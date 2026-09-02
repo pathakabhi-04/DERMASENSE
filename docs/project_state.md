@@ -468,9 +468,9 @@ change — the result is significant, not a definitive clinical claim.
 CV-7 proceeds to CV-8 integration as a classical component.
 
 ### CV-8 — Risk Engine / Severity
-**Status: CV-4+CV-6+CV-7 CONVERGENCE IMPLEMENTED AND THREADED INTO THE
-PIPELINE (2026-09-02). CV-5 (Grad-CAM) evidence is the one signal not
-yet surfaced into `quality_flags` — see below.**
+**Status: CV-4+CV-5+CV-6+CV-7 ALL WIRED INTO THE PIPELINE (2026-09-02).
+Every CV phase now feeds `DermaSensePipeline.predict()` — see "Baseline
+v1" below.**
 - `src/risk/action_mapping.py` and `src/risk/safety_gate.py`: unchanged,
   still the internal `ProductAction`/gate logic.
 - `src/risk/convergence.py::assess_risk()` — NEW. Converges a
@@ -554,13 +554,69 @@ yet surfaced into `quality_flags` — see below.**
   `ensemble_probability_distance`/`ensemble_confidence_spread` got no
   flag — no calibrated cutoff exists for either anywhere in this
   project, so none was invented. 10 new tests, full suite 157/157.
-- **Not yet done**: CV-5 (Grad-CAM/explainability) evidence isn't
-  threaded into `assess_risk()` at all yet — `CandidateResult` doesn't
-  currently carry a CV-5 field the way it carries CV-3/CV-6 evidence,
-  so this needs that plumbing first, not just a new flag; the
-  lesion-history store itself (which prior image to supply for a given
-  lesion_id) — a product/backend persistence concern, out of this
-  pipeline's scope by design, not attempted here.
+- **CV-5 wired (2026-09-02).** `CandidateResult.gradcam_mask_iou` — new
+  field, opt-in via `compute_gradcam=True` on `__init__`/
+  `from_checkpoints` (off by default: Grad-CAM needs a real backward
+  pass through the classifier, `torch.enable_grad()`, a materially
+  different cost from CV-6's forward-only ensemble evidence). Recorded
+  raw, like `ensemble_probability_distance`/`ensemble_confidence_spread`
+  — no calibrated threshold exists for `gradcam_mask_iou` anywhere in
+  this project (`docs/cv5_cv6_evidence_architecture.md` always framed
+  it as a raw cross-check), so no flag was fabricated for it. Verified
+  end-to-end on a real checkpoint (IoU 0.187 on a real PAD-UFES image).
+  2 new tests, full suite 159/159.
+- **Not yet done**: the lesion-history store itself (which prior image
+  to supply for a given lesion_id) — a product/backend persistence
+  concern, out of this pipeline's scope by design, not attempted here.
+
+### Baseline v1 — full CV-1→CV-8 pipeline (2026-09-02)
+
+Every CV phase built this session now feeds one call:
+`DermaSensePipeline.predict(image_bgr, *, lesion_id=None,
+prior_image_bgr=None, prior_timestamp=None, current_timestamp=None)`.
+
+```
+image -> CV-1 quality gate -> CV-1.5 router -> [CV-2 if wide_field]
+      -> per candidate: CV-3 mask -> CV-4 diagnosis -> CV-5 Grad-CAM (opt-in)
+                       -> CV-6 calibration/ensemble (opt-in)
+                       -> CV-7 temporal (if prior image + unambiguous)
+                       -> CV-8 assess_risk() -> risk_assessment
+```
+
+Every candidate always gets a `CandidateResult.risk_assessment`
+(the locked JSON contract: `lesion_id/diagnosis/risk_category/
+risk_reason/temporal/uncertainty/quality_flags`) — CV-8 degrades
+gracefully at every optional input (no prior image, no ensemble, no
+Grad-CAM), so "we didn't have X" is always a flag or a `None`, never a
+silently wrong value. This is the same fail-loud principle applied
+consistently since CV-1: `PipelineOutcome` for whole-image
+non-assessment, `RulerCalibration.confident` for per-image calibration,
+now `risk_assessment`'s optional fields for per-signal availability.
+
+**What "baseline v1" deliberately does NOT include, by design, not
+oversight:**
+- The lesion-history store (which prior image to supply) — a
+  product/backend persistence concern this pipeline was never asked to
+  own; the caller supplies `prior_image_bgr` if it has one.
+- Cross-image lesion re-identification for wide-field multi-candidate
+  images — genuinely ambiguous without it, so CV-7 pairing is skipped
+  and flagged (`PRIOR_IMAGE_PAIRING_AMBIGUOUS`) rather than guessed.
+- The two flagged discrepancies against the RAG contract: `native_class`
+  taxonomy (PAD-UFES 6-class vs. the contract's ISIC 8-class example)
+  and CV-2's known tiling limitation — both pre-existing, deliberately
+  out of this scope, documented where they were found.
+- Any Stage 2 (learned) model for CV-1.5 or CV-7 — both stayed
+  Stage-1-only after their own evaluations found no need to escalate.
+- CV-6/CV-5 are opt-in (cost tradeoffs — extra forward passes / a
+  backward pass), off by default; a caller wanting them passes
+  `additional_ensemble_checkpoints=...` / `compute_gradcam=True`.
+
+**What this milestone means**: every CV phase has at least one path
+from raw image to the final JSON contract, verified end-to-end on real
+checkpoints and real images (not just unit-tested in isolation). It
+does not mean every signal fires on every image — most won't (no
+ruler, no ensemble/Grad-CAM by default, no prior image) — by design,
+per each component's own documented, measured coverage.
 
 ---
 

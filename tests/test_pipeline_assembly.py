@@ -394,3 +394,52 @@ def test_prior_image_wires_real_cv7_comparison():
     assert risk.temporal["verdict"] in {
         "STABLE", "GROWING", "SHRINKING", "CHANGED_COLOR", "NO_PRIOR_DATA",
     }
+
+
+@pytest.mark.skipif(
+    not CHECKPOINTS_PRESENT, reason="component checkpoints not available"
+)
+def test_gradcam_evidence_absent_by_default():
+    """CV-5 evidence is opt-in -- off unless explicitly requested."""
+    pipeline = DermaSensePipeline.from_checkpoints(
+        router_checkpoint=ROUTER_CHECKPOINT,
+        segmentation_checkpoint=SEGMENTATION_CHECKPOINT,
+        classifier_checkpoint=CLASSIFIER_CHECKPOINT,
+        detector_weights=None,
+        device="cpu",
+    )
+
+    row = pd.read_csv(PAD_UFES_TEST).iloc[0]
+    image_bgr = cv2.imread(str(REPO_ROOT / row["image_path"]))
+    result = pipeline.predict(image_bgr)
+
+    assert result.assessed
+    assert result.candidates[0].gradcam_mask_iou is None
+
+
+@pytest.mark.skipif(
+    not CHECKPOINTS_PRESENT, reason="component checkpoints not available"
+)
+def test_gradcam_evidence_populated_when_requested():
+    """CV-5 evidence (gradcam_mask_iou) appears only when requested."""
+    pipeline = DermaSensePipeline.from_checkpoints(
+        router_checkpoint=ROUTER_CHECKPOINT,
+        segmentation_checkpoint=SEGMENTATION_CHECKPOINT,
+        classifier_checkpoint=CLASSIFIER_CHECKPOINT,
+        detector_weights=None,
+        compute_gradcam=True,
+        device="cpu",
+    )
+
+    rows = pd.read_csv(PAD_UFES_TEST).head(2)
+    for _, row in rows.iterrows():
+        image_bgr = cv2.imread(str(REPO_ROOT / row["image_path"]))
+        result = pipeline.predict(image_bgr)
+        if not result.assessed:
+            continue
+        for candidate in result.candidates:
+            assert candidate.gradcam_mask_iou is not None
+            assert 0.0 <= candidate.gradcam_mask_iou <= 1.0
+            # no calibrated threshold exists for this yet -- must never
+            # be silently gated into risk_category/requires_review
+            assert candidate.risk_assessment is not None
