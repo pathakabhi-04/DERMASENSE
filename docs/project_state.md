@@ -652,6 +652,22 @@ no ruler) size threshold, and a pointer-level resource plan for a
 learned Stage 2 held in reserve until one of three named trigger
 conditions is actually met.
 
+**RunPod volume snapshot taken before termination (2026-09-02).**
+`analysis/quality/runpod_volume_snapshot/result.md`. User's plan
+(terminate the volume now, re-provision only what's needed when a
+Phase 2 trigger fires) was sound, but the paper-trail snapshot found
+the volume was a full repo mirror, not just the 5 research datasets as
+initially assumed — including `checkpoints/`, `runs/`, and
+`evaluation/`. Diffing against local found **8 trained checkpoint
+files that existed only on the volume** (`cv3_768/*` entirely, plus
+5 PAD-UFES variant checkpoints including the 107MB SupCon one) —
+these would have been unrecoverable on termination. **Downloaded and
+MD5-verified against S3's own ETag before giving the go-ahead**, along
+with 106MB of `runs/` and 86.5MB of `evaluation/` logs also missing
+locally. Verdict: safe to terminate now — everything else on the
+volume (the 5 datasets, `.venv`, `.cache/pip`, `.git`, source/docs) is
+either re-obtainable from source or redundant with GitHub.
+
 ---
 
 ## Repo structure conventions
