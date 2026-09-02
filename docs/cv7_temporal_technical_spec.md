@@ -144,13 +144,30 @@ guessed value. Improving detection sensitivity (e.g. template matching
 against the ruler's visual pattern) is a separately-scoped follow-up,
 not attempted now, per this spec's own anti-rabbit-hole boundary.
 
+## Update (2026-09-02): measurement implemented, CV-3 domain fit verified
+
+`src/temporal/measurement.py` is built
+(`analysis/quality/cv7_temporal_data/measurement_result.md`). Before
+writing it, verified CV-3 actually segments this domain well — a
+100-image random sample (seed=7) measured **5.0% degenerate-empty
+masks, 0% degenerate-full**, far better than the ~22% fragmentation
+rate measured on iToBoS TBP crops, confirming this domain matches
+CV-3's training distribution as expected. `measure_lesion()` mirrors
+calibration's fail-loud design with two independent gates: `valid`
+(was any lesion mask found) and calibration-confidence (whether
+`diameter_mm`/`area_mm2` can be real-unit; `area_fraction` and
+`compactness` are scale-invariant and always available when valid). A
+multi-blob mask (a real case found during validation) is resolved by
+keeping only the largest connected component, since the dataset names
+one lesion per image.
+
 ## Files
 
 - `src/temporal/calibration.py` — DONE. Ruler detection, per-image
   pixel-to-mm scale factor, confidence-gated (see above).
-- `src/temporal/measurement.py` — next. Per-visit size/color/border
-  measurement from a CV-3 mask + calibration
-- `src/temporal/delta.py` — pairwise delta computation + verdict
+- `src/temporal/measurement.py` — DONE. Per-visit size/color/border
+  measurement from a CV-3 mask + calibration (see update above).
+- `src/temporal/delta.py` — next. Pairwise delta computation + verdict
   assignment against calibrated thresholds
 - `scripts/calibrate_cv7_thresholds.py` — one-time threshold
   calibration against the staged sample, following the same pattern as

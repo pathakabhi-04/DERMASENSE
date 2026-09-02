@@ -272,8 +272,8 @@ complementary, not redundant — direct evidence for why CV-8 needs CV-5/6/7
 as convergent inputs rather than one collapsed score.
 
 ### CV-7 — Temporal ("What Changed?")
-**Status: IMPLEMENTATION STARTED (2026-09-02) — ruler calibration
-done and gated; measurement/delta/verdict modules next.**
+**Status: IMPLEMENTATION STARTED (2026-09-02) — ruler calibration and
+per-visit measurement done; delta/verdict modules next.**
 `docs/cv7_temporal_rag_integration_spec.md` — the product/architecture
 spec, decided by the user, covers two things:
 
@@ -373,8 +373,23 @@ almost exactly, confirming the gap is detection sensitivity (mostly
 handheld framing), not a wrong assumption. **Decision: ship the gate as
 designed** — a failed calibration returns `NO_PRIOR_DATA` for size only
 (color/border deltas are unaffected); improving detection sensitivity
-is a separately-scoped follow-up, not attempted now. `src/temporal/measurement.py`,
-`delta.py`, and the verdict-assignment logic are next.
+is a separately-scoped follow-up, not attempted now.
+
+**Measurement implemented (2026-09-02).** `src/temporal/measurement.py`,
+full result: `analysis/quality/cv7_temporal_data/measurement_result.md`.
+Before writing it, verified CV-3 actually fits this domain: a 100-image
+random sample (seed=7) measured **5.0% degenerate-empty masks, 0%
+degenerate-full**, far better than the ~22% fragmentation rate on
+iToBoS TBP crops, confirming the technical spec's expectation. Reuses
+CV-3 directly (no retraining); `measure_lesion()` mirrors calibration's
+fail-loud design with two independent gates — `valid` (was a lesion
+mask found at all) and calibration-confidence (whether `diameter_mm`/
+`area_mm2` are real-unit; pixel-space `area_fraction` and border
+`compactness` are scale-invariant and always available when valid). A
+real multi-blob case found during validation (two separate lesions in
+one frame) is resolved by keeping only the largest connected
+component, since the dataset names one lesion per image. `delta.py`
+and the verdict-assignment logic are next.
 
 ### CV-8 — Risk Engine / Severity
 **Status: PARTIALLY IMPLEMENTED**
