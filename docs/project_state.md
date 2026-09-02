@@ -637,6 +637,21 @@ discrepancy). Regenerable via
 example set, not a live delivery mechanism — no API/queue/file-drop
 integration was built or decided; that remains open.
 
+**Planning doc: `docs/build_on_baseline_1.md` (2026-09-02).** Covers
+the three open questions after baseline v1, each trigger-gated per
+this project's anti-rabbit-hole discipline: (A) the live-feed delivery
+plan for the RAG collaborator (prerequisite unknowns, a recommended
+minimal sync-HTTP default, explicitly what NOT to build yet); (B) a
+14-item, cited weakness audit across CV-1→CV-8, each with an issue,
+evidence, a concrete trigger condition, and a bounded first step — no
+item without a stated trigger; (C) the CV-7 full-dataset training
+question, concluding it is **not currently triggered** — Stage 1 was
+already shown sufficient — with an explicit recommendation AGAINST a
+full-dataset pull just to calibrate the near-useless (real users have
+no ruler) size threshold, and a pointer-level resource plan for a
+learned Stage 2 held in reserve until one of three named trigger
+conditions is actually met.
+
 ---
 
 ## Repo structure conventions
