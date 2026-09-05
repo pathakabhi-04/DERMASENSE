@@ -683,6 +683,22 @@ analysis/<topic>/       investigation outputs (CSVs, summaries)
 docs/                   specs and decision records
 checkpoints/            model checkpoints (GITIGNORED -- on volume/local)
 data/                   raw + splits (large files gitignored)
+  data/raw/             SYMLINK (2026-09-05) -> /mnt/hdd/dermasense_data/raw/
+                        All 5 datasets (isic2018, isic2019, itobos,
+                        pad_ufes, UQ_zip -- 127.4GB, 58,264 files) moved
+                        to the external HDD to free local disk space.
+                        Copied via rsync, verified byte-for-byte
+                        identical (file count + total bytes matched
+                        exactly) before the local copy was deleted and
+                        replaced with this symlink. Every existing
+                        script/path reference (`data/raw/...`, relative
+                        to repo root) works unchanged -- verified via a
+                        real cv2.imread() through the symlink and the
+                        full test suite (159/159 passing). If
+                        /mnt/hdd is ever unmounted or unavailable,
+                        every `data/raw/*` path will fail to resolve --
+                        check the symlink target exists before
+                        debuging a "file not found" as a code bug.
 tests/                  central test suite (CV-3 tests; CV-2 detection
                         tests are inside src/detection/ -- inconsistency,
                         flagged for future cleanup)
