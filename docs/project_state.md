@@ -699,6 +699,17 @@ data/                   raw + splits (large files gitignored)
                         every `data/raw/*` path will fail to resolve --
                         check the symlink target exists before
                         debuging a "file not found" as a code bug.
+                        One consequence: `data/raw/isic2019/isic2019_archive_index.csv`
+                        was previously git-tracked (an exception to
+                        the usual gitignored-raw-data convention) --
+                        git cannot track a path through a symlinked
+                        parent directory, so it now shows as deleted
+                        from version control even though the file
+                        itself is intact on disk. Untracked
+                        deliberately rather than left as a dangling
+                        diff: it's trivially regenerable via
+                        `scripts/index_isic2019_archive.py` if ever
+                        needed, so this is not a real loss.
 tests/                  central test suite (CV-3 tests; CV-2 detection
                         tests are inside src/detection/ -- inconsistency,
                         flagged for future cleanup)
