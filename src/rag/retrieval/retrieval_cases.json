@@ -1,0 +1,96 @@
+[
+  {
+    "query": "What changes in a mole may be concerning?",
+    "expected_document_ids": [
+      "AAD_MOLES_SYMPTOMS_001",
+      "AAD_MOLE_PROBLEM_001",
+      "NCI_MOLES_MELANOMA_001"
+    ],
+    "expected_topics": ["skin_lesions", "skin_cancer"]
+  },
+  {
+    "query": "What are the ABCDE warning signs of melanoma?",
+    "expected_document_ids": [
+      "AAD_MOLES_SYMPTOMS_001",
+      "NCI_MOLES_MELANOMA_001",
+      "NCI_MELANOMA_APPEARANCE_001"
+    ],
+    "expected_topics": ["skin_lesions", "skin_cancer"]
+  },
+  {
+    "query": "When should I see a dermatologist about a changing mole?",
+    "expected_document_ids": [
+      "AAD_MOLES_SYMPTOMS_001",
+      "AAD_MOLE_PROBLEM_001"
+    ],
+    "expected_topics": ["skin_lesions"]
+  },
+  {
+    "query": "What does melanoma look like?",
+    "expected_document_ids": [
+      "NCI_MELANOMA_APPEARANCE_001",
+      "NCI_MOLES_MELANOMA_001"
+    ],
+    "expected_topics": ["skin_cancer", "skin_lesions"]
+  },
+  {
+    "query": "What should I do if a mole starts itching or bleeding?",
+    "expected_document_ids": [
+      "AAD_MOLE_PROBLEM_001",
+      "AAD_MOLES_SYMPTOMS_001"
+    ],
+    "expected_topics": ["skin_lesions"]
+  },
+  {
+    "query": "How should I treat a superficial scrape?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_SCRAPE_001"
+    ],
+    "expected_topics": ["wounds"]
+  },
+  {
+    "query": "How should I clean an abrasion?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_SCRAPE_001"
+    ],
+    "expected_topics": ["wounds"]
+  },
+  {
+    "query": "How should a cut be cleaned?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_CUTS_001"
+    ],
+    "expected_topics": ["wounds"]
+  },
+  {
+    "query": "What are signs that a cut may be infected?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_CUTS_001"
+    ],
+    "expected_topics": ["wounds"]
+  },
+  {
+    "query": "What should I do for a minor burn?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_MINOR_BURNS_001",
+      "MEDLINEPLUS_BURNS_001"
+    ],
+    "expected_topics": ["burns"]
+  },
+  {
+    "query": "What are signs that a burn needs medical attention?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_BURNS_001",
+      "MEDLINEPLUS_MINOR_BURNS_001"
+    ],
+    "expected_topics": ["burns"]
+  },
+  {
+    "query": "How should I provide first aid for a burn?",
+    "expected_document_ids": [
+      "MEDLINEPLUS_BURNS_001",
+      "MEDLINEPLUS_MINOR_BURNS_001"
+    ],
+    "expected_topics": ["burns"]
+  }
+]
