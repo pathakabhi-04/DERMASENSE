@@ -274,9 +274,35 @@ Steps 1-6 below are complete as of this checkpoint (2026-09-06). See §6 and §7
 7. ~~Evidence formatter.~~ Done — `src/rag/retrieval/evidence.py`, per spec §3.1: top-3 chunks, deduplicated by source document. 9 unit tests pass; smoke-tested against the real rebuilt index.
 8. ~~Hosted LLM adapter.~~ Done — see §11 below (moved out of order since the API-key decision landed before the prompt builder).
 9. ~~Prompt builder.~~ Done — see §12 below.
-10. Deterministic safety/grounding check (per spec §5): banned-phrase scan, source-presence check, generation-timeout fallback (the adapter already raises `LLMGenerationError` on timeout/failure — the safety layer must catch this and fall back, not let it surface as a crash).
+10. ~~Deterministic safety/grounding check.~~ Done — see §13 below.
 11. Run the Phase 1 answer-evaluation gate (spec §6): 100% pass on the fixed test set across all three criteria (cites a real source, no banned diagnostic phrase, states uncertainty on low-similarity retrieval — define the similarity threshold from the actual score distribution observed in §7 above, e.g. case 11's ~0.33 range, rather than inventing one).
 12. Update this file with commands run, results, failures, decisions, and the next concrete gate.
+
+---
+
+## 13. Deterministic safety/grounding check — DONE (2026-09-06)
+
+`src/rag/safety/grounding_check.py` implements both deterministic checks from the primary spec (§5, points 1-2), plus the required fallback (points 3-4). `src/rag/pipeline.py` wires the complete baseline loop together: `RagAnswerPipeline.answer(query)` runs retrieval → evidence → prompt → LLM → safety check, and guarantees a user never sees an exception or empty response.
+
+### Banned-phrase scan
+
+`check_banned_phrases(answer_text)`: flags a sentence that co-occurs a certainty phrase (`you have`, `this is`, `confirmed`, `definitely`, `diagnosed with` — taken verbatim from spec §5.1) with a condition name (the 6 CV-native classes plus general terms like `mole`/`skin cancer`). Deliberately broad per the spec's own stated tradeoff (over-flag now, narrow later only if real failures justify it, not preemptively). Verified this doesn't false-positive on the real grounded answer already produced in §12's live test.
+
+### Source-presence check
+
+`check_source_presence(answer_text, evidence, ...)`: **lexical Jaccard word-overlap** (4+ letter words, common function words excluded) between the answer and each evidence chunk — the "simple substring/embedding-similarity check" spec §5.2 says is sufficient for baseline, implemented as the cheaper of the two options (no extra model call). Threshold calibrated, not guessed, against real data: the real grounded actinic-keratosis answer from §12 scores 0.316 overlap against its true evidence and 0.0 against an unrelated (burns) chunk — a default threshold of 0.12 sits with margin on both sides of that real gap.
+
+### Fallback
+
+`build_fallback_answer(evidence)`: returns the evidence text and sources directly, unnarrated, with an explicit "a full explanation isn't available right now" note. `RagAnswerPipeline` invokes this fallback in exactly two cases: the LLM adapter raises `LLMGenerationError` (network/timeout/blocked-response failure), or `run_safety_check` fails (banned-phrase or ungrounded). Both paths are required behavior per spec, not optional degradation.
+
+### Testing
+
+- `src/rag/safety/test_grounding_check.py` — 18 unit tests: banned-phrase true/false positives (including same-sentence vs. cross-sentence co-occurrence), source-presence against real grounded/unrelated text, empty-evidence/empty-answer edge cases, combined `run_safety_check` behavior, fallback content. All pass.
+- `src/rag/test_pipeline.py` — 5 unit tests with a fake LLM adapter (no network calls): safe answer passes through, LLM error falls back, unsafe (banned-phrase) answer falls back, ungrounded answer falls back, query correctly reaches the evidence formatter. All pass.
+- **Live end-to-end**, real index + real Gemini call, run through the full `RagAnswerPipeline`: both the actinic-keratosis query and the previously-ambiguous "How should I clean an abrasion?" query (§7's one retrieval near-miss) passed through cleanly with `used_fallback=False` — the safety layer does not over-trigger on real, legitimately-grounded answers.
+
+Phase 1's remaining item is the formal answer-evaluation gate (§6): running the full fixed test set through this pipeline and confirming 100% pass on all three criteria.
 
 ---
 
