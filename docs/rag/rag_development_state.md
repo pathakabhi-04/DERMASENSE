@@ -271,12 +271,43 @@ Steps 1-6 below are complete as of this checkpoint (2026-09-06). See §6 and §7
 
 **Next concrete gate (not yet started):** build Phase 1's remaining pipeline components per the primary specification —
 
-7. Evidence formatter (`src/rag/retrieval/evidence.py`, per spec §3.1): top-3 chunks, deduplicated by source document.
-8. Prompt builder (per spec §3.2/§4.1): constrained-paraphrase system prompt, uncertainty/adversarial-decline instructions.
-9. Hosted LLM adapter (per spec §4.2).
-10. Deterministic safety/grounding check (per spec §5): banned-phrase scan, source-presence check, generation-timeout fallback.
+7. ~~Evidence formatter.~~ Done — `src/rag/retrieval/evidence.py`, per spec §3.1: top-3 chunks, deduplicated by source document. 9 unit tests pass; smoke-tested against the real rebuilt index.
+8. ~~Hosted LLM adapter.~~ Done — see §11 below (moved out of order since the API-key decision landed before the prompt builder).
+9. Prompt builder (per spec §3.2/§4.1): constrained-paraphrase system prompt, uncertainty/adversarial-decline instructions, using `EvidenceBundle.format_for_prompt()` from step 7.
+10. Deterministic safety/grounding check (per spec §5): banned-phrase scan, source-presence check, generation-timeout fallback (the adapter already raises `LLMGenerationError` on timeout/failure — the safety layer must catch this and fall back, not let it surface as a crash).
 11. Run the Phase 1 answer-evaluation gate (spec §6): 100% pass on the fixed test set across all three criteria (cites a real source, no banned diagnostic phrase, states uncertainty on low-similarity retrieval — define the similarity threshold from the actual score distribution observed in §7 above, e.g. case 11's ~0.33 range, rather than inventing one).
 12. Update this file with commands run, results, failures, decisions, and the next concrete gate.
+
+---
+
+## 11. Hosted LLM adapter — DONE (2026-09-06)
+
+Per spec §4.2's resolved decision (hosted API, not local/RunPod), the baseline LLM is **Gemini**, accessed via the `generateContent` REST endpoint directly (no SDK dependency added — `urllib` from the standard library is sufficient for one request/response call).
+
+### API key
+
+- A `GEMINI_API_KEY` was required. The first key obtained returned `403 PERMISSION_DENIED / CONSUMER_SUSPENDED` from Google's API — the underlying Google Cloud project/key was suspended on Google's side (not a local misconfiguration). A second key, verified with a live `models.list` call (200 OK, 50 models) and a real `generateContent` call, works.
+- Key is stored in `.env` at the project root (already covered by `.gitignore`'s `.env`/`.env.*` rules). Added `.env.example` (with `GEMINI_API_KEY=` and no value) as a committed template, which required adding `!.env.example` to `.gitignore` since the existing `.env.*` pattern was blocking it too.
+
+### Model choice
+
+Initially attempted `gemini-2.5-flash` (the model name that appeared newest in prior knowledge): the live API rejected it with `404 NOT_FOUND — "This model ... is no longer available to new users."` This is expected drift for a fast-moving hosted API, not a bug. Switched to **`gemini-flash-latest`**, an alias Google keeps pointed at their current fast model — this avoids the adapter silently breaking again as models are deprecated. Verified working via both a raw `models.list` check and a real `generateContent` call.
+
+### Adapter implementation
+
+`src/rag/llm/gemini_adapter.py`:
+
+- `resolve_api_key()` — real environment variable takes precedence over `.env` file; raises `LLMGenerationError` if neither has it.
+- `GeminiAdapter.generate(system_prompt, user_prompt) -> LLMResponse` — sends one `systemInstruction` + one user `contents` turn, returns `(text, model, finish_reason)`.
+- Retries up to 2 times (short exponential backoff) on transient errors only (`429`, `500`, `503` — confirmed `503 UNAVAILABLE` occurs in practice under real API load); non-retryable errors (e.g. `400`) raise immediately.
+- Raises `LLMGenerationError` — never lets urllib exceptions leak — on: no candidates returned, empty response text (e.g. blocked by safety filters), any HTTP/network/timeout failure. This is the exception type the safety layer (next step) must catch to implement the required generation-failure fallback (spec §5, point 4).
+- API key is redacted from any raised error message before it propagates (Google's own error bodies can echo the key back verbatim — confirmed during manual testing).
+
+### Testing
+
+`src/rag/llm/test_gemini_adapter.py` — 10 unit tests, all mocked (`unittest.mock.patch` on `urlopen`; no network calls, no real key used in tests): key resolution (env-var precedence, `.env` fallback, missing-key error), successful generation, retry-then-succeed on 503, no-retry on non-retryable 400, give-up-after-max-retries, empty-candidates error, empty-text error, key redaction in error messages. All pass.
+
+Also smoke-tested live against the real key and `gemini-flash-latest`: a real `generate()` call returns `"Paris."` for "What is the capital of France?" with `finish_reason=STOP`.
 
 ---
 
