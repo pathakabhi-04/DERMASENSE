@@ -4,7 +4,7 @@
 
 **Updated:** 2026-09-06
 
-**Primary specification:** `docs/rag/rag_evolution_and_cv_integration_strategy_v2.md`
+**Primary specification:** `docs/rag/RAG_EVOLUTION_AND_CV_INTEGRATION_STRATEGY_v2.md`
 
 **Purpose:** This is the persistent engineering checkpoint for the RAG pipeline. Update it after every material implementation, experiment, validation run, decision, or blocker. It records what is true in the repository, rather than replacing the architecture and safety decisions in the primary specification.
 
@@ -312,7 +312,7 @@ Validated outcomes:
 
 | Date | Change | Result |
 |---|---|---|
-| 2026-09-06 | Analysed `rag_evolution_and_cv_integration_strategy_v2.md` against the coverage experiment. | Identified missing ACK, BCC, SCC, and SEK evidence as the immediate Phase 1 blocker. |
+| 2026-09-06 | Analysed `RAG_EVOLUTION_AND_CV_INTEGRATION_STRATEGY_v2.md` against the coverage experiment. | Identified missing ACK, BCC, SCC, and SEK evidence as the immediate Phase 1 blocker. |
 | 2026-09-06 | Corrected document grouping in the class-coverage checker and added regression tests. | Source-level reporting is now accurate; 2 tests pass. |
 | 2026-09-06 | Added four authoritative AAD class-specific sources and acquired snapshots. | Fresh corpus expanded from 8 to 12 usable documents. |
 | 2026-09-06 | Expanded retrieval evaluation from 12 to 16 cases. | Each native CV class now has at least one targeted retrieval query. |
