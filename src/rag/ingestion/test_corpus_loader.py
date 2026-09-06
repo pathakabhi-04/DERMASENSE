@@ -19,8 +19,8 @@ def main():
         f"Documents loaded: {len(documents)}"
     )
 
-    assert len(documents) == 8, (
-        "Expected 8 successfully acquired documents."
+    assert len(documents) == 12, (
+        "Expected 12 successfully acquired documents."
     )
 
     for document in documents:
@@ -76,6 +76,10 @@ def main():
         "NCI_MOLES_MELANOMA_001",
         "NCI_MELANOMA_APPEARANCE_001",
         "AAD_MOLE_PROBLEM_001",
+        "AAD_ACTINIC_KERATOSIS_SYMPTOMS_001",
+        "AAD_BASAL_CELL_CARCINOMA_001",
+        "AAD_SQUAMOUS_CELL_CARCINOMA_001",
+        "AAD_SEBORRHEIC_KERATOSES_SYMPTOMS_001",
         "MEDLINEPLUS_SCRAPE_001",
         "MEDLINEPLUS_CUTS_001",
         "MEDLINEPLUS_BURNS_001",

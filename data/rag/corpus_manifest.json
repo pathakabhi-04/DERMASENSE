@@ -75,6 +75,58 @@
       ]
     },
     {
+      "document_id": "AAD_ACTINIC_KERATOSIS_SYMPTOMS_001",
+      "title": "Actinic keratosis: Signs and symptoms",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/skin-cancer/actinic-keratosis-symptoms",
+      "topic": "skin_lesions",
+      "condition": "actinic_keratosis",
+      "sections": [
+        "appearance",
+        "symptoms",
+        "professional_evaluation"
+      ]
+    },
+    {
+      "document_id": "AAD_BASAL_CELL_CARCINOMA_001",
+      "title": "Basal cell carcinoma: From symptoms to treatments",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/skin-cancer/basal-cell-carcinoma",
+      "topic": "skin_cancer",
+      "condition": "basal_cell_carcinoma",
+      "sections": [
+        "symptoms",
+        "appearance",
+        "professional_evaluation"
+      ]
+    },
+    {
+      "document_id": "AAD_SQUAMOUS_CELL_CARCINOMA_001",
+      "title": "Squamous cell carcinoma: From symptoms to treatments",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/skin-cancer/squamous-cell-carcinoma/",
+      "topic": "skin_cancer",
+      "condition": "squamous_cell_carcinoma",
+      "sections": [
+        "symptoms",
+        "appearance",
+        "professional_evaluation"
+      ]
+    },
+    {
+      "document_id": "AAD_SEBORRHEIC_KERATOSES_SYMPTOMS_001",
+      "title": "Seborrheic keratoses: Signs and symptoms",
+      "source": "American Academy of Dermatology",
+      "source_url": "https://www.aad.org/public/diseases/a-z/seborrheic-keratoses-symptoms",
+      "topic": "skin_lesions",
+      "condition": "seborrheic_keratosis",
+      "sections": [
+        "appearance",
+        "symptoms",
+        "professional_evaluation"
+      ]
+    },
+    {
       "document_id": "MEDLINEPLUS_SCRAPE_001",
       "title": "Scrape",
       "source": "MedlinePlus",

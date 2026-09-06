@@ -42,6 +42,34 @@
     "expected_topics": ["skin_lesions"]
   },
   {
+    "query": "What are common signs of actinic keratosis?",
+    "expected_document_ids": [
+      "AAD_ACTINIC_KERATOSIS_SYMPTOMS_001"
+    ],
+    "expected_topics": ["skin_lesions"]
+  },
+  {
+    "query": "What can basal cell carcinoma look like?",
+    "expected_document_ids": [
+      "AAD_BASAL_CELL_CARCINOMA_001"
+    ],
+    "expected_topics": ["skin_cancer"]
+  },
+  {
+    "query": "What are possible signs of squamous cell carcinoma?",
+    "expected_document_ids": [
+      "AAD_SQUAMOUS_CELL_CARCINOMA_001"
+    ],
+    "expected_topics": ["skin_cancer"]
+  },
+  {
+    "query": "What are the signs of seborrheic keratosis?",
+    "expected_document_ids": [
+      "AAD_SEBORRHEIC_KERATOSES_SYMPTOMS_001"
+    ],
+    "expected_topics": ["skin_lesions"]
+  },
+  {
     "query": "How should I treat a superficial scrape?",
     "expected_document_ids": [
       "MEDLINEPLUS_SCRAPE_001"

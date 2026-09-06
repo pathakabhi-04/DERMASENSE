@@ -30,7 +30,7 @@ class SentenceTransformerEmbedder:
     def dimension(self) -> int:
         """Return the embedding dimensionality."""
 
-        return self.model.get_embedding_dimension()
+        return self.model.get_sentence_embedding_dimension()
 
     def embed_documents(
         self,
