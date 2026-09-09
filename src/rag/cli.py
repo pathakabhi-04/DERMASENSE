@@ -20,10 +20,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from src.rag.embeddings.embedder import SentenceTransformerEmbedder
-from src.rag.llm.gemini_adapter import GeminiAdapter
+from src.rag.llm.groq_adapter import GroqAdapter
 from src.rag.pipeline import RagAnswerPipeline
 from src.rag.prompts.prompt_builder import PromptBuilder
 from src.rag.retrieval.evidence import EvidenceFormatter
@@ -51,7 +52,7 @@ def build_pipeline() -> RagAnswerPipeline:
     return RagAnswerPipeline(
         evidence_formatter=EvidenceFormatter(retriever=retriever),
         prompt_builder=PromptBuilder(),
-        llm_adapter=GeminiAdapter(),
+        llm_adapter=GroqAdapter(),
     )
 
 
@@ -84,6 +85,12 @@ def load_case_queries() -> list[str]:
 
 
 def main() -> None:
+    # Windows terminals often default stdout to a legacy codepage (e.g.
+    # cp1252) that can't encode curly quotes/apostrophes found in the
+    # scraped source text, mangling them into "?" or "?". Force UTF-8.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(
         description="Manually exercise the baseline RAG answer pipeline."
     )

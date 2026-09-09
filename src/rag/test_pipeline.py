@@ -1,6 +1,6 @@
 import unittest
 
-from src.rag.llm.gemini_adapter import LLMGenerationError, LLMResponse
+from src.rag.llm.groq_adapter import LLMGenerationError, LLMResponse
 from src.rag.pipeline import RagAnswerPipeline
 from src.rag.prompts.prompt_builder import PromptBuilder
 from src.rag.retrieval.evidence import EvidenceBundle, EvidenceChunk

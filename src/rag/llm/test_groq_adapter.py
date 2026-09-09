@@ -4,8 +4,8 @@ import unittest
 import urllib.error
 from unittest.mock import patch
 
-from src.rag.llm.gemini_adapter import (
-    GeminiAdapter,
+from src.rag.llm.groq_adapter import (
+    GroqAdapter,
     LLMGenerationError,
     resolve_api_key,
 )
@@ -40,13 +40,13 @@ def make_http_error(code: int, message: str = "error") -> urllib.error.HTTPError
 
 def make_success_payload(
     text: str = "Answer text.",
-    finish_reason: str = "STOP",
+    finish_reason: str = "stop",
 ) -> dict:
     return {
-        "candidates": [
+        "choices": [
             {
-                "content": {"parts": [{"text": text}]},
-                "finishReason": finish_reason,
+                "message": {"content": text},
+                "finish_reason": finish_reason,
             }
         ]
     }
@@ -56,7 +56,7 @@ class ResolveApiKeyTests(unittest.TestCase):
     def test_prefers_real_environment_variable(self):
         with patch.dict(
             "os.environ",
-            {"GEMINI_API_KEY": "from-env"},
+            {"GROQ_API_KEY": "from-env"},
             clear=False,
         ):
             self.assertEqual(resolve_api_key(), "from-env")
@@ -69,7 +69,7 @@ class ResolveApiKeyTests(unittest.TestCase):
             with tempfile.TemporaryDirectory() as tmp_dir:
                 env_path = Path(tmp_dir) / ".env"
                 env_path.write_text(
-                    "GEMINI_API_KEY=from-dotenv\n",
+                    "GROQ_API_KEY=from-dotenv\n",
                     encoding="utf-8",
                 )
 
@@ -90,15 +90,15 @@ class ResolveApiKeyTests(unittest.TestCase):
                     resolve_api_key(missing_path)
 
 
-class GeminiAdapterGenerateTests(unittest.TestCase):
-    def _adapter(self) -> GeminiAdapter:
-        return GeminiAdapter(
+class GroqAdapterGenerateTests(unittest.TestCase):
+    def _adapter(self) -> GroqAdapter:
+        return GroqAdapter(
             api_key="test-key",
             max_retries=2,
         )
 
-    @patch("src.rag.llm.gemini_adapter.time.sleep", return_value=None)
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
+    @patch("src.rag.llm.groq_adapter.time.sleep", return_value=None)
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
     def test_successful_generation_returns_text(
         self,
         mock_urlopen,
@@ -112,10 +112,10 @@ class GeminiAdapterGenerateTests(unittest.TestCase):
         result = adapter.generate("system", "user query")
 
         self.assertEqual(result.text, "Hello there.")
-        self.assertEqual(result.finish_reason, "STOP")
+        self.assertEqual(result.finish_reason, "stop")
 
-    @patch("src.rag.llm.gemini_adapter.time.sleep", return_value=None)
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
+    @patch("src.rag.llm.groq_adapter.time.sleep", return_value=None)
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
     def test_retries_on_503_then_succeeds(
         self,
         mock_urlopen,
@@ -132,8 +132,8 @@ class GeminiAdapterGenerateTests(unittest.TestCase):
         self.assertEqual(result.text, "Recovered.")
         self.assertEqual(mock_urlopen.call_count, 2)
 
-    @patch("src.rag.llm.gemini_adapter.time.sleep", return_value=None)
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
+    @patch("src.rag.llm.groq_adapter.time.sleep", return_value=None)
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
     def test_does_not_retry_on_non_retryable_error(
         self,
         mock_urlopen,
@@ -148,8 +148,8 @@ class GeminiAdapterGenerateTests(unittest.TestCase):
 
         self.assertEqual(mock_urlopen.call_count, 1)
 
-    @patch("src.rag.llm.gemini_adapter.time.sleep", return_value=None)
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
+    @patch("src.rag.llm.groq_adapter.time.sleep", return_value=None)
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
     def test_gives_up_after_max_retries(
         self,
         mock_urlopen,
@@ -164,19 +164,19 @@ class GeminiAdapterGenerateTests(unittest.TestCase):
 
         self.assertEqual(mock_urlopen.call_count, 3)
 
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
-    def test_no_candidates_raises(self, mock_urlopen):
-        mock_urlopen.return_value = FakeHTTPResponse({"candidates": []})
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
+    def test_no_choices_raises(self, mock_urlopen):
+        mock_urlopen.return_value = FakeHTTPResponse({"choices": []})
 
         adapter = self._adapter()
 
         with self.assertRaises(LLMGenerationError):
             adapter.generate("system", "user query")
 
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
     def test_empty_text_raises(self, mock_urlopen):
         mock_urlopen.return_value = FakeHTTPResponse(
-            make_success_payload(text="", finish_reason="SAFETY")
+            make_success_payload(text="", finish_reason="content_filter")
         )
 
         adapter = self._adapter()
@@ -184,7 +184,7 @@ class GeminiAdapterGenerateTests(unittest.TestCase):
         with self.assertRaises(LLMGenerationError):
             adapter.generate("system", "user query")
 
-    @patch("src.rag.llm.gemini_adapter.urllib.request.urlopen")
+    @patch("src.rag.llm.groq_adapter.urllib.request.urlopen")
     def test_error_body_redacts_api_key(self, mock_urlopen):
         mock_urlopen.side_effect = make_http_error(
             400,

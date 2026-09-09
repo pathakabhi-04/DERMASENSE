@@ -8,18 +8,28 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_MODEL = "gemini-flash-latest"
+# openai/gpt-oss-120b: the largest general-purpose instruction model this
+# API key has access to (checked via GET /openai/v1/models -- llama-3.3
+# and llama-3.1 chat models are not enabled on this account/region).
+# Chosen over gpt-oss-20b because this adapter drives constrained medical
+# paraphrase + grounding (spec section 4.2), where faithfulness to the
+# supplied evidence matters more than the latency difference between the
+# two sizes, and over groq/compound because that model can invoke tools
+# (e.g. web search) on its own, which is undesirable for a task that must
+# stay strictly grounded in the evidence passed in the prompt.
+DEFAULT_MODEL = "openai/gpt-oss-120b"
 DEFAULT_TIMEOUT_SECONDS = 30.0
-DEFAULT_MAX_RETRIES = 2
+DEFAULT_MAX_RETRIES = 4
+MAX_BACKOFF_SECONDS = 16.0
 RETRYABLE_HTTP_CODES = {429, 500, 503}
-API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
+API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
 class LLMGenerationError(Exception):
     """
     Raised when the hosted LLM call fails: network error, timeout,
     a non-retryable HTTP error, or a response with no usable text
-    (e.g. blocked by safety filters).
+    (e.g. blocked by content filters).
 
     Per the primary specification (section 5, generation-failure
     fallback): callers must treat this as a signal to fall back to
@@ -37,7 +47,7 @@ class LLMResponse:
 
 def _load_api_key_from_dotenv(env_path: Path) -> str | None:
     """
-    Minimal .env parser for GEMINI_API_KEY only. Avoids adding a
+    Minimal .env parser for GROQ_API_KEY only. Avoids adding a
     python-dotenv dependency for a single variable.
     """
 
@@ -50,7 +60,7 @@ def _load_api_key_from_dotenv(env_path: Path) -> str | None:
         if not line or line.startswith("#"):
             continue
 
-        if line.startswith("GEMINI_API_KEY="):
+        if line.startswith("GROQ_API_KEY="):
             value = line.split("=", 1)[1].strip()
             return value or None
 
@@ -59,11 +69,11 @@ def _load_api_key_from_dotenv(env_path: Path) -> str | None:
 
 def resolve_api_key(env_path: str | Path = ".env") -> str:
     """
-    Resolve the Gemini API key. A real environment variable takes
+    Resolve the Groq API key. A real environment variable takes
     precedence over the .env file.
     """
 
-    key = os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GROQ_API_KEY")
 
     if key:
         return key
@@ -72,23 +82,23 @@ def resolve_api_key(env_path: str | Path = ".env") -> str:
 
     if not key:
         raise LLMGenerationError(
-            "GEMINI_API_KEY is not set. Set it as an environment "
+            "GROQ_API_KEY is not set. Set it as an environment "
             "variable or in a .env file at the project root."
         )
 
     return key
 
 
-class GeminiAdapter:
+class GroqAdapter:
     """
-    Thin adapter over the Gemini generateContent REST API.
+    Thin adapter over Groq's OpenAI-compatible chat completions API.
 
     Per the primary specification (section 4.2): the baseline uses a
     hosted API model, not local or self-hosted inference. This
     adapter is intentionally minimal -- one system+user prompt pair
-    in, one text response out -- so it can be replaced with a
-    different provider later without touching the rest of the
-    pipeline.
+    in, one text response out -- mirroring the previous Gemini
+    adapter's interface so the rest of the pipeline needed no
+    changes beyond the import.
     """
 
     def __init__(
@@ -109,28 +119,20 @@ class GeminiAdapter:
         user_prompt: str,
     ) -> LLMResponse:
         """
-        Send one system+user prompt pair to Gemini and return the
+        Send one system+user prompt pair to Groq and return the
         model's text response.
 
-        Retries a small, fixed number of times on transient errors
-        (429 rate limit, 500/503 server errors) with a short backoff.
-        All other failures raise immediately.
+        Retries on transient errors (429 rate limit, 500/503 server
+        errors) with exponential backoff capped at
+        MAX_BACKOFF_SECONDS, up to max_retries times. All other
+        failures raise immediately.
         """
 
-        url = (
-            f"{API_BASE_URL}/models/{self.model}:generateContent"
-            f"?key={self.api_key}"
-        )
-
         payload = {
-            "systemInstruction": {
-                "parts": [{"text": system_prompt}],
-            },
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": user_prompt}],
-                }
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
             ],
         }
 
@@ -140,7 +142,7 @@ class GeminiAdapter:
 
         for attempt in range(self.max_retries + 1):
             try:
-                data = self._send_request(url, body)
+                data = self._send_request(body)
                 return self._parse_response(data)
 
             except LLMGenerationError as error:
@@ -151,16 +153,20 @@ class GeminiAdapter:
                 ):
                     raise
 
-                time.sleep(2 ** attempt)
+                time.sleep(min(2 ** attempt, MAX_BACKOFF_SECONDS))
 
         # Unreachable, but keeps type-checkers satisfied.
         raise last_error
 
-    def _send_request(self, url: str, body: bytes) -> dict:
+    def _send_request(self, body: bytes) -> dict:
         request = urllib.request.Request(
-            url,
+            API_URL,
             data=body,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}",
+                "User-Agent": "dermasense-rag/1.0",
+            },
             method="POST",
         )
 
@@ -173,18 +179,18 @@ class GeminiAdapter:
 
         except urllib.error.HTTPError as error:
             raise LLMGenerationError(
-                f"Gemini API returned HTTP {error.code}: "
+                f"Groq API returned HTTP {error.code}: "
                 f"{self._safe_error_body(error)}"
             ) from error
 
         except urllib.error.URLError as error:
             raise LLMGenerationError(
-                f"Gemini API request failed: {error.reason}"
+                f"Groq API request failed: {error.reason}"
             ) from error
 
         except TimeoutError as error:
             raise LLMGenerationError(
-                "Gemini API request timed out."
+                "Groq API request timed out."
             ) from error
 
     def _is_retryable(self, error: LLMGenerationError) -> bool:
@@ -205,25 +211,22 @@ class GeminiAdapter:
             return "(error body unavailable)"
 
     def _parse_response(self, data: dict) -> LLMResponse:
-        candidates = data.get("candidates") or []
+        choices = data.get("choices") or []
 
-        if not candidates:
+        if not choices:
             raise LLMGenerationError(
-                "Gemini API returned no candidates "
-                "(the response may have been blocked by safety "
+                "Groq API returned no choices "
+                "(the response may have been blocked by content "
                 "filters)."
             )
 
-        finish_reason = candidates[0].get("finishReason")
-
-        parts = candidates[0].get("content", {}).get("parts", [])
-
-        text = "".join(part.get("text", "") for part in parts)
+        finish_reason = choices[0].get("finish_reason")
+        text = choices[0].get("message", {}).get("content", "") or ""
 
         if not text.strip():
             raise LLMGenerationError(
-                "Gemini API returned an empty response "
-                f"(finishReason={finish_reason})."
+                "Groq API returned an empty response "
+                f"(finish_reason={finish_reason})."
             )
 
         return LLMResponse(

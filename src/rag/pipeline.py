@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.rag.llm.gemini_adapter import LLMGenerationError
+from src.rag.llm.groq_adapter import LLMGenerationError
 from src.rag.prompts.prompt_builder import PromptBuilder
 from src.rag.retrieval.evidence import EvidenceFormatter
 from src.rag.safety.grounding_check import (
