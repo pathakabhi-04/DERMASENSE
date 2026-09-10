@@ -3,6 +3,7 @@
     "description": "first visit -- no prior image supplied at all",
     "source": "data/raw/pad_ufes/images/imgs_part_1/PAT_106_158_270.png",
     "payload": {
+      "contract_version": "1.1",
       "lesion_id": "first-visit-example",
       "diagnosis": {
         "native_class": "BCC",
@@ -16,7 +17,7 @@
         }
       },
       "risk_category": "HIGH",
-      "risk_reason": "BCC -> URGENT_EVALUATION (46% confidence)",
+      "risk_reason": "BCC -> URGENT_EVALUATION (44% confidence)",
       "temporal": {
         "verdict": "NO_PRIOR_DATA",
         "magnitude": 0.0,
@@ -47,6 +48,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/General/General18_Lesion7_visit2.jpg"
     },
     "payload": {
+      "contract_version": "1.1",
       "lesion_id": "General18_Lesion7",
       "diagnosis": {
         "native_class": "ACK",
@@ -60,7 +62,7 @@
         }
       },
       "risk_category": "MEDIUM",
-      "risk_reason": "ACK -> EVALUATE_SOON (90% confidence)",
+      "risk_reason": "ACK -> EVALUATE_SOON (84% confidence)",
       "temporal": {
         "verdict": "STABLE",
         "magnitude": 0.854914638849878,
@@ -89,6 +91,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/HighRisk/HighRisk37_Lesion6_visit2.jpg"
     },
     "payload": {
+      "contract_version": "1.1",
       "lesion_id": "HighRisk37_Lesion6",
       "diagnosis": {
         "native_class": "NEV",
@@ -102,7 +105,7 @@
         }
       },
       "risk_category": "MEDIUM",
-      "risk_reason": "NEV -> MONITOR (81% confidence); escalated to MEDIUM due to CHANGED_COLOR (magnitude 1.37)",
+      "risk_reason": "NEV -> MONITOR (73% confidence); escalated to MEDIUM due to CHANGED_COLOR exceeding its flagging threshold",
       "temporal": {
         "verdict": "CHANGED_COLOR",
         "magnitude": 1.373424925237653,
@@ -131,6 +134,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/General/General151_Lesion3_visit2.jpg"
     },
     "payload": {
+      "contract_version": "1.1",
       "lesion_id": "General151_Lesion3",
       "diagnosis": {
         "native_class": "ACK",
@@ -144,7 +148,7 @@
         }
       },
       "risk_category": "MEDIUM",
-      "risk_reason": "ACK -> EVALUATE_SOON (44% confidence)",
+      "risk_reason": "ACK -> EVALUATE_SOON (41% confidence)",
       "temporal": {
         "verdict": "NO_PRIOR_DATA",
         "magnitude": 0.0,
@@ -176,6 +180,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/HighRisk/HighRisk274_Lesion16_visit3.jpg"
     },
     "payload": {
+      "contract_version": "1.1",
       "lesion_id": "HighRisk274_Lesion16",
       "diagnosis": {
         "native_class": "ACK",
@@ -189,7 +194,7 @@
         }
       },
       "risk_category": "MEDIUM",
-      "risk_reason": "ACK -> EVALUATE_SOON (57% confidence)",
+      "risk_reason": "ACK -> EVALUATE_SOON (52% confidence)",
       "temporal": {
         "verdict": "STABLE",
         "magnitude": 1.0343485912419719,

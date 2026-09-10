@@ -108,6 +108,12 @@ def main():
         for lesion_id, description, earlier_path, later_path in UQ_EXAMPLES:
             earlier_img = _read_zip_image(zf, earlier_path)
             later_img = _read_zip_image(zf, later_path)
+            # `*_timestamp` is opaque passthrough -- CV-7 never parses it
+            # (src/temporal/pipeline.py::assess_pair). The UQ Longitudinal
+            # dataset carries visit ORDER, not visit dates, so the honest
+            # value here is the image identifier, not a fabricated date.
+            # Consumers must not parse `compared_timestamps` as dates or
+            # compute an interval from them -- see the README.
             result = pipeline.predict(
                 later_img,
                 lesion_id=lesion_id,

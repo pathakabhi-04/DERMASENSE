@@ -12,6 +12,7 @@ from __future__ import annotations
 from src.inference.orchestrator import CandidateResult
 from src.risk.action_mapping import ProductAction
 from src.risk.convergence import (
+    CONTRACT_VERSION,
     LOW_CROP_BLUR_THRESHOLD,
     LOW_CROP_CONTRAST_THRESHOLD,
     MIN_TEMPORAL_CONFIDENCE_FOR_ESCALATION,
@@ -40,6 +41,10 @@ def _candidate(
         box_pixels=(0, 0, 10, 10),
         detection_confidence=None,
         predicted_class="NEV",
+        # Raw softmax and calibrated confidence are deliberately DIFFERENT
+        # here. They used to both be 0.9, which made the two fields
+        # indistinguishable and let risk_reason quote the raw one
+        # undetected for the whole life of this module.
         confidence=0.9,
         probabilities={"NEV": 0.9},
         product_action=action,
@@ -51,7 +56,7 @@ def _candidate(
         mask_touches_border=mask_touches_border,
         crop_blur=crop_blur,
         crop_contrast=crop_contrast,
-        calibrated_confidence=0.9,
+        calibrated_confidence=0.74,
         ensemble_agree=ensemble_agree,
     )
 
@@ -187,12 +192,47 @@ def test_to_dict_matches_locked_contract_shape():
     payload = result.to_dict()
 
     assert set(payload.keys()) == {
-        "lesion_id", "diagnosis", "risk_category", "risk_reason",
-        "temporal", "uncertainty", "quality_flags",
+        "contract_version", "lesion_id", "diagnosis", "risk_category",
+        "risk_reason", "temporal", "uncertainty", "quality_flags",
     }
     assert set(payload["diagnosis"].keys()) == {"native_class", "probabilities"}
     assert set(payload["uncertainty"].keys()) == {"confidence", "requires_review"}
     assert payload["lesion_id"] == "lesion-42"
+    assert payload["contract_version"] == CONTRACT_VERSION
+
+
+# ---- risk_reason is consumed downstream, so its numbers must be safe ----
+
+
+def test_risk_reason_quotes_calibrated_confidence_not_raw_softmax():
+    """
+    A downstream consumer narrates risk_reason to a user, so the figure
+    in it must be the same calibrated number as uncertainty.confidence
+    -- never the raw max softmax. Fixture: raw 0.9, calibrated 0.74.
+    """
+    result = assess_risk(_candidate(ProductAction.MONITOR), lesion_id="L1")
+
+    assert "74% confidence" in result.risk_reason
+    assert "90% confidence" not in result.risk_reason
+    assert result.to_dict()["uncertainty"]["confidence"] == 0.74
+
+
+def test_risk_reason_never_states_magnitude_numerically():
+    """
+    `magnitude` is a unitless threshold-relative ratio. Narrated as a
+    bare number it reads as a physical quantity ("changed by 1.5"), so
+    the escalation clause states it qualitatively instead.
+    """
+    temporal = _temporal(TemporalVerdict.CHANGED_COLOR, magnitude=1.37, confidence=1.0)
+    result = assess_risk(_candidate(ProductAction.MONITOR), lesion_id="L1", temporal=temporal)
+
+    assert "escalated" in result.risk_reason
+    assert "CHANGED_COLOR" in result.risk_reason
+    assert "1.37" not in result.risk_reason
+    assert "magnitude" not in result.risk_reason
+    # The raw value stays available on the temporal block for any
+    # consumer that genuinely wants it.
+    assert result.temporal["magnitude"] == 1.37
 
 
 # ---- CV-1/CV-3/CV-6 evidence surfaced as quality_flags -------------------

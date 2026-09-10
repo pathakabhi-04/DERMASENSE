@@ -38,6 +38,59 @@ verdict. This module's only new logic is how they combine.
    taxonomy question, orthogonal to wiring CV-7's signal into risk
    convergence, and stays open per the spec's own note.
 
+## `risk_reason` is consumed downstream, not just logged
+
+The RAG side's integration strategy treats `risk_reason` as structured
+evidence to translate into user-facing language, which means every
+number in this string reaches a patient. It was originally written as
+an internal diagnostic line, and carried two things it should not have:
+
+1. **The RAW max softmax** (`candidate.confidence`), while
+   `uncertainty.confidence` carried CV-6's CALIBRATED figure. Those are
+   deliberately different numbers -- that is the entire point of
+   calibration -- and they diverge by up to ~7 points across the five
+   real examples in `docs/cv8_sample_outputs/`. A consumer narrating
+   the string got the uncalibrated one while believing, per its own
+   spec, that it was showing the calibrated one. Now uses
+   `calibrated_confidence`, so both places in the payload agree.
+2. **`magnitude` as a bare number** ("magnitude 1.37"). `magnitude` is
+   a unitless ratio against each feature's own calibrated escalation
+   threshold (1.0 == exactly at threshold) -- not millimetres, not a
+   percentage, and not comparable across lesions. Stated qualitatively
+   here instead; the raw value stays on `temporal.magnitude`.
+
+The `ProductAction` token (`URGENT_EVALUATION`/`EVALUATE_SOON`/
+`MONITOR`/`UNKNOWN`) is deliberately KEPT in the string, but it is
+internal vocabulary that no external consumer can be expected to know
+-- `src/risk/action_mapping.py` is its source of truth, and its mapping
+to `risk_category` is in the section above.
+
+## `temporal.per_feature_deltas` is a MIXED-UNIT dict
+
+Not documented anywhere before, and easy to misread as three
+comparable numbers:
+
+- `size`  -- real millimetres (`later.diameter_mm - earlier.diameter_mm`),
+  and `None` unless BOTH visits had a confident ruler calibration.
+- `border` -- a unitless compactness difference (threshold 3.0).
+- `color`  -- CIE Lab delta-E distance (threshold 24.0).
+
+Only `magnitude` is threshold-normalized. A nonzero delta therefore
+does NOT imply a change was detected: a real `STABLE` example in
+`docs/cv8_sample_outputs/` carries `color: 20.5` against the 24.0
+threshold. The thresholds live in `src/temporal/delta.py` and are not
+part of this contract, so a consumer holding only the payload cannot
+interpret these numbers -- they are disclosure/audit values, and none
+of the three is patient-facing.
+
+## `temporal.compared_timestamps` is opaque caller-supplied passthrough
+
+`TemporalPipeline.assess_pair` takes these as arbitrary strings and
+never parses them; CV-7 does not derive them and does not require them
+to be dates. Both entries are independently nullable. A consumer must
+not assume they are timestamps, parse them as dates, or compute an
+interval from them.
+
 ## `quality_flags`: surfacing evidence CV-1/CV-3/CV-6 already compute
 
 `CandidateResult` already carries mask evidence (CV-3), crop-quality
@@ -178,6 +231,14 @@ _NO_COMPARISON_TEMPORAL: dict[str, Any] = {
 }
 
 
+# Bumped whenever `to_dict()`'s shape changes in a way a downstream
+# parser could not absorb silently (a renamed/removed key, a new enum
+# value). 1.1 added this field itself plus the `risk_reason` fixes
+# described in the module docstring. Consumers should fail loudly on an
+# unrecognized MAJOR, and may proceed on a higher MINOR.
+CONTRACT_VERSION = "1.1"
+
+
 @dataclass(frozen=True)
 class RiskAssessment:
     """CV-8's convergent output. `to_dict()` is the locked JSON contract."""
@@ -194,6 +255,7 @@ class RiskAssessment:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "contract_version": CONTRACT_VERSION,
             "lesion_id": self.lesion_id,
             "diagnosis": {
                 "native_class": self.native_class,
@@ -281,14 +343,21 @@ def assess_risk(
     risk_category = _ESCALATE_ONE_STEP[base_category] if escalated else base_category
     requires_review = candidate.requires_review or escalated
 
+    # CV-6's CALIBRATED confidence, never `candidate.confidence` (the raw
+    # max softmax) -- see the module docstring's "risk_reason is consumed
+    # downstream" section. These differ by up to ~7 points on real data.
     reason = (
         f"{candidate.predicted_class} -> {candidate.product_action.value} "
-        f"({candidate.confidence:.0%} confidence)"
+        f"({candidate.calibrated_confidence:.0%} confidence)"
     )
     if escalated:
+        # `magnitude` is a unitless threshold-relative ratio, meaningless
+        # to a reader without the threshold constants -- stated
+        # qualitatively here, and left on `temporal.magnitude` for any
+        # consumer that wants the number itself.
         reason += (
             f"; escalated to {risk_category.value} due to "
-            f"{temporal.verdict.value} (magnitude {temporal.magnitude:.2f})"
+            f"{temporal.verdict.value} exceeding its flagging threshold"
         )
 
     return RiskAssessment(
