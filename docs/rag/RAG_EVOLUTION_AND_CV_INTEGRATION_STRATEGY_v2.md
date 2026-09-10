@@ -32,6 +32,16 @@ v1 is a strong document — its core architectural boundary (`CV computes, RAG r
 
 Everything else in v1 — the dependency-direction diagram, the taxonomy-discrepancy handling, the phase structure, the quality-flags resilience rule, the testing fixtures — was correct and is carried forward with only wording tightened.
 
+### 0.1 Patch (2026-09-10): baseline LLM finalized as Groq, not Gemini
+
+§4.2 below originally left the *specific* hosted-API provider open ("start with a hosted API model," decision deferred to whichever account was available). That has since resolved with a real constraint, not a preference:
+
+- Gemini was tried first (`gemini-flash-latest`). Its **free tier caps at 20 `generateContent` requests/day**, which directly blocks running §6's evaluation gate (16 queries, one request each, with no headroom for re-runs or manual testing).
+- Switched to **Groq**, calling its OpenAI-compatible chat completions API. Model: `openai/gpt-oss-120b` — the largest general-purpose instruct model available on the account (confirmed via `GET /openai/v1/models`; `llama-3.3-70b-versatile` returned `model_not_found` on this key). Avoided `groq/compound`, which can invoke its own tools (e.g. web search) — incompatible with §4.1's constrained-paraphrase requirement.
+- `GroqAdapter` (`src/rag/llm/groq_adapter.py`) sets `temperature=0.1`. Reason: at default sampling temperature, the same query could pass or fail §5's banned-phrase safety check across identical calls depending on incidental phrasing (e.g. whether the model happened to write "This is the most serious skin cancer" as a general statement). Near-deterministic output reduces that variance without changing the safety rule itself.
+- Two new manual-testing tools now exist that didn't when this document was first written: a CLI (`src/rag/cli.py`) and a Streamlit UI (`src/rag/streamlit_app.py`) that renders answers as real formatted markdown instead of raw terminal text — useful for actually reading the tables/structure the constrained-paraphrase prompt produces.
+- **Not yet done**: the formal §6 evaluation gate (100% pass, 16-query fixed set, all three pass criteria) still has not been run. The Gemini rate limit was the reason it was deferred; that blocker is now resolved, so running the gate is the concrete next action for Phase 1 (see §24, §28 Step 1).
+
 ---
 
 ## 1. Current RAG Baseline
@@ -142,6 +152,8 @@ v1's stated goal for this step is "functional correctness and rapid end-to-end v
 | RunPod-hosted inference | Same objection as local HF, plus the CV side's own `build_on_baseline_1.md` (Section A) documents that no live-serving infrastructure decision has been made for CV either — building RAG's LLM serving on RunPod now would be solving a hosting problem twice, independently, before either side needs to. |
 
 **Decision: start with a hosted API model for the baseline.** Revisit only if a real constraint appears (cost at volume, data-residency requirement, latency measurement showing an API round-trip is the bottleneck) — not preemptively.
+
+**Update (§0.1): the "real constraint" appeared quickly.** Gemini's free-tier request cap made it unusable for even a single evaluation-gate run. The baseline is now Groq (`openai/gpt-oss-120b`) instead — same category of decision (hosted API, no infra to stand up), different provider. This is exactly the "model can be replaced later" principle already stated above, not a change to the decision logic.
 
 ### 4.3 What must NOT change when CV context is added later
 
@@ -494,6 +506,8 @@ Question → Retriever → Evidence → Prompt → LLM → Answer
 
 **Goal, made falsifiable (v1 said only "prove the complete RAG loop works"):** 100% of the fixed test-question set (§6) passes all three pass criteria (cites a real source, no banned-phrase diagnostic claim, states uncertainty when evidence is thin). This is the actual finish line for Phase 1 — not "it runs," but "it runs and passes this specific check."
 
+**Status (§0.1):** all components exist and are unit-tested (evidence formatter, prompt builder, `GroqAdapter`, safety check, end-to-end pipeline), and manual spot-checks through the CLI and Streamlit UI show grounded, correctly-cited, well-structured answers. The formal 16-query, 100%-pass gate run itself has not been executed yet — that is the one remaining action closing out Phase 1.
+
 ### Phase 2 — CV-8 Context Integration
 
 ```text
@@ -566,7 +580,7 @@ Still deliberately open — do not solve prematurely:
 ## 28. Current Execution Plan (unchanged structure, gates made concrete)
 
 ### Step 1 — Complete baseline RAG
-Evidence formatter → Prompt builder → LLM adapter (hosted API, §4.2) → End-to-end pipeline → Answer evaluation (§6's fixed-set, 100%-pass gate).
+Evidence formatter → Prompt builder → LLM adapter (hosted API, §4.2, now Groq per §0.1) → End-to-end pipeline → Answer evaluation (§6's fixed-set, 100%-pass gate — components done, CLI/Streamlit tooling exists, gate run itself still pending).
 
 ### Step 2 — Commit the baseline
 `feat(rag): add end-to-end medical answer generation`, only once Step 1's gate is met.
