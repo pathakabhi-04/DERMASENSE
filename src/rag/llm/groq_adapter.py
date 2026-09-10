@@ -18,6 +18,11 @@ from pathlib import Path
 # (e.g. web search) on its own, which is undesirable for a task that must
 # stay strictly grounded in the evidence passed in the prompt.
 DEFAULT_MODEL = "openai/gpt-oss-120b"
+# Low, not zero: near-deterministic phrasing (reduces run-to-run variance
+# that otherwise makes the downstream banned-phrase safety check pass or
+# fail on the same query), while avoiding the repetition/looping some
+# hosted models exhibit at temperature=0.
+DEFAULT_TEMPERATURE = 0.1
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_MAX_RETRIES = 4
 MAX_BACKOFF_SECONDS = 16.0
@@ -105,11 +110,13 @@ class GroqAdapter:
         self,
         api_key: str | None = None,
         model: str = DEFAULT_MODEL,
+        temperature: float = DEFAULT_TEMPERATURE,
         timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
         max_retries: int = DEFAULT_MAX_RETRIES,
     ):
         self.api_key = api_key or resolve_api_key()
         self.model = model
+        self.temperature = temperature
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
 
@@ -130,6 +137,7 @@ class GroqAdapter:
 
         payload = {
             "model": self.model,
+            "temperature": self.temperature,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
