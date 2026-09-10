@@ -280,6 +280,60 @@ Steps 1-6 below are complete as of this checkpoint (2026-09-06). See §6 and §7
 
 ---
 
+## 15. Future idea: reference images in answers (not started, 2026-09-10)
+
+When a query asks what a condition looks like (e.g. "What does melanoma
+look like?"), the answer today is text-only. Idea: detect this class of
+query and additionally surface a reference photo of the condition, so
+the user can visually compare it against their own lesion alongside the
+generated text explanation.
+
+Not scoped or designed yet. Open questions for whenever this is picked
+up:
+
+- Image source: the acquired corpus's own source pages (`acquire_corpus.py`
+  / `html_extractor.py`) may or may not have retained image URLs during
+  cleaning — needs checking. Using external/hotlinked medical images
+  raises licensing and availability (dead-link) concerns that would need
+  a real answer before shipping, not just at demo time.
+- Trigger detection: needs a rule or classifier for "what does X look
+  like"-style queries, separate from the existing evidence retrieval.
+- Where it surfaces: CLI is text-only by construction; the new
+  `src/rag/streamlit_app.py` demo (§16) could render an image via
+  `st.image` fairly easily once a source is picked, but the pipeline's
+  `RagAnswer` dataclass (`src/rag/pipeline.py`) would need an optional
+  image-reference field added, which is a `RagAnswer` shape change all
+  callers (CLI, Streamlit, tests) would need to handle.
+- Safety framing: an image must not read as "your lesion is/isn't this,"
+  which would reintroduce the direct-diagnosis risk the banned-phrase
+  check (§13) exists to prevent — it's a reference for comparison, not a
+  match/no-match verdict.
+
+---
+
+## 16. Streamlit demo UI — DONE (2026-09-10)
+
+`src/rag/streamlit_app.py` runs the same `RagAnswerPipeline` as the CLI
+(§14), but renders the answer as actual formatted markdown (tables,
+headers) instead of raw text in a terminal, plus a pass/fallback banner
+and the sources line. Three tabs: free-text question, the 16
+`retrieval_cases.json` queries, and the 4 built-in adversarial probes.
+
+```powershell
+streamlit run src/rag/streamlit_app.py
+```
+
+Needed a `sys.path` fix: Streamlit runs the target file standalone
+rather than via `python -m`, so the project root (needed for the
+`src.*` absolute imports the rest of the codebase uses) isn't on
+`sys.path` by default the way it is for `python -m src.rag.cli`. Fixed
+by inserting the project root at the top of `streamlit_app.py` before
+the `src.*` imports.
+
+Added `streamlit==1.63.0` to `requirements.txt`.
+
+---
+
 ## 14. CLI smoke-testing tool — DONE (2026-09-06)
 
 `src/rag/cli.py` runs the full `RagAnswerPipeline` from the command line for manual testing, without needing a Python REPL each time:
