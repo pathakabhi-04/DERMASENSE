@@ -8,6 +8,7 @@ __pycache__/
 # Environment variables / secrets
 .env
 .env.*
+!.env.example
 
 # Raw dataset archives
 data/raw/**/*.zip
@@ -49,3 +50,8 @@ analysis/**/*.webp
 
 # Generated experiment artifacts
 artifacts/
+
+# RAG generated/raw data
+data/rag/raw/
+data/rag/processed/
+data/rag/indexes/
