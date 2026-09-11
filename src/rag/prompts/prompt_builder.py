@@ -76,44 +76,61 @@ class PromptBuilder:
 
         sections = [f"USER QUESTION:\n{query.strip()}"]
 
+        # Spec section 6's third pass criterion: state uncertainty
+        # explicitly when retrieval came back weak. Until now nothing
+        # consumed `top_score`, so that criterion had no implementation
+        # and could only be met by the model happening to hedge.
+        low_similarity_note = (
+            "\n\nNOTE ON EVIDENCE STRENGTH: the retrieved evidence is only "
+            "weakly related to this question. Say so plainly, early in the "
+            "answer, and do not present the evidence as though it settles "
+            "the question. If it does not address the question at all, say "
+            "that instead of answering from general knowledge."
+            if evidence.is_low_similarity
+            else ""
+        )
+
         if cv_block:
             sections.append(cv_block)
 
         sections.append(
-            f"RETRIEVED MEDICAL EVIDENCE (general information, not about "
+            "RETRIEVED MEDICAL EVIDENCE (general information, not about "
             f"this patient):\n{evidence.format_for_prompt()}"
+            if cv_block
+            else f"RETRIEVED EVIDENCE:\n{evidence.format_for_prompt()}"
+        )
+
+        # Shared by both branches so the two cannot drift apart.
+        citation_rule = (
+            "Cite evidence by its bracketed number exactly as supplied — "
+            "[1], [2], [3]. Do not invent finer-grained references such as "
+            "line numbers or section anchors: the evidence has none, so any "
+            "such reference would imply a precision that does not exist. "
+        )
+        insufficiency_rule = (
+            "If the evidence does not adequately address the question, say "
+            "so explicitly rather than filling the gap yourself."
         )
 
         if cv_block:
             sections.append(
-                "Using only the CV assessment and the medical evidence above, "
-                "answer the user's question. "
-            "Cite evidence by its bracketed number exactly as supplied "
-            "— [1], [2], [3]. Do not invent finer-grained references "
-            "such as line numbers or section anchors: the evidence has "
-            "none, so any such reference would imply a precision that "
-            "does not exist. "
-                "Keep the two distinct: the CV "
-                "assessment describes THIS patient's photo, while the medical "
-                "evidence is general information. Do not restate the "
-                "assessment as a diagnosis, do not recompute or second-guess "
-                "any of its values, and do not introduce figures it does not "
-                "contain. If the evidence does not adequately address the "
-                "question, say so explicitly rather than filling the gap "
-                "yourself."
+                "Using only the CV assessment and the medical evidence "
+                "above, answer the user's question. "
+                + citation_rule
+                + "Keep the two distinct: the CV assessment describes THIS "
+                "patient's photo, while the medical evidence is general "
+                "information. Do not restate the assessment as a diagnosis, "
+                "do not recompute or second-guess any of its values, and do "
+                "not introduce figures it does not contain. "
+                + insufficiency_rule
+                + low_similarity_note
             )
         else:
             sections.append(
-                "Using only the evidence above, answer the user's "
-                "question. "
-            "Cite evidence by its bracketed number exactly as supplied "
-            "— [1], [2], [3]. Do not invent finer-grained references "
-            "such as line numbers or section anchors: the evidence has "
-            "none, so any such reference would imply a precision that "
-            "does not exist. "
-                "If the evidence does not adequately address "
-                "the question, say so explicitly rather than filling "
-                "the gap yourself."
+                "Using only the evidence above, answer the user's question. "
+                + citation_rule
+                + insufficiency_rule
+                + low_similarity_note
             )
 
         return AssembledPrompt(

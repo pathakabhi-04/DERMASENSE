@@ -7,6 +7,32 @@ from src.rag.retrieval.retriever import MedicalRetriever, RetrievalResult
 DEFAULT_MAX_CHUNKS = 3
 DEFAULT_CANDIDATE_POOL = 10
 
+# Below this top similarity, the prompt tells the LLM to state plainly
+# that the evidence may not cover the question (spec section 6's third
+# pass criterion). Calibrated against the real score distribution rather
+# than chosen, as that section requires:
+#
+#   in-scope (the 16 eval queries)   0.3415 - 0.8001, p50 0.6930
+#   dermatology-adjacent, uncovered  0.4285 - 0.5650, p50 0.4639
+#   out-of-scope                     0.0439 - 0.1843, p50 0.1220
+#
+# The in-scope set has a gap: 0.3415, then nothing until 0.4847. A
+# threshold inside it flags exactly one legitimate query -- case 11,
+# "How should I clean an abrasion?", which is the retrieval eval's own
+# known Top-1 miss and so is precisely the answer that should hedge.
+# 0.45 also catches 3 of 5 dermatology-adjacent queries the corpus
+# cannot answer, and every out-of-scope query.
+#
+# It does NOT cleanly separate "covered" from "uncovered": the
+# dermatology-adjacent band (0.43-0.57) overlaps real in-scope queries
+# (0.5280 is a genuine one), and no single threshold can split them.
+# That is a limit of similarity as a proxy, not a tuning problem.
+#
+# Erring toward hedging is deliberate and cheap here: a false positive
+# adds a sentence of caution, unlike the grounding check where a false
+# positive discards the whole answer.
+LOW_SIMILARITY_THRESHOLD = 0.45
+
 
 @dataclass
 class EvidenceChunk:
@@ -48,6 +74,18 @@ class EvidenceBundle:
             return None
 
         return max(chunk.score for chunk in self.chunks)
+
+    @property
+    def is_low_similarity(self) -> bool:
+        """
+        True when the best retrieved chunk is weak enough that the
+        answer should say so (spec section 6, third pass criterion).
+
+        Empty retrieval counts: nothing was found, which is the
+        strongest reason to state uncertainty rather than the weakest.
+        """
+
+        return self.top_score is None or self.top_score < LOW_SIMILARITY_THRESHOLD
 
     def format_for_prompt(self) -> str:
         """

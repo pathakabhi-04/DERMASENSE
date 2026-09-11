@@ -252,7 +252,7 @@ Suite: **90 pass**, up from their 53. None of their 53 were modified.
 | Jaccard similarity metric | Thin margins argue for containment, but swapping the metric is a semantic decision — raised, not taken |
 | `_SENTENCE_SPLIT_RE` | Hypothesised as the banned-phrase cause; **tested and disproved** — a newline-aware splitter flags the identical cases. Recorded so nobody retries it |
 | `EvidenceFormatter`, retriever, index, chunking, embeddings | Correct as delivered; §7 rightly defers optimization |
-| `top_score` → uncertainty | Defined and tested but never consumed, so their Phase 1 gate criterion 3 has no implementation. **Theirs, and Phase 1 — not ours to close** |
+| ~~`top_score` → uncertainty~~ | **Now CHANGED — see §15 below** |
 | Corpus, `retrieval_cases.json`, Phase 1 gate | Theirs |
 | 6-class vs 8-class taxonomy | Jointly open (§18); still not guessed at |
 
@@ -446,6 +446,52 @@ measurement time (not a cost worth removing), and segmentation is
 **So the sync/async question is really an image-size question**, and
 that is a product decision — client-side downscaling before upload is
 standard practice and saves bandwidth anyway.
+
+---
+
+## 15. Phase 1 gate criterion 3 implemented ⚠️ EXTENDED (2026-09-11)
+
+**EXTENDED** — `EvidenceBundle.is_low_similarity` and a prompt note.
+
+`top_score` was defined and unit-tested but **nothing consumed it**, so
+spec §6's third pass criterion — "states uncertainty explicitly whenever
+retrieval returned low-similarity evidence" — had no implementation and
+could only be met by the model happening to hedge. Their gate could not
+fail on it, so it certified less than it claimed.
+
+Threshold calibrated against the real distribution, per that section's
+own instruction not to invent a number:
+
+| bucket | min | p50 | max |
+|---|---|---|---|
+| in-scope (the 16 eval queries) | 0.3415 | 0.6930 | 0.8001 |
+| dermatology-adjacent, uncovered | 0.4285 | 0.4639 | 0.5650 |
+| out-of-scope | 0.0439 | 0.1220 | 0.1843 |
+
+`LOW_SIMILARITY_THRESHOLD = 0.45` sits in a real gap inside the in-scope
+set — 0.3415, then nothing until 0.4847 — so it flags exactly one
+legitimate query: case 11, the retrieval eval's own known Top-1 miss,
+which is precisely the answer that should hedge. It also catches 3 of 5
+dermatology-adjacent queries and every out-of-scope one.
+
+**Stated limit:** it does *not* cleanly separate covered from uncovered.
+The dermatology-adjacent band (0.43–0.57) overlaps genuine in-scope
+queries (0.5280 is real), and no single threshold can split them. That
+is a limit of similarity as a proxy, not a tuning problem.
+
+Erring toward hedging is deliberate: a false positive here adds a
+sentence of caution, unlike the grounding check where a false positive
+discards the answer.
+
+Verified against the live model: "How do I treat psoriasis?" and "How
+should I clean an abrasion?" both hedge explicitly; "What does melanoma
+look like?" (0.7751) does not.
+
+**A bug this caught, worth recording.** Rewriting the instruction block
+deleted the `RETRIEVED EVIDENCE` section outright — prompts were going
+out with no evidence at all. Two of *their* original prompt-builder
+tests failed immediately and localised it. Their tests earned their
+keep; the fix was restoring the section, not weakening the tests.
 
 ---
 
