@@ -20,6 +20,8 @@ a CV assessment is in the prompt:
 6. never prints a `compared_timestamps` value
 7. does not claim a comparison happened when verdict is NO_PRIOR_DATA
 8. when a delta is null, does not assert that feature was unchanged
+9. cites only the bracketed numbers actually supplied -- no invented
+   line ranges or section anchors
 
 Criteria 4-8 are the ones a generic RAG eval would miss entirely: they
 are about a specific patient's numbers being narrated correctly, not
@@ -79,6 +81,14 @@ _COMPARISON_CLAIMS = (
 
 # Phrases asserting a specific feature is unchanged. Checked only for
 # features whose delta is null ("could not be measured").
+# Citation forms the evidence never contains. The formatter emits
+# "[1] Source: <title>" and nothing finer, so a marker carrying a line
+# range or section anchor is fabricated precision: it reads as traceable
+# to specific lines of a source that has no line numbering. Observed in
+# the wild as the browsing-style form some instruct models were trained
+# on, e.g. "【2†L9-L13】".
+_FABRICATED_CITATION_RE = re.compile(r"【[^】]*】|\[\d+\s*[†:]\s*L\d+")
+
 _UNCHANGED_CLAIMS = {
     "size": ("size has not changed", "same size", "size is unchanged",
              "no change in size", "size remained"),
@@ -178,6 +188,12 @@ def check_answer(
     checks["8_null_not_unchanged"] = not unchanged_hits
     if unchanged_hits:
         evidence_of_failure["8_null_not_unchanged"] = unchanged_hits
+
+    # 9. citations must match the supplied [n] blocks, nothing finer
+    fabricated = _FABRICATED_CITATION_RE.findall(text)
+    checks["9_no_fabricated_citations"] = not fabricated
+    if fabricated:
+        evidence_of_failure["9_no_fabricated_citations"] = fabricated[:5]
 
     return checks
 

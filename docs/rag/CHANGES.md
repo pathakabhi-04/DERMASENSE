@@ -298,10 +298,31 @@ rule.
 
 ---
 
+## 10b. Citation format pinned ⚠️ EXTENDED (2026-09-11)
+
+**EXTENDED** — `PromptBuilder.build` now tells the model how to cite.
+
+Found in a live UI answer, not by testing: the model emitted
+`【2†L9-L13】` and `【3†L1-L8】` — browsing-style markers carrying line
+ranges. `EvidenceBundle.format_for_prompt` emits `[1] Source: <title>`
+and nothing finer, so those line numbers refer to nothing. The content
+was correctly grounded; the *citation* implied a traceability that does
+not exist, which in a medical answer is its own kind of wrong.
+
+Root cause: the prompt never said how to cite at all, so the model fell
+back on its training convention. Both prompt branches now say to use the
+supplied bracketed numbers and not to invent finer references.
+
+Gate **criterion 9** detects the fabricated form. It appeared in 0 of 5
+scripted answers but did appear in real UI use, so it is intermittent —
+the check exists because absence from one sample is not evidence.
+
+---
+
 ## 11. Phase 2 gate result
 
-With §4, §5 and §10 in place the CV-integration gate passes **5/5 on all
-eight criteria**, up from 2/5. All 53 of the collaborator's original
+With §4, §5, §10 and §10b in place the CV-integration gate passes
+**5/5 on all nine criteria**, up from 2/5 on eight. All 53 of the collaborator's original
 tests still pass, unmodified. Suite total: **99**.
 
 ---
@@ -328,4 +349,5 @@ two images and will cost more.
 | 2026-09-11 | `bc7d70b` | CV context schema + parser; fix Blockers A and B; thread `cv_context` through the pipeline |
 | 2026-09-11 | `b2841d2` | Safety-layer findings note for the collaborator; this file |
 | 2026-09-11 | `b70e8dc` | Phase 2: CV modes in the CLI, CV-integration gate, corpus false-positive measurement |
+| 2026-09-11 | `d6170b1` | CV-grounded tab in the Streamlit demo; citation format pinned; gate criterion 9 |
 | 2026-09-11 | `9a65b29` | Containment metric for CV grounding; banned-phrase check narrowed (clause-scoped); CV-8 latency measured; Phase 2 gate 5/5 |

@@ -87,7 +87,13 @@ class PromptBuilder:
         if cv_block:
             sections.append(
                 "Using only the CV assessment and the medical evidence above, "
-                "answer the user's question. Keep the two distinct: the CV "
+                "answer the user's question. "
+            "Cite evidence by its bracketed number exactly as supplied "
+            "— [1], [2], [3]. Do not invent finer-grained references "
+            "such as line numbers or section anchors: the evidence has "
+            "none, so any such reference would imply a precision that "
+            "does not exist. "
+                "Keep the two distinct: the CV "
                 "assessment describes THIS patient's photo, while the medical "
                 "evidence is general information. Do not restate the "
                 "assessment as a diagnosis, do not recompute or second-guess "
@@ -99,7 +105,13 @@ class PromptBuilder:
         else:
             sections.append(
                 "Using only the evidence above, answer the user's "
-                "question. If the evidence does not adequately address "
+                "question. "
+            "Cite evidence by its bracketed number exactly as supplied "
+            "— [1], [2], [3]. Do not invent finer-grained references "
+            "such as line numbers or section anchors: the evidence has "
+            "none, so any such reference would imply a precision that "
+            "does not exist. "
+                "If the evidence does not adequately address "
                 "the question, say so explicitly rather than filling "
                 "the gap yourself."
             )
