@@ -30,6 +30,7 @@ from sklearn.metrics import roc_auc_score
 
 from src.data.torch_dataset import CVDatasetTorch
 
+TRAIN_FEATURES = Path("analysis/scc_bcc/isic2019_train_backbone_features.npz")
 VAL_FEATURES = Path("analysis/scc_bcc/isic2019_val_backbone_features.npz")
 TEST_FEATURES = Path("analysis/scc_bcc/isic2019_test_scc_bcc_features.npz")
 OUT = Path("analysis/quality/mel_sensitivity/referral_head_result.json")
@@ -54,14 +55,19 @@ def load(split: str, path: Path):
 
 
 def main() -> None:
+    # Fit on TRAIN (18,402). Val is used only to choose the operating
+    # point, test only to report. 3,304 val samples in 2,048 dimensions
+    # was a thin regime -- this is the 5.5x version of the same fit.
+    Xtr, ytr, _ = load("train", TRAIN_FEATURES)
     Xv, yv, dv = load("val", VAL_FEATURES)
     Xt, yt, dt = load("test", TEST_FEATURES)
-    print(f"  fit on  val : {len(yv)} ({yv.sum()} refer / {(yv == 0).sum()} benign)")
+    print(f"  fit on train: {len(ytr)} ({ytr.sum()} refer / {(ytr == 0).sum()} benign)")
+    print(f"  threshold on val: {len(yv)}")
     print(f"  eval on test: {len(yt)} ({yt.sum()} refer / {(yt == 0).sum()} benign)")
     print(f"  test melanomas: {(dt == 'MEL').sum()}\n")
 
     head = LogisticRegression(max_iter=3000, C=1.0)
-    head.fit(Xv, yv)
+    head.fit(Xtr, ytr)
 
     # Operating point fixed on VAL, then applied to test unchanged.
     val_scores = head.predict_proba(Xv)[:, 1]
@@ -96,7 +102,7 @@ def main() -> None:
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({
-        "fit_split": "val", "eval_split": "test",
+        "fit_split": "train", "threshold_split": "val", "eval_split": "test",
         "threshold_chosen_on": "val", "threshold": threshold,
         "test_melanoma_routed": mel_routed,
         "test_benign_referred": benign_referred,

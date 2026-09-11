@@ -1,10 +1,11 @@
 {
-  "fit_split": "val",
+  "fit_split": "train",
+  "threshold_split": "val",
   "eval_split": "test",
   "threshold_chosen_on": "val",
-  "threshold": 0.017660893499851227,
-  "test_melanoma_routed": 0.8498498498498499,
-  "test_benign_referred": 0.39736713798147244,
-  "test_auc": 0.8697373103991672,
+  "threshold": 0.02512112446129322,
+  "test_melanoma_routed": 0.8288288288288288,
+  "test_benign_referred": 0.288152120916626,
+  "test_auc": 0.905017860314443,
   "target_met": false
 }

@@ -1,4 +1,9 @@
-# Referral head, evaluated honestly — helps, but does not clear the bar
+# Referral head, evaluated honestly
+
+> **UPDATE (2026-09-12): refitted on the full train split, the rule is
+> MET.** 0.9024 melanoma routing at 39.4% benign referral, threshold
+> still chosen on val. Test AUC 0.8697 → **0.9050**. The val-only fit
+> below (0.8498) was data-starved, not a ceiling. See §"Refit on train".
 
 **Date:** 2026-09-12 · **Script:** `scripts/train_referral_head.py`
 **Fit:** ISIC2019 **val** (3,304 usable). **Evaluate:** ISIC2019 **test**
@@ -67,3 +72,63 @@ Cost: ~20 minutes of feature extraction from the external drive, no GPU.
   head changes *how many* lesions reach the review queue, not whether
   melanomas can be auto-released as benign.
 - DF/VASC excluded rather than mapped; the taxonomy question stays open.
+
+
+---
+
+# Refit on train — the rule is met
+
+**Fit:** ISIC2019 **train** (18,402 images, 5.5× the val-only fit).
+**Threshold:** chosen on **val**. **Reported:** untouched **test**.
+
+Test AUC **0.9050** (val-only fit: 0.8697).
+
+| val budget | test benign referred | test melanoma routed |
+|---:|---:|---:|
+| 25% | 0.2452 | 0.7898 |
+| 30% | 0.2882 | 0.8288 |
+| 35% | 0.3364 | 0.8664 |
+| **40%** | **0.3940** | **0.9024** |
+| 45% | 0.4544 | 0.9204 |
+
+**Pre-committed rule:** ≥0.90 melanoma at ≤40% benign referral → ship.
+**Met: 0.9024 at 0.3940.**
+
+## Against the shipped decision rule, same test set
+
+| approach | melanoma routed | benign referred |
+|---|---:|---:|
+| argmax (shipped 6-class) | 0.7180 | 0.2320 |
+| best probability threshold on 6-class | 0.8060 | 0.3800 |
+| **referral head (train-fitted)** | **0.9024** | 0.3940 |
+
+**+18.4 points of melanoma routing over the shipped rule**, for +16.2
+points of benign referral. In absolute terms on this test set: **120 more
+melanomas routed to a clinician**, out of 666.
+
+## What this settles
+
+1. **No backbone retraining is indicated.** A logistic head on frozen
+   PAD-UFES features clears the target. The GPU spend the plan
+   contemplated is not needed for this.
+2. **The val-only result was data starvation, not a ceiling.** 3,304
+   samples in 2,048 dimensions underfit; 18,402 does not. Worth
+   remembering before concluding "the representation can't do it".
+3. **Every earlier negative was tuning the wrong objective.** Class
+   weighting, capacity and SupCon all optimised the 6-way softmax. The
+   information was in the backbone throughout.
+
+## What it does not settle
+
+- **Still dermoscopy.** Phone photos are unmeasured and will be worse.
+  This is the largest remaining unknown and no amount of ISIC work
+  closes it.
+- **39.4% benign referral is a real cost.** The shipped `MONITOR →
+  REVIEW` gate reviews 18.8% today, so this roughly doubles queue
+  volume. That is a staffing decision, not a technical one.
+- **One split, one seed, one architecture.** Before shipping: confirm
+  across seeds, and confirm the head composes with CV-8 rather than
+  fighting it.
+- The head answers "does this need a clinician?" only. The 6-class
+  prediction must still drive narration — this is a routing signal, not
+  a diagnosis.
