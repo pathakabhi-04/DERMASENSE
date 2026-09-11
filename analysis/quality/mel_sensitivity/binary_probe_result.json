@@ -1,0 +1,42 @@
+{
+  "n_hard": 78,
+  "sweep": [
+    {
+      "benign_referred": 0.1,
+      "threshold": 0.528509259223938,
+      "all_mel_recovered": 0.7597597597597597,
+      "hard_recovered": 0.3974358974358974
+    },
+    {
+      "benign_referred": 0.2,
+      "threshold": 0.13994286954402924,
+      "all_mel_recovered": 0.8618618618618619,
+      "hard_recovered": 0.5897435897435898
+    },
+    {
+      "benign_referred": 0.3,
+      "threshold": 0.04194182530045509,
+      "all_mel_recovered": 0.9069069069069069,
+      "hard_recovered": 0.7435897435897436
+    },
+    {
+      "benign_referred": 0.4,
+      "threshold": 0.01020741555839777,
+      "all_mel_recovered": 0.9519519519519519,
+      "hard_recovered": 0.8846153846153846
+    },
+    {
+      "benign_referred": 0.5,
+      "threshold": 0.0030421086121350527,
+      "all_mel_recovered": 0.975975975975976,
+      "hard_recovered": 0.9487179487179487
+    }
+  ],
+  "best_at_40pct": {
+    "benign_referred": 0.4,
+    "threshold": 0.01020741555839777,
+    "all_mel_recovered": 0.9519519519519519,
+    "hard_recovered": 0.8846153846153846
+  },
+  "signal_present": true
+}
