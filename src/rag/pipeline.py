@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from src.rag.llm.groq_adapter import LLMGenerationError
 from src.rag.prompts.prompt_builder import PromptBuilder
@@ -9,6 +10,9 @@ from src.rag.safety.grounding_check import (
     build_fallback_answer,
     run_safety_check,
 )
+
+if TYPE_CHECKING:
+    from src.rag.cv_context.schema import CVAssessmentContext
 
 
 @dataclass
@@ -47,9 +51,30 @@ class RagAnswerPipeline:
         self.prompt_builder = prompt_builder
         self.llm_adapter = llm_adapter
 
-    def answer(self, query: str) -> RagAnswer:
+    def answer(
+        self,
+        query: str,
+        cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
+    ) -> RagAnswer:
+        """
+        Answer one question, optionally grounded in a CV-8 assessment.
+
+        `cv_context` accepts a single assessment or a list: CV-8 emits
+        one per detected lesion, so a single turn can carry several
+        (spec section 20). It defaults to None so every Phase 1 caller
+        keeps working unchanged.
+
+        The CV assessment is threaded to all three downstream stages,
+        and it must reach all three or the guarantees break:
+          - the prompt, so the LLM can explain it;
+          - the safety check, so an answer grounded in the assessment
+            is recognised as grounded rather than rejected;
+          - the fallback, so the assessment still reaches the user when
+            narration fails (spec section 5.4).
+        """
+
         evidence = self.evidence_formatter.get_evidence(query)
-        prompt = self.prompt_builder.build(query, evidence)
+        prompt = self.prompt_builder.build(query, evidence, cv_context=cv_context)
 
         try:
             llm_result = self.llm_adapter.generate(
@@ -58,17 +83,19 @@ class RagAnswerPipeline:
             )
         except LLMGenerationError as error:
             return RagAnswer(
-                text=build_fallback_answer(evidence),
+                text=build_fallback_answer(evidence, cv_context=cv_context),
                 sources_line=evidence.format_sources_line(),
                 used_fallback=True,
                 fallback_reason=f"LLM generation failed: {error}",
             )
 
-        safety_result = run_safety_check(llm_result.text, evidence)
+        safety_result = run_safety_check(
+            llm_result.text, evidence, cv_context=cv_context
+        )
 
         if not safety_result.passed:
             return RagAnswer(
-                text=build_fallback_answer(evidence),
+                text=build_fallback_answer(evidence, cv_context=cv_context),
                 sources_line=evidence.format_sources_line(),
                 used_fallback=True,
                 fallback_reason=safety_result.reason,

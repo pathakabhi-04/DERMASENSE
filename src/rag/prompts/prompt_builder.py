@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from src.rag.retrieval.evidence import EvidenceBundle
+from src.rag.cv_context.schema import render_cv_context
+
+if TYPE_CHECKING:
+    from src.rag.cv_context.schema import CVAssessmentContext
 
 SYSTEM_PROMPT = (
     "You are a medical information assistant for DermaSense. You "
@@ -48,24 +53,58 @@ class PromptBuilder:
         self,
         query: str,
         evidence: EvidenceBundle,
+        cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
     ) -> AssembledPrompt:
+        """
+        Assemble the prompt. `cv_context` is optional, so every Phase 1
+        caller keeps working unchanged.
+
+        The generation approach does NOT change when CV context arrives
+        (spec section 4.3): the system prompt is untouched, and the CV
+        assessment is added as one more category of supplied evidence
+        the LLM may explain but never originate. That is precisely why
+        the context objects are kept separate and combined only here
+        (spec section 19).
+        """
+
         if not query.strip():
             raise ValueError(
                 "Query cannot be empty."
             )
 
-        user_prompt = (
-            f"USER QUESTION:\n{query.strip()}\n"
-            "\n"
-            f"RETRIEVED EVIDENCE:\n{evidence.format_for_prompt()}\n"
-            "\n"
-            "Using only the evidence above, answer the user's "
-            "question. If the evidence does not adequately address "
-            "the question, say so explicitly rather than filling "
-            "the gap yourself."
+        cv_block = render_cv_context(cv_context)
+
+        sections = [f"USER QUESTION:\n{query.strip()}"]
+
+        if cv_block:
+            sections.append(cv_block)
+
+        sections.append(
+            f"RETRIEVED MEDICAL EVIDENCE (general information, not about "
+            f"this patient):\n{evidence.format_for_prompt()}"
         )
+
+        if cv_block:
+            sections.append(
+                "Using only the CV assessment and the medical evidence above, "
+                "answer the user's question. Keep the two distinct: the CV "
+                "assessment describes THIS patient's photo, while the medical "
+                "evidence is general information. Do not restate the "
+                "assessment as a diagnosis, do not recompute or second-guess "
+                "any of its values, and do not introduce figures it does not "
+                "contain. If the evidence does not adequately address the "
+                "question, say so explicitly rather than filling the gap "
+                "yourself."
+            )
+        else:
+            sections.append(
+                "Using only the evidence above, answer the user's "
+                "question. If the evidence does not adequately address "
+                "the question, say so explicitly rather than filling "
+                "the gap yourself."
+            )
 
         return AssembledPrompt(
             system_prompt=SYSTEM_PROMPT,
-            user_prompt=user_prompt,
+            user_prompt="\n\n".join(sections),
         )
