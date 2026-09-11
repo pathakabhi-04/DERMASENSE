@@ -144,6 +144,64 @@ met, and this is worth a decision rather than drift.
 
 We'd lean 1. But it's your check and your risk call.
 
+### Decisive evidence: 25% of your own corpus fails this check
+
+After writing the above we ran the check over the indexed corpus
+itself. **39 of 156 chunks (25%) contain a sentence that trips the
+banned-phrase rule** — authoritative AAD / NCI / MedlinePlus text, the
+very evidence the system exists to ground answers in:
+
+```
+[AAD_BASAL_CELL_CARCINOMA_001]  "you have" + "basal cell carcinoma"
+   "A dermatologist can tell you if you have basal cell carcinoma and
+    if you do, what treatment is recommended."
+
+[NCI_MOLES_MELANOMA_001]        "diagnosed with" + "melanoma"
+   "in 2017-2018, the lifetime risk of being diagnosed with melanoma
+    was 2.9% (1 in 34) for White people but 0.1% (1 in 1,000)..."
+
+[AAD_ACTINIC_KERATOSIS_SYMPTOMS_001]  "you have" + "skin cancer"
+   "Should that change be an AK, you have a greater risk of developing
+    skin cancer."
+
+[AAD_MOLE_PROBLEM_001]          "you have" + "mole"
+   "If you have a raised mole on skin that you shave, you may nick the
+    mole, causing it to bleed."
+```
+
+None of these is a diagnostic claim. Two are conditionals, one is an
+epidemiological statistic, one is advice about shaving. The rule cannot
+distinguish "a dermatologist can tell you **if** you have X" from "you
+have X".
+
+Three consequences worth weighing:
+
+1. **A faithful constrained paraphrase inherits the phrasing.** An LLM
+   asked to explain a chunk that says "a dermatologist can tell you if
+   you have basal cell carcinoma" will quite reasonably reuse that
+   construction — and be rejected for accurately paraphrasing the
+   evidence it was given. The check penalises the behaviour the
+   architecture asks for.
+
+2. **The fallback can contain what the check rejected.** The fallback
+   renders retrieved evidence verbatim, so an answer rejected for a
+   banned phrase may be replaced by corpus text carrying the same
+   phrasing. Whatever the rule is protecting against, this path isn't
+   protected.
+
+3. **This is the real source of the temperature variance in your
+   §0.1.** Not sampling noise in the abstract — the model is drawing on
+   source text that is 25% "unsafe" by this rule, so whether a given
+   generation trips it is close to a coin flip on phrasing.
+
+This moves our recommendation from "lean option 1" to **option 1 is the
+one worth doing**: requiring the condition name to fall within a few
+tokens *after* the certainty phrase would clear every example above
+while still catching "you have a basal cell carcinoma". It stays
+deterministic and needs no model call.
+
+We have measured this but not changed it. Still your call.
+
 ### One related note
 
 We suspect this is also the real story behind your §0.1 decision to

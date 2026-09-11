@@ -55,3 +55,6 @@ artifacts/
 data/rag/raw/
 data/rag/processed/
 data/rag/indexes/
+
+# RAG evaluation outputs (regenerate with: python -m src.rag.evaluate_cv_integration)
+evaluation/rag/

@@ -155,7 +155,52 @@ is shown.
 
 ---
 
-## 7. Tests ADDED
+## 7. Phase 2 tooling (2026-09-11)
+
+**EXTENDED** — `src/rag/cli.py`. Their Phase 1 modes are untouched;
+added `--cv-fixture N`, `--cv-json PATH`, `--cv-all`. CV context is
+resolved *before* the embedding model loads, so a bad fixture index or
+malformed payload fails in ~4s instead of after a model load. The
+interactive REPL keeps the CV context across turns.
+
+**ADDED** — `src/rag/evaluate_cv_integration.py`, the Phase 2 gate
+(§28 Step 5's analogue of their §6 Phase 1 gate). Eight binary criteria
+per answer against the real pipeline and real Groq:
+
+| # | Criterion |
+|---|---|
+| 1 | no fallback |
+| 2 | cites a real retrieved source |
+| 3 | no banned-phrase diagnostic claim |
+| 4 | states the CALIBRATED confidence, never the raw softmax |
+| 5 | never states `magnitude` or a per-feature delta numerically |
+| 6 | never prints a `compared_timestamps` value |
+| 7 | claims no comparison when verdict is `NO_PRIOR_DATA` |
+| 8 | never narrates a null delta as "unchanged" |
+
+Criteria 4–8 are the CV-specific ones a generic RAG eval would miss:
+they check that a particular patient's numbers are narrated correctly,
+not that the prose is fluent. Answers are written to
+`evaluation/rag/cv_integration_answers.json` so a failure is
+diagnosable without re-running five LLM calls.
+
+**Current result: 4/5, GATE FAIL.** Criteria 2, 4, 5, 6, 7, 8 pass 5/5.
+The single failing answer trips criterion 3 (banned phrase) and
+therefore 1 (fallback) — the known, unfixed issue in §8 below, not a CV
+contract problem.
+
+**A gate bug found and fixed during bring-up, worth recording:**
+criterion 7 initially matched the bare phrase "since the previous
+photo", which is the *label* of a line in `render_cv_context`'s own
+output — and the fallback embeds that render verbatim. The gate was
+failing its own text. It now strips the supplied CV block and matches
+only comparison *outcome* assertions. Re-checked against the same saved
+answers: 7 and 8 went from 3/5 and 4/5 to 5/5 with no new LLM calls,
+confirming those were harness bugs rather than model errors.
+
+---
+
+## 8. Tests ADDED
 
 - `src/rag/cv_context/test_parser.py` — 21 tests including §26 Tests
   1–7, run against the **real** v1.1 fixtures rather than hand-written
@@ -168,12 +213,12 @@ Suite: **90 pass**, up from their 53. None of their 53 were modified.
 
 ---
 
-## 8. NOT CHANGED — considered and left alone
+## 9. NOT CHANGED — considered and left alone
 
 | Thing | Why |
 |---|---|
 | `SYSTEM_PROMPT` | §4.3; already written for CV context |
-| Banned-phrase check | Fires on 1/5 good CV answers, but §5 deliberately chose over-flagging. Narrowing a safety check is their call — raised in `../rag_safety_findings.md` with three ranked options |
+| Banned-phrase check | Fires on 1–2 of 5 good CV answers, and **39 of 156 corpus chunks (25%) would fail it themselves** — including "A dermatologist can tell you if you have basal cell carcinoma" and NCI lifetime-risk statistics. So a faithful paraphrase of the evidence inherits the phrasing and is rejected for it, and the fallback can contain what the check rejected. §5 deliberately chose over-flagging, so narrowing it is their call — raised in `../rag_safety_findings.md`, which now recommends the syntactic-proximity fix outright |
 | Jaccard similarity metric | Thin margins argue for containment, but swapping the metric is a semantic decision — raised, not taken |
 | `_SENTENCE_SPLIT_RE` | Hypothesised as the banned-phrase cause; **tested and disproved** — a newline-aware splitter flags the identical cases. Recorded so nobody retries it |
 | `EvidenceFormatter`, retriever, index, chunking, embeddings | Correct as delivered; §7 rightly defers optimization |
@@ -189,4 +234,5 @@ Suite: **90 pass**, up from their 53. None of their 53 were modified.
 |---|---|---|
 | 2026-09-11 | `4e01036` | Import RAG baseline; verify it runs here |
 | 2026-09-11 | `5d8f580` | CV context schema + parser; fix Blockers A and B; thread `cv_context` through the pipeline |
-| 2026-09-11 | `02f12b7` | Safety-layer findings note for the collaborator; this file |
+| 2026-09-11 | `5fb3aa0` | Safety-layer findings note for the collaborator; this file |
+| 2026-09-11 | (this commit) | Phase 2: CV modes in the CLI, CV-integration gate, corpus false-positive measurement |
