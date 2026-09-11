@@ -128,11 +128,13 @@ class TemporalPipeline:
 
     def assess_pair(
         self,
-        earlier_image_bgr: np.ndarray,
+        earlier_image_bgr: np.ndarray | None,
         later_image_bgr: np.ndarray,
         *,
         earlier_timestamp: str | None = None,
         later_timestamp: str | None = None,
+        earlier_measurement: LesionMeasurement | None = None,
+        earlier_calibration: RulerCalibration | None = None,
     ) -> TemporalResult:
         """
         Assess temporal change between two images of the SAME lesion.
@@ -141,11 +143,42 @@ class TemporalPipeline:
         visit time -- this method does not infer which came first.
         Timestamps are opaque passthrough strings for the JSON contract
         (e.g. ISO dates); they play no role in the measurement itself.
+
+        ## Reusing the earlier visit's measurement
+
+        Supply `earlier_measurement` (and its `earlier_calibration`) to
+        skip re-measuring the prior image, in which case
+        `earlier_image_bgr` may be None.
+
+        The prior image was already segmented and measured at its own
+        visit, so re-measuring it is pure repeated work: ~0.5s of a
+        ~2.2s returning-visit request on CPU. Reuse is bit-identical to
+        re-measuring -- same verdict, same magnitude, same per-feature
+        deltas -- because `compute_delta` consumes only the two
+        measurements and never the pixels. That is what makes this a
+        pure optimisation rather than an approximation.
         """
-        self._validate(earlier_image_bgr, "earlier_image_bgr")
         self._validate(later_image_bgr, "later_image_bgr")
 
-        earlier_measurement, earlier_calibration = self._measure(earlier_image_bgr)
+        if earlier_measurement is None:
+            if earlier_image_bgr is None:
+                raise ValueError(
+                    "assess_pair needs either earlier_image_bgr or "
+                    "earlier_measurement; neither was supplied."
+                )
+            self._validate(earlier_image_bgr, "earlier_image_bgr")
+            earlier_measurement, earlier_calibration = self._measure(earlier_image_bgr)
+        elif earlier_calibration is None:
+            # The measurement already encodes whether real-unit fields were
+            # available; a placeholder here keeps the audit fields populated
+            # without claiming a calibration that was never re-run.
+            earlier_calibration = RulerCalibration(
+                px_per_mm=None,
+                confident=False,
+                num_ticks_detected=0,
+                reason="reused cached measurement; calibration not re-run",
+            )
+
         later_measurement, later_calibration = self._measure(later_image_bgr)
 
         delta: LesionDelta = compute_delta(earlier_measurement, later_measurement)

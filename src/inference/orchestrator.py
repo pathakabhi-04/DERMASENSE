@@ -100,6 +100,8 @@ from src.quality.capture_guidance import (
 from src.quality.signals import blur_signal, contrast_signal
 from src.risk.action_mapping import ProductAction
 from src.risk.convergence import RiskAssessment, assess_risk
+from src.temporal.calibration import RulerCalibration
+from src.temporal.measurement import LesionMeasurement
 from src.risk.safety_gate import GateDecision
 from src.routing.classifier import load_router_checkpoint
 from src.routing.classifier import route_image as route_image_classifier
@@ -238,6 +240,13 @@ class PipelineResult:
     candidates: tuple[CandidateResult, ...] = ()
     suggestions: tuple[CaptureSuggestion, ...] = ()
 
+    # This visit's own lesion measurement, populated only when
+    # `predict(measure_current=True)` asked for it. A caller that stores
+    # it can pass it back as `prior_measurement` next visit and skip
+    # re-measuring this image then -- see `DermaSensePipeline.predict`.
+    current_measurement: LesionMeasurement | None = None
+    current_calibration: RulerCalibration | None = None
+
     @property
     def assessed(self) -> bool:
         return self.outcome is PipelineOutcome.ASSESSED
@@ -290,7 +299,7 @@ class PipelineResult:
 
 
 def _resolve_temporal_pairing(
-    num_candidates: int, prior_image_bgr: np.ndarray | None
+    num_candidates: int, prior_evidence: Any | None
 ) -> tuple[bool, str | None]:
     """
     Decide whether CV-7 temporal pairing should run for this predict()
@@ -298,12 +307,17 @@ def _resolve_temporal_pairing(
     without checkpoints -- see module docstring's "CV-7/CV-8 wiring"
     section for the reasoning.
 
+    `prior_evidence` is whatever represents a previous visit: the prior
+    image, or that visit's cached `LesionMeasurement`. Only its presence
+    matters here, never its type -- the two are interchangeable as far
+    as "is there something to compare against" is concerned.
+
     Returns (should_pair, skip_reason). skip_reason is None whenever
-    should_pair is True OR no prior image was supplied at all (nothing
-    to explain); it is set only when a prior image WAS supplied but
+    should_pair is True OR no prior visit was supplied at all (nothing
+    to explain); it is set only when a prior visit WAS supplied but
     pairing couldn't be applied, so CV-8 can record why.
     """
-    if prior_image_bgr is None:
+    if prior_evidence is None:
         return False, None
     if num_candidates != 1:
         return False, "PRIOR_IMAGE_PAIRING_AMBIGUOUS"
@@ -588,6 +602,9 @@ class DermaSensePipeline:
         prior_image_bgr: np.ndarray | None = None,
         prior_timestamp: str | None = None,
         current_timestamp: str | None = None,
+        prior_measurement: LesionMeasurement | None = None,
+        prior_calibration: RulerCalibration | None = None,
+        measure_current: bool = False,
     ) -> PipelineResult:
         """
         Run the full pipeline on one BGR image (as cv2.imread returns).
@@ -596,7 +613,25 @@ class DermaSensePipeline:
         SAME lesion -- finding it is the caller's job (a lesion-history
         store this pipeline doesn't own), not this method's. It is only
         actually compared (CV-7) when this image has exactly one
-        candidate; see `_resolve_temporal_pairing`. `lesion_id`
+        candidate; see `_resolve_temporal_pairing`.
+
+        `prior_measurement` is the previous visit's own measurement, as
+        returned to the caller then. Supplying it skips re-measuring the
+        prior image -- about 0.5s of a 2.2s returning-visit request on
+        CPU -- and is bit-identical to re-measuring, because the delta is
+        computed from the two measurements and never from the pixels.
+        When it is supplied, `prior_image_bgr` is not needed at all.
+
+        `measure_current=True` returns this visit's own measurement on
+        the result, so the caller can store it and supply it as
+        `prior_measurement` next time. It is free when a temporal
+        comparison ran (that path already measured this image) and costs
+        one measurement pass (~0.5s on CPU) when it did not -- i.e. on a
+        first visit, which is the cheap request anyway. The trade is
+        deliberate: it moves work off the expensive returning-visit path
+        onto the cheap first-visit one, lowering the worst case.
+
+        `lesion_id`
         identifies that lesion for CV-8's output and for pairing; with
         no lesion_id and no ambiguity, one is synthesized per candidate.
         """
@@ -637,8 +672,13 @@ class DermaSensePipeline:
                 for box, conf in detections
             ]
 
+        # A cached prior measurement stands in for the prior image: both
+        # mean "a previous visit is available to compare against".
+        prior_available = (
+            prior_image_bgr if prior_image_bgr is not None else prior_measurement
+        )
         should_pair, skip_reason = _resolve_temporal_pairing(
-            len(candidate_boxes), prior_image_bgr
+            len(candidate_boxes), prior_available
         )
         temporal_result = None
         if should_pair:
@@ -647,6 +687,8 @@ class DermaSensePipeline:
                 image_bgr,
                 earlier_timestamp=prior_timestamp,
                 later_timestamp=current_timestamp,
+                earlier_measurement=prior_measurement,
+                earlier_calibration=prior_calibration,
             )
 
         candidates = tuple(
@@ -662,10 +704,25 @@ class DermaSensePipeline:
             for index, (box_norm, confidence) in enumerate(candidate_boxes)
         )
 
+        current_measurement = None
+        current_calibration = None
+        if measure_current:
+            if temporal_result is not None:
+                # Already measured inside the comparison -- reuse it
+                # rather than paying for a second identical pass.
+                current_measurement = temporal_result.later_measurement
+                current_calibration = temporal_result.later_calibration
+            else:
+                current_measurement, current_calibration = (
+                    self.temporal_pipeline._measure(image_bgr)
+                )
+
         return PipelineResult(
             outcome=PipelineOutcome.ASSESSED,
             quality=quality,
             framing=framing,
             candidates=candidates,
             suggestions=suggestions,
+            current_measurement=current_measurement,
+            current_calibration=current_calibration,
         )

@@ -138,6 +138,9 @@ class FixtureReproductionTests(unittest.TestCase):
         self.assertTrue(body["assessed"])
         self.assertEqual(body["num_assessments"], 1)
         self.assertEqual(body["assessments"][0], expected)
+        # The token is envelope-level metadata, never inside the contract.
+        self.assertNotIn("measurement", body["assessments"][0])
+        self.assertIsNotNone(body["measurement"])
 
     def test_returning_visit_with_prior_image_matches(self):
         expected = self.fixtures[1]["payload"]
@@ -163,6 +166,52 @@ class FixtureReproductionTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["assessments"][0], expected)
+
+    def test_cached_measurement_reproduces_the_same_assessment(self):
+        """
+        Reusing the prior visit's measurement must be bit-identical to
+        re-measuring its image. If it ever diverges, the optimisation has
+        silently become an approximation of a temporal verdict.
+        """
+        expected = self.fixtures[1]["payload"]
+        source = self.fixtures[1]["source"]
+
+        with zipfile.ZipFile(UQ_ZIP) as zf:
+            earlier = cv2.imdecode(
+                np.frombuffer(zf.read(source["earlier"]), np.uint8), cv2.IMREAD_COLOR)
+            later = cv2.imdecode(
+                np.frombuffer(zf.read(source["later"]), np.uint8), cv2.IMREAD_COLOR)
+
+        # Visit 1: measure the earlier image, keep the token.
+        first = self.client.post(
+            "/assess", files={"image": ("earlier.png", _png(earlier), "image/png")})
+        token = first.json()["measurement"]
+        self.assertIsNotNone(token, "first visit must hand back a token")
+
+        # Visit 2: send the token instead of the prior image.
+        second = self.client.post(
+            "/assess",
+            files={"image": ("later.png", _png(later), "image/png")},
+            data={
+                "lesion_id": expected["lesion_id"],
+                "prior_timestamp": source["earlier"].rsplit("/", 1)[-1],
+                "current_timestamp": source["later"].rsplit("/", 1)[-1],
+                "prior_measurement": json.dumps(token),
+            },
+        )
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(second.json()["assessments"][0], expected)
+
+    def test_malformed_prior_measurement_is_rejected_loudly(self):
+        image = cv2.imread(str(REPO_ROOT / self.pad_row["image_path"]))
+        for bad in ('{"measurement": {"valid": true}}', "not json", '["a"]'):
+            with self.subTest(bad=bad):
+                response = self.client.post(
+                    "/assess",
+                    files={"image": ("c.png", _png(image), "image/png")},
+                    data={"prior_measurement": bad},
+                )
+                self.assertEqual(response.status_code, 400)
 
     def test_response_parses_with_the_rag_side_parser(self):
         """The endpoint's output must satisfy the consumer that exists."""

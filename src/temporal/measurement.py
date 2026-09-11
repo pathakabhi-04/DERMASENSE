@@ -45,6 +45,71 @@ class LesionMeasurement:
     diameter_mm: float | None
     area_mm2: float | None
 
+    def to_dict(self) -> dict:
+        """
+        Serialise for reuse at a later visit.
+
+        Measuring an image costs ~0.5s, and a returning visit would
+        otherwise re-measure a prior image that was already measured at
+        its own visit. Handing this back to the caller lets them return
+        it next time instead, which is bit-identical to re-measuring
+        (verified: same verdict, same magnitude, same per-feature deltas)
+        and removes the work entirely.
+        """
+
+        return {
+            "valid": self.valid,
+            "reason": self.reason,
+            "area_fraction": self.area_fraction,
+            "compactness": self.compactness,
+            "mean_lab": list(self.mean_lab) if self.mean_lab is not None else None,
+            "diameter_mm": self.diameter_mm,
+            "area_mm2": self.area_mm2,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "LesionMeasurement":
+        """
+        Rebuild from `to_dict`. Raises ValueError on anything malformed:
+        this value arrives from outside the process and feeds a temporal
+        comparison, so a silently-defaulted field would produce a real
+        verdict from fabricated evidence.
+        """
+
+        if not isinstance(data, dict):
+            raise ValueError(
+                f"measurement must be an object, got {type(data).__name__}"
+            )
+
+        missing = {
+            "valid", "reason", "area_fraction", "compactness",
+            "mean_lab", "diameter_mm", "area_mm2",
+        } - set(data)
+        if missing:
+            raise ValueError(
+                f"measurement is missing key(s): {', '.join(sorted(missing))}"
+            )
+
+        lab = data["mean_lab"]
+        if lab is not None:
+            if not isinstance(lab, (list, tuple)) or len(lab) != 3:
+                raise ValueError(f"mean_lab must be 3 numbers or null, got {lab!r}")
+            lab = tuple(float(v) for v in lab)
+
+        def _opt(key: str) -> float | None:
+            value = data[key]
+            return None if value is None else float(value)
+
+        return cls(
+            valid=bool(data["valid"]),
+            reason=str(data["reason"]),
+            area_fraction=_opt("area_fraction"),
+            compactness=_opt("compactness"),
+            mean_lab=lab,
+            diameter_mm=_opt("diameter_mm"),
+            area_mm2=_opt("area_mm2"),
+        )
+
 
 def _largest_component_mask(mask: np.ndarray) -> np.ndarray | None:
     """

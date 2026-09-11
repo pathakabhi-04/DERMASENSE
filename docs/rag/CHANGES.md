@@ -391,6 +391,64 @@ grounded answer — runs in ~4.6s for a returning visit.
 
 ---
 
+## 14. Prior-measurement caching (2026-09-11)
+
+**ADDED** — a returning visit re-segmented and re-measured the prior
+image, which had already been measured at its own visit. That is ~0.5s
+of repeated work per request on CPU.
+
+`TemporalPipeline.assess_pair` now accepts `earlier_measurement`
+instead of `earlier_image_bgr`; `predict()` takes `prior_measurement`
+and, with `measure_current=True`, returns this visit's own measurement;
+`/assess` hands that back as an opaque `measurement` token on the
+envelope and accepts it as `prior_measurement`.
+
+**It is an optimisation, not an approximation** — verified bit-identical,
+including after a JSON round-trip: same verdict, same magnitude to nine
+decimal places, same per-feature deltas. `compute_delta` consumes the
+two measurements and never the pixels, which is what makes reuse exact.
+A test asserts a cached returning visit reproduces the delivered fixture
+payload exactly, so a future divergence fails loudly.
+
+**Stateless by design.** The token round-trips through the caller, so
+"who owns lesion history" (Section A question 4) does not have to be
+answered to get the speedup.
+
+A malformed token is a 400, never ignored: it feeds a real temporal
+verdict, so a partially-defaulted measurement would yield a
+confident-looking comparison against fabricated evidence — worse than
+no comparison, which the contract already represents honestly as
+`NO_PRIOR_DATA`.
+
+**The measurement token is envelope-level, not inside an assessment.**
+It describes the image rather than any one lesion, and keeping it out
+preserves the property that assessments match
+`docs/cv8_sample_outputs/` byte-for-byte. The fixture test caught this
+when it was first placed wrongly.
+
+### Result — and why the answer depends on image size
+
+| request shape | 624×624 photo | 6000×4000 archival |
+|---|---|---|
+| first visit (returns token) | 1.25s | 2.05s |
+| returning, prior image uploaded | 1.76s | 2.89s |
+| returning, cached token | **1.23s** | 2.06s |
+| **worst case** | **1.25s — passes** | 2.06s — fails |
+
+29% better on both. But the earlier benchmarks used 24-megapixel
+dermoscopic archive images, which no phone produces; on realistic photo
+sizes the worst case clears the 2.0s bar with room.
+
+Profiling also corrected two guesses: ruler calibration is ~1% of
+measurement time (not a cost worth removing), and segmentation is
+78–92% at ~0.54s, essentially fixed on CPU without a smaller model.
+
+**So the sync/async question is really an image-size question**, and
+that is a product decision — client-side downscaling before upload is
+standard practice and saves bandwidth anyway.
+
+---
+
 ## Change log
 
 | Date | Commit | Change |

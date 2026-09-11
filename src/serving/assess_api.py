@@ -56,8 +56,12 @@ import cv2
 import numpy as np
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
+import json
+
 from src.inference.orchestrator import DermaSensePipeline, PipelineOutcome
 from src.risk.convergence import CONTRACT_VERSION
+from src.temporal.calibration import RulerCalibration
+from src.temporal.measurement import LesionMeasurement
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +134,69 @@ def _decode(upload: UploadFile, raw: bytes, field: str) -> np.ndarray:
     return image
 
 
+def _parse_prior_measurement(
+    raw: str | None,
+) -> tuple[LesionMeasurement | None, RulerCalibration | None]:
+    """
+    Parse a `prior_measurement` token supplied by the caller.
+
+    Rejected loudly rather than ignored. This value arrives from outside
+    the process and feeds a real temporal verdict, so a malformed or
+    partially-defaulted measurement would produce a confident-looking
+    comparison against fabricated evidence -- worse than no comparison,
+    which the contract already represents honestly as NO_PRIOR_DATA.
+    """
+
+    if not raw:
+        return None, None
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise HTTPException(400, f"'prior_measurement' is not valid JSON: {error}")
+
+    if not isinstance(payload, dict):
+        raise HTTPException(
+            400,
+            "'prior_measurement' must be the object this endpoint returned, "
+            f"got {type(payload).__name__}.",
+        )
+
+    try:
+        measurement = LesionMeasurement.from_dict(payload.get("measurement", payload))
+        calibration = (
+            RulerCalibration.from_dict(payload["calibration"])
+            if isinstance(payload.get("calibration"), dict)
+            else None
+        )
+    except ValueError as error:
+        raise HTTPException(400, f"'prior_measurement' is malformed: {error}")
+
+    return measurement, calibration
+
+
+def _measurement_token(result: Any) -> dict[str, Any] | None:
+    """
+    The opaque token a caller stores and returns at the next visit.
+
+    None when this image could not be measured, which is honest rather
+    than unhelpful: a fabricated token would produce a confident-looking
+    comparison next visit against evidence that was never computed.
+    """
+
+    if result.current_measurement is None:
+        return None
+
+    return {
+        "measurement": result.current_measurement.to_dict(),
+        "calibration": (
+            result.current_calibration.to_dict()
+            if result.current_calibration is not None
+            else None
+        ),
+    }
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     """Liveness plus whether the checkpoints finished loading."""
@@ -150,6 +217,14 @@ async def assess(
     lesion_id: str | None = Form(None),
     prior_timestamp: str | None = Form(None),
     current_timestamp: str | None = Form(None),
+    prior_measurement: str | None = Form(
+        None,
+        description=(
+            "The `measurement` object this endpoint returned at the previous "
+            "visit, as JSON. Supplying it makes `prior_image` unnecessary and "
+            "removes ~0.5s from the request."
+        ),
+    ),
 ) -> dict[str, Any]:
     """
     Assess one image, optionally against a previous visit's photo.
@@ -161,6 +236,25 @@ async def assess(
     `*_timestamp` are opaque passthrough. CV-7 never parses them and
     does not require them to be dates; they reappear verbatim in
     `temporal.compared_timestamps`.
+
+    ## Reusing the previous visit's measurement
+
+    Each assessment comes back with a `measurement` object. Store it,
+    and send it as `prior_measurement` at the next visit instead of
+    re-uploading the previous photo. The prior image was already
+    segmented and measured then, so re-measuring it is repeated work:
+    ~0.5s of a ~2.2s returning-visit request on CPU.
+
+    It is bit-identical to re-measuring -- same verdict, same magnitude,
+    same per-feature deltas -- because the delta is computed from the two
+    measurements and never from the pixels. Treat the object as opaque:
+    send back exactly what you were given, unmodified.
+
+    This deliberately keeps the service stateless. Who owns lesion
+    history is still an open question (docs/build_on_baseline_1.md
+    Section A, question 4), and round-tripping the measurement through
+    the caller means that question does not have to be answered to get
+    the speedup.
 
     Returns one assessment per detected lesion -- zero, one, or several.
     """
@@ -175,14 +269,24 @@ async def assess(
     if prior_image is not None and prior_image.filename:
         prior_bgr = _decode(prior_image, await prior_image.read(), "prior_image")
 
+    cached_measurement, cached_calibration = _parse_prior_measurement(prior_measurement)
+
     result = pipeline.predict(
         image_bgr,
         lesion_id=lesion_id,
         prior_image_bgr=prior_bgr,
         prior_timestamp=prior_timestamp,
         current_timestamp=current_timestamp,
+        prior_measurement=cached_measurement,
+        prior_calibration=cached_calibration,
+        measure_current=True,
     )
 
+    # The assessment objects stay the locked contract, untouched: the
+    # measurement token is transport-level metadata, and it describes the
+    # IMAGE rather than any one lesion, so it belongs on the envelope.
+    # Putting it inside an assessment would also break the property that
+    # these match docs/cv8_sample_outputs/ exactly.
     assessments = [
         candidate.risk_assessment.to_dict()
         for candidate in result.candidates
@@ -200,4 +304,7 @@ async def assess(
             "usable": result.quality.usable,
             "score": result.quality.quality_score,
         },
+        # Store this and send it back as `prior_measurement` next visit.
+        # Opaque: return exactly what you were given.
+        "measurement": _measurement_token(result),
     }

@@ -57,6 +57,39 @@ class RulerCalibration:
     num_ticks_detected: int
     reason: str
 
+    def to_dict(self) -> dict:
+        """Serialise alongside the measurement it produced."""
+
+        return {
+            "px_per_mm": self.px_per_mm,
+            "confident": self.confident,
+            "num_ticks_detected": self.num_ticks_detected,
+            "reason": self.reason,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "RulerCalibration":
+        """Rebuild from `to_dict`; raises ValueError on anything malformed."""
+
+        if not isinstance(data, dict):
+            raise ValueError(
+                f"calibration must be an object, got {type(data).__name__}"
+            )
+
+        missing = {"px_per_mm", "confident", "num_ticks_detected", "reason"} - set(data)
+        if missing:
+            raise ValueError(
+                f"calibration is missing key(s): {', '.join(sorted(missing))}"
+            )
+
+        px = data["px_per_mm"]
+        return cls(
+            px_per_mm=None if px is None else float(px),
+            confident=bool(data["confident"]),
+            num_ticks_detected=int(data["num_ticks_detected"]),
+            reason=str(data["reason"]),
+        )
+
     def mm_per_pixel(self) -> float | None:
         if self.px_per_mm is None:
             return None
