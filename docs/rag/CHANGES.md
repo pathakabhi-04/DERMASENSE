@@ -333,11 +333,61 @@ Not a RAG change, recorded because it unblocks the delivery mechanism.
 `scripts/measure_cv8_latency.py` measures `DermaSensePipeline.predict()`
 against a pre-committed rule (p50 < 2.0s → build the sync endpoint).
 
-Result on CPU, 8 warm runs on real PAD-UFES images: **p50 0.52s**
-(min 0.48s, max 0.64s), cold 0.53s, startup 8.7s amortised.
-**Decision: a synchronous HTTP endpoint is viable.** Caveat: no prior
-image in this run, so CV-7 did not execute; a returning visit segments
-two images and will cost more.
+**Corrected 2026-09-11 — the first measurement was incomplete.** It
+timed only first visits (one image, CV-7 idle) and reported p50 0.52s,
+concluding sync was viable. Measuring the returning-visit path — prior
+image supplied, so two segmentations plus CV-7, which is the shape CV-7
+exists for — gives **p50 2.46s, 4.9× slower and over the 2.0s bar**.
+
+| Request shape | p50 (CPU) | vs the 2.0s rule |
+|---|---|---|
+| First visit | 0.50s | passes |
+| **Returning visit** | **2.46s** | **fails** |
+
+End-to-end over HTTP, a returning visit plus its RAG answer measured
+**~4.6s** wall clock (CV 2.5s + RAG 2.1s).
+
+**So sync is NOT settled.** Per the rule fixed before measuring, the
+sync-vs-async question goes back to the RAG side with this number. The
+endpoint below is built and works, but that decision is theirs and is
+open. The script now measures both shapes, because measuring only the
+cheap path is how a latency budget gets set on the wrong number.
+
+---
+
+## 13. `POST /assess` — the live feed (2026-09-11)
+
+**ADDED** — `src/serving/assess_api.py`, a FastAPI transport layer over
+`DermaSensePipeline.predict()`. No new CV logic; every field comes from
+`RiskAssessment.to_dict()` unchanged.
+
+Built to `docs/build_on_baseline_1.md` Section A, including its
+"explicitly not now" list, which is honoured in full: no auth, rate
+limiting, scaling, retry/queue, streaming, TLS, or observability. Where
+it runs remains an infra decision and is still open.
+
+- Checkpoints load once at startup (~9s), never per request.
+- `POST /assess` — multipart `image`, optional `prior_image`, optional
+  `lesion_id` / `prior_timestamp` / `current_timestamp`.
+- Returns one assessment per detected lesion: zero, one, or several.
+- An undecodable upload is **400**, not a 500 with
+  `TypeError: image_bgr must be a numpy.ndarray`.
+- A non-ASSESSED outcome returns **200** with `assessed=false`, an empty
+  list and the reason named. The orchestrator is explicit that
+  `QUALITY_REJECTED` / `NO_CANDIDATES` must not read as "we looked and
+  it was fine", so an empty success can never be mistaken for "no risk".
+
+**Verified against Section A's own acceptance criterion (item 3):**
+`tests/test_assess_api.py` posts the same real images and asserts the
+response equals the delivered fixture payloads exactly — which is what
+proves this is transport and not a second implementation of the
+contract. The response is also parsed by the RAG side's own parser in
+the same test. 9 tests; checkpoint-backed ones skip when the weights or
+the dataset volume are unavailable.
+
+Live over HTTP: first visit **0.54s** end-to-end, matching the p50, so
+the transport layer adds nothing measurable. Full loop — HTTP → parser →
+grounded answer — runs in ~4.6s for a returning visit.
 
 ---
 
