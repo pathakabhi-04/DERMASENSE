@@ -5,8 +5,14 @@ collaborator delivered, so the two trees can be reconciled without
 archaeology. **Append to this file with every further change.**
 
 **Baseline received:** `rag_baseline.zip`, 2026-09-11, 155 files,
-equivalent to `origin/rag-development` @ `2dcbc8d`.
-**Working branch:** `rag-integration` (off `cv8-contract-v1.1`, off `main`).
+verified content-identical to `origin/rag-development` @ `2dcbc8d`
+(`git diff --ignore-cr-at-eol` was empty; the zip differed only in line
+endings).
+**Working branch:** `integration`.
+**Integration point:** `84d8b5a`, tagged `integration-v1` — a two-parent
+merge of the CV baseline (`d55cff7`, carrying contract v1.1) and the RAG
+baseline (`2dcbc8d`). Everything before it belongs to one baseline;
+everything after is integration work.
 
 **Section references** ("§4.3") are to
 `RAG_EVOLUTION_AND_CV_INTEGRATION_STRATEGY_v2.md` unless stated otherwise.
@@ -24,15 +30,30 @@ equivalent to `origin/rag-development` @ `2dcbc8d`.
 
 ---
 
-## 1. Import scope (2026-09-11, `4e01036`)
+## 1. How the RAG side arrived (`84d8b5a`)
 
-**ADDED** — `src/rag/**` and `data/rag/**`, imported verbatim.
+**MERGED** — the RAG baseline enters as a genuine two-parent merge of
+`origin/rag-development`, not as a copy of the delivered zip.
 
-**NOT IMPORTED, deliberately.** The archive also carried `src/data/`,
-`src/models/`, `src/training/`, `configs/cv_*.yaml` and `docs/CV_*.md` —
-stale copies of this repo's own CV code from an older merge-base.
-Importing them would have clobbered current CV work. If they ever need
-CV code it should come from this repo, not round-trip through theirs.
+An earlier attempt did import the zip, adding 64 files as though they
+were written here. That was wrong about provenance (`git blame` on
+`src/rag` credited the wrong author) and would have made every future
+merge with `rag-development` an add/add conflict, for want of a common
+ancestor. It also buried the real changes: reviewing the zip-import
+branch against `rag-development` showed 44 files and 4967 insertions,
+almost all line-ending noise. Against the merge it is **11 files and
+1874 insertions** — exactly the work described below.
+
+Because untouched files keep her exact bytes, `git diff
+origin/rag-development..integration -- src/rag/` is a clean review diff.
+
+**NOT taken from the zip, deliberately.** The archive also carried
+`src/data/`, `src/models/`, `src/training/`, `configs/cv_*.yaml` and
+`docs/CV_*.md` — stale copies of this repo's own CV code from an older
+merge-base. The merge does not bring them either, since `rag-development`
+predates CV-8 entirely (it has no `src/risk/convergence.py` and no
+`docs/cv8_sample_outputs/`). That is also why the integration could not
+live on `rag-development`: the parser tests read the v1.1 fixtures.
 
 **EXTENDED** — `requirements.txt`: union of both. Their `faiss-cpu`,
 `sentence-transformers`, `beautifulsoup4`, `streamlit`, and their
@@ -62,7 +83,7 @@ Listed because their parser depends on it. Detail in
 
 ---
 
-## 3. `CVAssessmentContext` and parser (2026-09-11, `5d8f580`)
+## 3. `CVAssessmentContext` and parser (2026-09-11, `bc7d70b`)
 
 **ADDED** — `src/rag/cv_context/{schema,parser}.py`. No equivalent
 existed; `memory/` and `patient_context/` were empty placeholders and
@@ -303,8 +324,8 @@ two images and will cost more.
 
 | Date | Commit | Change |
 |---|---|---|
-| 2026-09-11 | `4e01036` | Import RAG baseline; verify it runs here |
-| 2026-09-11 | `5d8f580` | CV context schema + parser; fix Blockers A and B; thread `cv_context` through the pipeline |
-| 2026-09-11 | `5fb3aa0` | Safety-layer findings note for the collaborator; this file |
-| 2026-09-11 | `1e30cb4` | Phase 2: CV modes in the CLI, CV-integration gate, corpus false-positive measurement |
-| 2026-09-11 | (this commit) | Containment metric for CV grounding; banned-phrase check narrowed (clause-scoped); CV-8 latency measured; Phase 2 gate 5/5 |
+| 2026-09-11 | `84d8b5a` | **`integration-v1`** — CV and RAG baselines merge |
+| 2026-09-11 | `bc7d70b` | CV context schema + parser; fix Blockers A and B; thread `cv_context` through the pipeline |
+| 2026-09-11 | `b2841d2` | Safety-layer findings note for the collaborator; this file |
+| 2026-09-11 | `b70e8dc` | Phase 2: CV modes in the CLI, CV-integration gate, corpus false-positive measurement |
+| 2026-09-11 | `9a65b29` | Containment metric for CV grounding; banned-phrase check narrowed (clause-scoped); CV-8 latency measured; Phase 2 gate 5/5 |
