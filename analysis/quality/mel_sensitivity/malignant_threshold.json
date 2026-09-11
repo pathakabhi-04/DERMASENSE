@@ -1,0 +1,103 @@
+{
+  "baseline": {
+    "mel_routed": 0.7177177177177178,
+    "benign_referred": 0.23208191126279865
+  },
+  "sweep": [
+    {
+      "threshold": 0.05,
+      "mel_routed": 0.8828828828828829,
+      "benign_referred": 0.5338859093125304
+    },
+    {
+      "threshold": 0.1,
+      "mel_routed": 0.8423423423423423,
+      "benign_referred": 0.439297903461726
+    },
+    {
+      "threshold": 0.15,
+      "mel_routed": 0.8063063063063063,
+      "benign_referred": 0.3798147245246221
+    },
+    {
+      "threshold": 0.2,
+      "mel_routed": 0.7777777777777778,
+      "benign_referred": 0.3339834227206241
+    },
+    {
+      "threshold": 0.25,
+      "mel_routed": 0.7522522522522522,
+      "benign_referred": 0.2983910287664554
+    },
+    {
+      "threshold": 0.3,
+      "mel_routed": 0.7357357357357357,
+      "benign_referred": 0.27254997562164796
+    },
+    {
+      "threshold": 0.35,
+      "mel_routed": 0.7147147147147147,
+      "benign_referred": 0.24524622135543636
+    },
+    {
+      "threshold": 0.4,
+      "mel_routed": 0.6891891891891891,
+      "benign_referred": 0.2174549000487567
+    },
+    {
+      "threshold": 0.45,
+      "mel_routed": 0.6726726726726727,
+      "benign_referred": 0.19502681618722575
+    },
+    {
+      "threshold": 0.5,
+      "mel_routed": 0.6561561561561562,
+      "benign_referred": 0.17844953681131157
+    },
+    {
+      "threshold": 0.55,
+      "mel_routed": 0.6291291291291291,
+      "benign_referred": 0.15699658703071673
+    },
+    {
+      "threshold": 0.6,
+      "mel_routed": 0.6006006006006006,
+      "benign_referred": 0.14431984397854705
+    },
+    {
+      "threshold": 0.65,
+      "mel_routed": 0.5585585585585585,
+      "benign_referred": 0.12286689419795221
+    },
+    {
+      "threshold": 0.7,
+      "mel_routed": 0.5285285285285285,
+      "benign_referred": 0.10921501706484642
+    },
+    {
+      "threshold": 0.75,
+      "mel_routed": 0.487987987987988,
+      "benign_referred": 0.09410043881033642
+    },
+    {
+      "threshold": 0.8,
+      "mel_routed": 0.43243243243243246,
+      "benign_referred": 0.0726474890297416
+    },
+    {
+      "threshold": 0.85,
+      "mel_routed": 0.36786786786786785,
+      "benign_referred": 0.0560702096538274
+    },
+    {
+      "threshold": 0.9,
+      "mel_routed": 0.28678678678678676,
+      "benign_referred": 0.03803022915650902
+    },
+    {
+      "threshold": 0.95,
+      "mel_routed": 0.17867867867867868,
+      "benign_referred": 0.018527547537786446
+    }
+  ]
+}
