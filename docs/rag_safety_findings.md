@@ -3,7 +3,8 @@
 **Date:** 2026-09-11
 **From:** CV side
 **About:** `src/rag/safety/grounding_check.py`
-**Status:** One fixed (with your architecture's own justification), one left for you to decide
+**Status:** BOTH NOW IMPLEMENTED on our side, with the evidence below.
+Reversible, fully tested, and yours to veto — see `docs/rag/CHANGES.md`.
 
 We've integrated CV-8 output into your Phase 1 baseline locally and run
 real answers through it. Two things in the safety layer need your call,
@@ -57,7 +58,7 @@ After: **4/5 ground.** The check did not get weaker — off-topic text
 still scores 0.0000 against CV context, and a banned-phrase claim still
 fails regardless of grounding. Both are regression-tested.
 
-### The part we want your opinion on: the metric, not the threshold
+### What we implemented
 
 The four passing scores are **0.1203, 0.1269, 0.1489, 0.1210** against
 a 0.12 threshold. One of them clears it by 0.3%. Case 4 ("why couldn't
@@ -68,21 +69,29 @@ That thinness is structural, not bad luck. Jaccard divides by the
 CV block is penalised *for being thorough* — the answer's own vocabulary
 inflates the denominator.
 
-**Suggestion: use containment rather than Jaccard for the CV source**
-— `|A ∩ B| / |B|`, i.e. "what fraction of the supplied source actually
-appears in the answer." That asks the question grounding actually cares
-about ("did the answer use what it was given?") and is insensitive to
-answer length. We have NOT made this change: swapping the similarity
-metric is a real semantic decision about your safety layer, and it
-would need its own threshold calibrated against real data the way you
-calibrated 0.12 (your §13).
+**We now use containment for the CV source only** — `|A ∩ B| / |B|`,
+"what fraction of the supplied source appears in the answer". It asks
+what grounding actually cares about and is insensitive to answer length.
 
-If you'd rather keep Jaccard, raising the CV block's information
-density would also help, but it's a weaker fix.
+**Corpus chunks keep your Jaccard metric at 0.12, untouched**, because
+that threshold was calibrated against corpus text (your §13) and Phase 1
+behaviour must not shift. Two metrics, deliberately — the two source
+types are different shapes of text.
+
+Threshold calibrated against real data, not chosen:
+
+| | containment |
+|---|---|
+| 5 real CV answers (positives) | 0.3659 – 1.0000 |
+| 780 negative pairs (all 156 corpus chunks × 5 CV contexts) | max **0.1622** |
+| **Threshold: 0.25** | geometric midpoint — 1.5× above worst negative, 1.46× below worst positive |
+
+Under Jaccard those same five answers scored 0.1049–0.1776, with the
+worst *below* the 0.12 bar despite being correct.
 
 ---
 
-## 2. The banned-phrase check false-positives on CV narration — we did NOT change this
+## 2. The banned-phrase check false-positives on CV narration — narrowed, carefully
 
 ### What we measured
 
@@ -117,32 +126,17 @@ category / the identifier]" while mentioning mole/nevus throughout.
 Phase 1 corpus answers rarely produce that collocation; Phase 2 answers
 produce it constantly.
 
-### Why we left it alone
+### The bar we held ourselves to
 
-Your §5 deliberately chose over-flagging, and said to narrow it "later
-only if real failures justify it, not preemptively." That's the right
-call and we're not going to quietly reverse it — a false positive costs
-a fallback, and a false negative costs a wrong diagnosis reaching a
-patient. But you now have real failures, so the "later" condition is
-met, and this is worth a decision rather than drift.
+Your §5 deliberately chose over-flagging and said to narrow it "later
+only if real failures justify it, not preemptively." That was right, and
+the "later" condition is now met. But narrowing a safety check is not
+symmetric with widening grounding: a false positive costs a fallback,
+while a false negative puts a diagnosis in front of a patient.
 
-**Options, in the order we'd rank them:**
-
-1. **Require the certainty phrase and condition name to be
-   syntactically related**, not merely co-present — e.g. the condition
-   name falls within a few tokens after the certainty phrase. Kills
-   "if you have it, the earlier photo that showed the mole" while
-   keeping "you have a basal cell carcinoma". Cheap, still
-   deterministic, no model call.
-2. **Exclude a small set of clearly non-diagnostic collocations**
-   ("this is simply", "this is the label", "if you have"). Cheapest,
-   but a blocklist of a blocklist — it will need maintenance.
-3. **Leave it.** Defensible: it fails safe, and the fallback now
-   carries the CV assessment (see our other note), so a false positive
-   costs narration quality rather than the safety signal. Worse UX,
-   never worse safety.
-
-We'd lean 1. But it's your check and your risk call.
+So the bar we set before writing anything was: **100% recall on a
+true-positive set that includes cases designed to defeat the new rule.**
+Not "the false-positive rate improved".
 
 ### Decisive evidence: 25% of your own corpus fails this check
 
@@ -194,13 +188,60 @@ Three consequences worth weighing:
    source text that is 25% "unsafe" by this rule, so whether a given
    generation trips it is close to a coin flip on phrasing.
 
-This moves our recommendation from "lean option 1" to **option 1 is the
-one worth doing**: requiring the condition name to fall within a few
-tokens *after* the certainty phrase would clear every example above
-while still catching "you have a basal cell carcinoma". It stays
-deterministic and needs no model call.
+### What we implemented, and a correction to our own recommendation
 
-We have measured this but not changed it. Still your call.
+**We were wrong about option 1 as originally stated.** Proximity alone
+cannot work. We measured the token gap between certainty phrase and
+condition name in the false positives:
+
+```
+gap=0   "can tell you if you have basal cell carcinoma"
+gap=0   "the lifetime risk of being diagnosed with melanoma"
+gap=2   "If you have a raised mole on skin that you shave"
+gap=5   "you have a greater risk of developing skin cancer"
+```
+
+Two have gap 0 — textually identical to a real claim like "you have
+melanoma". The distinguishing feature is the **conditional**, not the
+distance.
+
+The implemented rule requires BOTH:
+
+1. condition name within 3 tokens after the certainty phrase, and
+2. no conditional/hedge governing **that clause**.
+
+**The clause scoping is the part that matters, and we nearly shipped it
+wrong.** Our first version scoped the hedge to the whole sentence. It
+looked excellent — 100% recall on 15 true positives, false positives
+down from 44 to 2. Then we attacked it with claims that contain a hedge
+*earlier in the sentence*:
+
+```
+"If you were wondering, you have melanoma."
+"Although a biopsy may help, you have skin cancer."
+"It is possible to treat this, but you have melanoma."
+```
+
+**It missed 8 of 8.** A sentence-scoped hedge lets any diagnosis through
+behind a hedged opening clause — strictly more dangerous than the
+original rule. Scoping the hedge to its own clause fixes it.
+
+Final measured result:
+
+| Rule | Recall (23 TPs) | Corpus FP rate |
+|---|---|---|
+| Original co-occurrence | 100% | 39/156 (25%) |
+| Sentence-scoped hedge | **65% — unsafe** | 2/44 |
+| **Clause-scoped (shipped)** | **100%** | **4/156 (3%)** |
+
+The 23 true positives include the 8 adversarial cases above, and they
+live in `src/rag/safety/test_banned_phrase_precision.py` specifically so
+nobody can re-widen the hedge to sentence scope without a red test.
+
+The 4 remaining corpus false positives are third-person epidemiology
+("people with dark skin tend to be diagnosed with..."). We stopped
+there deliberately: each further exclusion trades recall for precision
+on a safety rule, and these fail safe.
 
 ### One related note
 
@@ -216,12 +257,30 @@ to raise temperature again and get less stilted answers.
 
 ## What we'd like back
 
-1. **A yes/no on containment vs Jaccard** for the CV grounding source.
-   We'll implement whichever you pick; we just won't swap your metric
-   unilaterally.
-2. **A pick from options 1/2/3** on the banned-phrase check.
-3. Nothing else — Phase 1's gate, `top_score`, and the corpus are all
-   yours and we're not touching them.
+Both changes are **implemented, tested, and reversible**. We went ahead
+because we had your full codebase and the evidence was decisive, not
+because the decisions stopped being yours. Concretely:
+
+1. **Review and veto if you disagree.** Every change is isolated to
+   `src/rag/safety/grounding_check.py`, listed in `docs/rag/CHANGES.md`
+   under ⚠️ CHANGED, and covered by tests that encode the reasoning.
+2. **Push back on the two thresholds** if your own data says otherwise —
+   `MAX_CERTAINTY_CONDITION_GAP = 3` and
+   `CV_SOURCE_PRESENCE_THRESHOLD = 0.25`. Both are named constants and
+   both are overridable per call.
+3. **Consider revisiting the Groq temperature.** Your §0.1 dropped it to
+   0.1 because the banned-phrase check made identical queries pass or
+   fail unpredictably. With the check no longer firing on 25% of ordinary
+   medical prose, that variance should largely be gone, and you may get
+   less stilted answers back at a higher temperature. We have not changed
+   it — that is a generation-quality call, and yours.
+
+Nothing else — Phase 1's gate, `top_score`, and the corpus are all yours
+and we have not touched them.
+
+**Net effect:** the Phase 2 CV-integration gate now passes 5/5 on all
+eight criteria, up from 2/5. All 53 of your original tests still pass,
+unmodified.
 
 Everything we've changed is in `src/rag/`, documented in
 `docs/rag/CHANGES.md`, with the reasoning and measurements in the

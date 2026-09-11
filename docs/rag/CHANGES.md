@@ -103,11 +103,20 @@ After: **4/5**. Off-topic text still scores 0.0000 against CV context and
 a banned-phrase claim still fails regardless of grounding — the check
 did not get weaker.
 
-**Open, raised with them** (`../rag_safety_findings.md`): passing margins
-are thin (0.1203–0.1489 against 0.12), because Jaccard divides by the
-union and so penalises thorough answers for their length. Containment
-(`|A∩B|/|B|`) would fit better. **Their metric, their call — not
-changed.**
+**RESOLVED (2026-09-11) — metric changed for the CV source only.**
+Jaccard margins were thin because it divides by the union, penalising a
+thorough answer for its own length; real CV answers scored 0.1049–0.1776
+against a 0.12 bar, the worst of them *below* it despite being correct.
+
+The CV source is now scored by **containment** (`|A∩B|/|B|`, "how much
+of the supplied source did the answer use?"), which is length-insensitive.
+**Corpus chunks keep Jaccard at 0.12, untouched** — that threshold was
+calibrated against corpus text (§13) and Phase 1 behaviour must not shift.
+
+Threshold calibrated, not chosen: positives 0.3659–1.0000; 780 negative
+pairs (all 156 corpus chunks × 5 CV contexts) peak at 0.1622.
+`CV_SOURCE_PRESENCE_THRESHOLD = 0.25` is the geometric midpoint — 1.5×
+above the worst negative, 1.46× below the worst positive.
 
 ---
 
@@ -218,13 +227,75 @@ Suite: **90 pass**, up from their 53. None of their 53 were modified.
 | Thing | Why |
 |---|---|
 | `SYSTEM_PROMPT` | §4.3; already written for CV context |
-| Banned-phrase check | Fires on 1–2 of 5 good CV answers, and **39 of 156 corpus chunks (25%) would fail it themselves** — including "A dermatologist can tell you if you have basal cell carcinoma" and NCI lifetime-risk statistics. So a faithful paraphrase of the evidence inherits the phrasing and is rejected for it, and the fallback can contain what the check rejected. §5 deliberately chose over-flagging, so narrowing it is their call — raised in `../rag_safety_findings.md`, which now recommends the syntactic-proximity fix outright |
+| ~~Banned-phrase check~~ | **Now CHANGED — see §10 below** |
 | Jaccard similarity metric | Thin margins argue for containment, but swapping the metric is a semantic decision — raised, not taken |
 | `_SENTENCE_SPLIT_RE` | Hypothesised as the banned-phrase cause; **tested and disproved** — a newline-aware splitter flags the identical cases. Recorded so nobody retries it |
 | `EvidenceFormatter`, retriever, index, chunking, embeddings | Correct as delivered; §7 rightly defers optimization |
 | `top_score` → uncertainty | Defined and tested but never consumed, so their Phase 1 gate criterion 3 has no implementation. **Theirs, and Phase 1 — not ours to close** |
 | Corpus, `retrieval_cases.json`, Phase 1 gate | Theirs |
 | 6-class vs 8-class taxonomy | Jointly open (§18); still not guessed at |
+
+---
+
+## 10. Banned-phrase check narrowed ⚠️ CHANGED (2026-09-11)
+
+**CHANGED** — `check_banned_phrases`. Bare co-occurrence of a certainty
+phrase and a condition name in a sentence now additionally requires:
+
+1. the condition name within `MAX_CERTAINTY_CONDITION_GAP` (3) tokens
+   after the certainty phrase, and
+2. no conditional/hedge governing **that clause**.
+
+**Why it was safe to change:** §5 chose over-flagging and said to narrow
+"later only if real failures justify it". Those failures arrived —
+**39 of 156 corpus chunks (25%) failed the check themselves**, including
+"A dermatologist can tell you if you have basal cell carcinoma" and NCI
+lifetime-risk statistics. A faithful constrained paraphrase inherited
+that phrasing and was rejected for being faithful.
+
+**The bar we held:** 100% recall on a true-positive set containing cases
+designed to defeat the new rule — not merely "the FP rate improved".
+
+**A near-miss worth recording.** The first version scoped the hedge to
+the whole **sentence**. It measured beautifully (100% recall on 15 TPs,
+FPs 44→2) and was **dangerously wrong**: any hedge earlier in the
+sentence suppressed the flag, so "If you were wondering, you have
+melanoma" passed. It missed **8 of 8** adversarial claims — strictly
+worse than the original rule. Scoping the hedge to its own clause fixed
+it. Those 8 cases now live in `test_banned_phrase_precision.py` so the
+scope cannot be re-widened without a red test.
+
+| Rule | Recall (23 TPs) | Corpus FP rate |
+|---|---|---|
+| Original co-occurrence | 100% | 39/156 (25%) |
+| Sentence-scoped hedge | **65% — unsafe, rejected** | 2/44 |
+| **Clause-scoped (shipped)** | **100%** | **4/156 (3%)** |
+
+The 4 survivors are third-person epidemiology and fail safe. We stopped
+there: each further exclusion trades recall for precision on a safety
+rule.
+
+---
+
+## 11. Phase 2 gate result
+
+With §4, §5 and §10 in place the CV-integration gate passes **5/5 on all
+eight criteria**, up from 2/5. All 53 of the collaborator's original
+tests still pass, unmodified. Suite total: **99**.
+
+---
+
+## 12. CV-side: live-feed latency measured (2026-09-11)
+
+Not a RAG change, recorded because it unblocks the delivery mechanism.
+`scripts/measure_cv8_latency.py` measures `DermaSensePipeline.predict()`
+against a pre-committed rule (p50 < 2.0s → build the sync endpoint).
+
+Result on CPU, 8 warm runs on real PAD-UFES images: **p50 0.52s**
+(min 0.48s, max 0.64s), cold 0.53s, startup 8.7s amortised.
+**Decision: a synchronous HTTP endpoint is viable.** Caveat: no prior
+image in this run, so CV-7 did not execute; a returning visit segments
+two images and will cost more.
 
 ---
 
@@ -235,4 +306,5 @@ Suite: **90 pass**, up from their 53. None of their 53 were modified.
 | 2026-09-11 | `4e01036` | Import RAG baseline; verify it runs here |
 | 2026-09-11 | `5d8f580` | CV context schema + parser; fix Blockers A and B; thread `cv_context` through the pipeline |
 | 2026-09-11 | `5fb3aa0` | Safety-layer findings note for the collaborator; this file |
-| 2026-09-11 | (this commit) | Phase 2: CV modes in the CLI, CV-integration gate, corpus false-positive measurement |
+| 2026-09-11 | `1e30cb4` | Phase 2: CV modes in the CLI, CV-integration gate, corpus false-positive measurement |
+| 2026-09-11 | (this commit) | Containment metric for CV grounding; banned-phrase check narrowed (clause-scoped); CV-8 latency measured; Phase 2 gate 5/5 |

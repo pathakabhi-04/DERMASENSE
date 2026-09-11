@@ -15,6 +15,7 @@ from pathlib import Path
 from src.rag.cv_context.parser import parse_cv_assessment
 from src.rag.retrieval.evidence import EvidenceBundle, EvidenceChunk
 from src.rag.safety.grounding_check import (
+    CV_SOURCE_PRESENCE_THRESHOLD,
     build_fallback_answer,
     check_source_presence,
     run_safety_check,
@@ -190,3 +191,61 @@ class BlockerBFallbackTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ContainmentMetricTests(unittest.TestCase):
+    """
+    The CV assessment is scored by containment, not Jaccard.
+
+    Jaccard divides by the union, so it penalised a thorough answer for
+    its own length: real CV answers scored 0.1049-0.1776 against a 0.12
+    threshold, the worst of them BELOW the bar despite being correct.
+    Grounding depended on verbosity rather than on whether the answer
+    used what it was given.
+    """
+
+    def test_a_thorough_cv_answer_is_not_penalised_for_length(self):
+        context = _context()
+        short = CV_NARRATION
+        padded = CV_NARRATION + (
+            " Your dermatologist can discuss the available options with you, "
+            "explain what to expect at the appointment, and answer any "
+            "questions you may have about next steps and follow-up care."
+        )
+        # Both are grounded; under Jaccard the longer one scored worse.
+        for answer in (short, padded):
+            with self.subTest(length=len(answer)):
+                self.assertTrue(
+                    check_source_presence(
+                        answer, EvidenceBundle(chunks=[]), cv_context=context
+                    )
+                )
+
+    def test_corpus_text_does_not_ground_against_cv_context(self):
+        """
+        Negative control across the real index: corpus prose is not
+        grounded in a CV assessment. Worst of 780 pairs was 0.1622,
+        below the 0.25 threshold.
+        """
+        chunks_path = Path("data/rag/indexes/medical_v0.1/chunks.json")
+        if not chunks_path.exists():
+            self.skipTest("index not built")
+
+        context = _context()
+        chunks = json.loads(chunks_path.read_text(encoding="utf-8"))
+        grounded = [
+            c for c in chunks
+            if check_source_presence(
+                c["text"], EvidenceBundle(chunks=[]), cv_context=context
+            )
+        ]
+        self.assertEqual(grounded, [], f"{len(grounded)} corpus chunks grounded")
+
+    def test_cv_threshold_is_overridable(self):
+        context = _context()
+        self.assertFalse(
+            check_source_presence(
+                CV_NARRATION, EvidenceBundle(chunks=[]),
+                cv_context=context, cv_threshold=0.99,
+            )
+        )

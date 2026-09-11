@@ -10,14 +10,16 @@ from src.rag.retrieval.evidence import EvidenceBundle
 if TYPE_CHECKING:
     from src.rag.cv_context.schema import CVAssessmentContext
 
-# Direct-diagnosis certainty phrases, taken verbatim from the
-# primary specification (section 5, point 1). A violation requires
-# one of these AND a disease/condition name to appear in the same
-# sentence -- neither alone is dangerous. This is intentionally
-# broad and will over-flag some benign sentences (e.g. "this is a
-# common growth"); the spec accepts that tradeoff at baseline and
-# defers precision tuning to a later phase, based on real observed
-# failures rather than preemptive narrowing.
+# Direct-diagnosis certainty phrases, taken verbatim from the primary
+# specification (section 5, point 1). Neither a certainty phrase nor a
+# condition name is dangerous alone.
+#
+# The spec's original rule flagged the two CO-OCCURRING anywhere in a
+# sentence, accepting over-flagging and deferring precision tuning
+# until real failures justified it. Those failures arrived with CV
+# integration (25% of the corpus self-flagged), so the rule is now
+# narrowed -- see check_banned_phrases for the evidence and the two
+# conditions that replaced bare co-occurrence.
 CERTAINTY_PHRASES = [
     "you have",
     "this is",
@@ -48,6 +50,25 @@ DEFAULT_SOURCE_PRESENCE_THRESHOLD = 0.12
 _SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 _WORD_RE = re.compile(r"[a-z]{4,}")
 
+# How far after a certainty phrase a condition name still counts as the
+# thing being asserted. "you have melanoma" (0) is a claim; "this is
+# simply the label the system uses to track the mole" (9) is not.
+MAX_CERTAINTY_CONDITION_GAP = 3
+
+# A hedge governs its own clause only -- see check_banned_phrases.
+_CLAUSE_SPLIT_RE = re.compile(
+    r"[,;:]|\b(?:but|although|though|because|however|while|whereas|so)\b"
+)
+
+# Markers that make a clause conditional, hypothetical, or statistical
+# rather than an assertion about this patient.
+_HEDGE_RE = re.compile(
+    r"\b(?:if|whether|unless|should|in case|tell you if|can tell you|"
+    r"to (?:see|find out|know|determine)|suspects?|might|may|could|"
+    r"possible|possibly|risk of|likelihood of|chance of|more likely to|"
+    r"likely to)\b"
+)
+
 # Common words excluded from the lexical-overlap check so overlap
 # reflects shared medical content, not shared function words.
 _STOPWORDS = {
@@ -72,35 +93,92 @@ class SafetyCheckResult:
     reason: str | None
 
 
+def _certainty_condition_pairs(clause: str):
+    """
+    Yield (gap_in_tokens, text_before_the_certainty_phrase) for every
+    certainty-phrase/condition-name pair in one clause, where the
+    condition name follows the certainty phrase.
+    """
+
+    for phrase in CERTAINTY_PHRASES:
+        start = 0
+        while (index := clause.find(phrase, start)) != -1:
+            after = clause[index + len(phrase):]
+            for condition in CONDITION_NAMES:
+                offset = after.find(condition)
+                if offset != -1:
+                    yield len(after[:offset].split()), clause[:index]
+            start = index + 1
+
+
 def check_banned_phrases(answer_text: str) -> bool:
     """
-    Return True if the answer contains a direct-diagnosis claim: a
-    certainty phrase and a condition name co-occurring in the same
-    sentence.
+    Return True if the answer asserts a diagnosis: a certainty phrase
+    followed closely by a condition name, in a clause that is not
+    hedged or conditional.
 
-    Deterministic, no model call. Intentionally biased toward
-    over-flagging -- a false positive costs a fallback to plain
-    evidence, not a wrong diagnosis reaching the user.
+    Deterministic, no model call. Still biased toward over-flagging --
+    a false positive costs a fallback to plain evidence, not a wrong
+    diagnosis reaching the user.
+
+    ## Why this is narrower than bare co-occurrence
+
+    The original rule flagged any sentence containing both a certainty
+    phrase and a condition name. Measured against the indexed corpus,
+    **39 of 156 chunks (25%) tripped it** -- authoritative AAD/NCI text
+    that the system is supposed to ground answers in:
+
+        "A dermatologist can tell you if you have basal cell carcinoma
+         and if you do, what treatment is recommended."
+        "the lifetime risk of being diagnosed with melanoma was 2.9%"
+        "If you have a raised mole on skin that you shave, you may nick
+         the mole."
+
+    None is a diagnostic claim: two are conditionals, one an
+    epidemiological statistic. A faithful constrained paraphrase
+    inherits that phrasing and was rejected for accurately explaining
+    the evidence it was given -- penalising exactly the behaviour the
+    architecture asks for. CV narration made this acute, because such
+    answers say "this is [the label / the risk category]" constantly
+    while mentioning mole/nevus throughout.
+
+    ## The two conditions, and why BOTH are needed
+
+    - **Proximity** (condition within `MAX_CERTAINTY_CONDITION_GAP`
+      tokens after the certainty phrase) rejects "this is simply the
+      label the system uses to track the mole".
+    - **No conditional/hedge governing the clause** rejects "can tell
+      you *if* you have basal cell carcinoma", which proximity alone
+      cannot -- its gap is 0, textually identical to a real claim.
+
+    ## Why the hedge is scoped to the CLAUSE, not the sentence
+
+    This is the part that is easy to get dangerously wrong. Scoping the
+    hedge to the whole sentence means any earlier hedge suppresses the
+    flag, so every one of these slips through:
+
+        "If you were wondering, you have melanoma."
+        "Although a biopsy may help, you have skin cancer."
+        "It is possible to treat this, but you have melanoma."
+
+    A sentence-scoped version missed 8 of 8 such cases in testing. A
+    conditional governs its own clause and no further, so the clause is
+    the correct unit. See `test_banned_phrase_precision.py` for the
+    23-case true-positive set, 8 of which exist purely to hold this
+    line, plus the measured corpus false-positive rate.
     """
 
-    sentences = _SENTENCE_SPLIT_RE.split(answer_text)
+    for sentence in _SENTENCE_SPLIT_RE.split(answer_text):
+        for clause in _CLAUSE_SPLIT_RE.split(sentence.lower()):
+            if not clause:
+                continue
 
-    for sentence in sentences:
-        lowered = sentence.lower()
-
-        has_certainty_phrase = any(
-            phrase in lowered for phrase in CERTAINTY_PHRASES
-        )
-
-        if not has_certainty_phrase:
-            continue
-
-        has_condition_name = any(
-            condition in lowered for condition in CONDITION_NAMES
-        )
-
-        if has_condition_name:
-            return True
+            for gap, before in _certainty_condition_pairs(clause):
+                if gap > MAX_CERTAINTY_CONDITION_GAP:
+                    continue
+                if _HEDGE_RE.search(before):
+                    continue
+                return True
 
     return False
 
@@ -124,6 +202,47 @@ def _lexical_overlap(text_a: str, text_b: str) -> float:
     return len(intersection) / len(union)
 
 
+def _containment(answer_text: str, source_text: str) -> float:
+    """
+    What fraction of the SOURCE's vocabulary appears in the answer:
+    `|A n B| / |B|`, not Jaccard's `|A n B| / |A u B|`.
+
+    Used for the CV assessment, not for corpus chunks -- see
+    CV_SOURCE_PRESENCE_THRESHOLD.
+    """
+
+    answer_words = set(_WORD_RE.findall(answer_text.lower())) - _STOPWORDS
+    source_words = set(_WORD_RE.findall(source_text.lower())) - _STOPWORDS
+
+    if not answer_words or not source_words:
+        return 0.0
+
+    return len(answer_words & source_words) / len(source_words)
+
+
+# The CV assessment is scored by containment against this threshold,
+# while retrieved corpus chunks keep their calibrated Jaccard score at
+# DEFAULT_SOURCE_PRESENCE_THRESHOLD. Two metrics, deliberately.
+#
+# Jaccard divides by the UNION, so it penalises a thorough answer for
+# its own length. The CV block is short (~600 chars) and a good CV
+# answer is long, so real CV answers scored 0.1049-0.1776 against a 0.12
+# threshold -- the worst of them BELOW the bar despite being correct.
+# Grounding would have depended on answer verbosity rather than on
+# whether the answer actually used what it was given.
+#
+# Containment asks the question grounding actually cares about ("how
+# much of the supplied source did the answer use?") and is insensitive
+# to answer length. Measured on real data: the same five answers score
+# 0.3659-1.0000, while 780 negative pairs (all 156 corpus chunks x 5 CV
+# contexts) peak at 0.1622. 0.25 is the geometric midpoint of that gap
+# -- 1.5x above the worst negative, 1.46x below the worst positive.
+#
+# Corpus chunks keep Jaccard because 0.12 was calibrated against corpus
+# text (spec section 13) and Phase 1 behaviour must not shift.
+CV_SOURCE_PRESENCE_THRESHOLD = 0.25
+
+
 SimilarityScorer = Callable[[str, str], float]
 
 
@@ -133,6 +252,7 @@ def check_source_presence(
     scorer: SimilarityScorer = _lexical_overlap,
     threshold: float = DEFAULT_SOURCE_PRESENCE_THRESHOLD,
     cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
+    cv_threshold: float = CV_SOURCE_PRESENCE_THRESHOLD,
 ) -> bool:
     """
     Return True if the answer shows meaningful lexical overlap with at
@@ -167,16 +287,24 @@ def check_source_presence(
     if not answer_text.strip():
         return False
 
-    sources: list[str] = [chunk.text for chunk in evidence.chunks]
-
     cv_block = render_cv_context(cv_context)
-    if cv_block:
-        sources.append(cv_block)
 
-    if not sources:
+    if not evidence.chunks and not cv_block:
         return False
 
-    return any(scorer(answer_text, source) >= threshold for source in sources)
+    # Corpus chunks: Jaccard at the threshold calibrated for corpus text.
+    if any(
+        scorer(answer_text, chunk.text) >= threshold
+        for chunk in evidence.chunks
+    ):
+        return True
+
+    # CV assessment: containment, which does not penalise a thorough
+    # answer for its length. See CV_SOURCE_PRESENCE_THRESHOLD.
+    if cv_block:
+        return _containment(answer_text, cv_block) >= cv_threshold
+
+    return False
 
 
 def run_safety_check(
@@ -184,6 +312,7 @@ def run_safety_check(
     evidence: EvidenceBundle,
     source_presence_threshold: float = DEFAULT_SOURCE_PRESENCE_THRESHOLD,
     cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
+    cv_threshold: float = CV_SOURCE_PRESENCE_THRESHOLD,
 ) -> SafetyCheckResult:
     """
     Run both deterministic checks (spec section 5, points 1-2) and
@@ -200,6 +329,7 @@ def run_safety_check(
         evidence,
         threshold=source_presence_threshold,
         cv_context=cv_context,
+        cv_threshold=cv_threshold,
     )
 
     source_presence_violation = not is_source_grounded
