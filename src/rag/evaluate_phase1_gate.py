@@ -70,7 +70,44 @@ HEDGE_MARKERS = (
     "does not contain", "doesn't contain", "limited", "does not provide",
     "doesn't provide", "not enough", "insufficient", "does not mention",
     "doesn't mention", "not mention", "beyond the", "outside the",
+    # Contracted forms. The deterministic fallback for an uncovered
+    # question says "the medical sources available to me DON'T cover this
+    # question" -- none of the expanded forms above match that, so a
+    # correct refusal scored as a criterion-3 failure.
+    "don't cover", "don't contain", "don't have", "don't provide",
+    "don't address", "don't mention",
 )
+
+# Text the deterministic fallback uses when retrieval returned nothing
+# usable. Matching it explicitly rather than relying on the hedge
+# keywords happening to overlap: this is a refusal we author ourselves,
+# so its wording can change without anyone thinking to update a keyword
+# list.
+DECLINING_FALLBACK_MARKER = "don't cover this question"
+
+
+def _states_uncertainty(answer_text: str) -> tuple[bool, list[str]]:
+    """
+    Does the answer acknowledge the evidence may not settle the question?
+
+    Two ways to satisfy it, and both genuinely do:
+      - the model hedged in its own words, or
+      - the pipeline fell back to the refusal it uses for an uncovered
+        question, which states the limitation more plainly than any
+        hedge would.
+
+    Keyword matching can only show hedging language is PRESENT, never
+    that the hedge is apt -- which is why every answer is written out for
+    reading.
+    """
+
+    lowered = answer_text.lower()
+
+    if DECLINING_FALLBACK_MARKER in lowered:
+        return True, ["<declined: sources do not cover the question>"]
+
+    hedges = [h for h in HEDGE_MARKERS if h in lowered]
+    return bool(hedges), hedges
 
 
 def build_pipeline() -> RagAnswerPipeline:
@@ -101,7 +138,7 @@ def main() -> int:
         answer = pipeline.answer(query)
         time.sleep(REQUEST_SPACING_S)
         low = evidence.is_low_similarity
-        hedges = [h for h in HEDGE_MARKERS if h in answer.text.lower()]
+        stated, hedges = _states_uncertainty(answer.text)
         infra = _is_infrastructure_failure(answer.fallback_reason)
         if infra:
             unreachable.append(index)
@@ -114,7 +151,7 @@ def main() -> int:
             "2_no_banned_phrase": not check_banned_phrases(answer.text),
             # Vacuously true when retrieval was strong: the criterion only
             # binds on low-similarity retrieval.
-            "3_uncertainty_when_weak": bool(hedges) if low else True,
+            "3_uncertainty_when_weak": stated if low else True,
         }
         rows.append(checks)
         log.append({
@@ -196,7 +233,7 @@ def _run_criterion3_stress(pipeline: RagAnswerPipeline, log: list) -> bool:
         evidence = pipeline.evidence_formatter.get_evidence(query)
         answer = pipeline.answer(query)
         time.sleep(REQUEST_SPACING_S)
-        hedges = [h for h in HEDGE_MARKERS if h in answer.text.lower()]
+        stated, hedges = _states_uncertainty(answer.text)
 
         # A query that no longer scores low tests nothing; say so rather
         # than counting it as a pass.
@@ -209,7 +246,7 @@ def _run_criterion3_stress(pipeline: RagAnswerPipeline, log: list) -> bool:
         elif not evidence.is_low_similarity:
             drifted.append((query, evidence.top_score))
             mark = "DRIFT"
-        elif hedges:
+        elif stated:
             passed += 1
             mark = "PASS "
         else:

@@ -201,3 +201,43 @@ class GroqAdapterGenerateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TransientNetworkRetryTests(unittest.TestCase):
+    """
+    Connection-level failures are transient and must be retried.
+
+    Originally only 429/500/503 were, so a DNS hiccup or reset
+    connection cost the whole request. Measured during a Phase 1 gate
+    run: 13 of 16 queries failed with "[Errno -3] Temporary failure in
+    name resolution" while DNS resolved fine seconds later.
+    """
+
+    def _adapter(self):
+        return GroqAdapter(api_key="test-key")
+
+    def test_dns_failure_is_retried_then_succeeds(self):
+        good = make_success_payload("recovered")
+        with patch("src.rag.llm.groq_adapter.urllib.request.urlopen") as mock:
+            mock.side_effect = [
+                urllib.error.URLError("[Errno -3] Temporary failure in name resolution"),
+                FakeHTTPResponse(good),
+            ]
+            result = self._adapter().generate("sys", "user")
+        self.assertEqual(result.text, "recovered")
+        self.assertEqual(mock.call_count, 2)
+
+    def test_timeout_is_retried(self):
+        good = make_success_payload("recovered")
+        with patch("src.rag.llm.groq_adapter.urllib.request.urlopen") as mock:
+            mock.side_effect = [TimeoutError(), FakeHTTPResponse(good)]
+            self.assertEqual(self._adapter().generate("s", "u").text, "recovered")
+            self.assertEqual(mock.call_count, 2)
+
+    def test_client_error_is_still_not_retried(self):
+        """A 400 means the request is wrong; repeating it changes nothing."""
+        with patch("src.rag.llm.groq_adapter.urllib.request.urlopen") as mock:
+            mock.side_effect = make_http_error(400, "bad request")
+            with self.assertRaises(LLMGenerationError):
+                self._adapter().generate("s", "u")
+            self.assertEqual(mock.call_count, 1)

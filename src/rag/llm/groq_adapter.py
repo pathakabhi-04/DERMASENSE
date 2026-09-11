@@ -202,10 +202,34 @@ class GroqAdapter:
             ) from error
 
     def _is_retryable(self, error: LLMGenerationError) -> bool:
+        """
+        Retry transient failures, whether they came back as an HTTP
+        status or never reached the server at all.
+
+        Connection-level failures were originally not retried, only
+        429/500/503 were. That is inconsistent: a DNS hiccup or a reset
+        connection is as transient as a 503, and arguably more so. On a
+        flaky link it cost a whole request each time -- measured during
+        a Phase 1 gate run where 13 of 16 queries failed with
+        "[Errno -3] Temporary failure in name resolution" while DNS
+        resolved fine seconds later. In production that is a user losing
+        their answer to a momentary blip.
+
+        Deliberately still NOT retried: 4xx other than 429 (the request
+        itself is wrong, so repeating it changes nothing), and an empty
+        or candidate-less response (the model replied; retrying invites
+        a different answer to the same prompt rather than fixing a
+        fault).
+        """
+
         message = str(error)
+
+        if any(f"HTTP {code}" in message for code in RETRYABLE_HTTP_CODES):
+            return True
+
         return any(
-            f"HTTP {code}" in message
-            for code in RETRYABLE_HTTP_CODES
+            marker in message
+            for marker in ("Groq API request failed:", "Groq API request timed out")
         )
 
     def _safe_error_body(

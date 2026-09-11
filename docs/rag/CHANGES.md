@@ -554,6 +554,88 @@ no true positive is lost — cannot be met here. Raised in
 
 ---
 
+## 17. Uncovered questions no longer get unrelated evidence ⚠️ CHANGED (2026-09-11)
+
+**CHANGED** — `build_fallback_answer` in `grounding_check.py`.
+
+Found by stress-testing criterion 3 with 18 low-similarity queries
+(`src/rag/retrieval/low_similarity_cases.json`), added because the fixed
+16-query gate set contains only **one** low-similarity query, so that
+criterion bound once and was vacuously true for the other 15.
+
+**The defect.** "How is impetigo treated?" (top_score 0.2622) returned
+FDA dosing instructions for basal cell carcinoma chemotherapy —
+Imiquimod, Fluorouracil — introduced as *"Here is the relevant evidence
+directly"*. A user asking about a common bacterial skin infection was
+handed skin-cancer medication instructions, labelled relevant.
+
+Three individually-correct behaviours composed into it:
+
+1. retrieval has no score floor, so it always returns its top-k;
+2. the model correctly said the sources do not cover impetigo;
+3. the grounding check correctly rejected that sentence — a statement
+   about the *absence* of evidence cannot lexically overlap the
+   evidence;
+4. the fallback then dumped the unrelated chunks as "relevant".
+
+Measured across the stress set: of the 18, every query that reached the
+model had its answer discarded this way — 10 of 10 non-network
+fallbacks were "insufficient lexical overlap", 0 answered.
+
+**The fix is in the fallback, not the grounding check.** Loosening
+grounding to accept "I have no evidence" would let any hallucination
+skip the check by saying that first. Instead, when evidence is empty or
+low-similarity, the fallback says the sources don't cover the question
+and shows nothing. CV context is still rendered unconditionally —
+spec §5.4 does not depend on what retrieval returned.
+
+This is a defect in the Phase 1 baseline, not something CV integration
+introduced. It affects every uncovered question a real user might ask.
+
+---
+
+## 18. Transient network failures are now retried ⚠️ CHANGED (2026-09-11)
+
+**CHANGED** — `GroqAdapter._is_retryable`.
+
+Only `429/500/503` were retried. A `URLError` — DNS hiccup, reset
+connection — was not, so a momentary blip cost the whole request and the
+user got the fallback instead of their answer.
+
+That is inconsistent: a connection that never reached the server is at
+least as transient as a 503. Measured during a Phase 1 gate run where
+**13 of 16 queries** failed with `[Errno -3] Temporary failure in name
+resolution` while DNS resolved fine seconds later.
+
+Still deliberately not retried: 4xx other than 429 (the request is
+wrong; repeating it changes nothing) and an empty/candidate-less
+response (the model replied — retrying invites a different answer to the
+same prompt rather than fixing a fault).
+
+**Gate runners now distinguish infrastructure from quality.** An
+unreachable LLM reports `INCONCLUSIVE`, not `FAIL`: during the outage
+the gate showed criteria failing when it was describing the network, not
+the pipeline.
+
+### Operational limit worth planning around
+
+The failures that prompted this were finally traced to **Groq's free
+tier: 200,000 tokens per day** for `openai/gpt-oss-120b`. They surfaced
+inconsistently — some as HTTP 429, some as DNS errors — which is why
+three wrong hypotheses were chased first (User-Agent blocking, empty
+reasoning-model content, transient DNS).
+
+A full gate run is 34 calls (16 gate + 18 stress) with ~3k-token
+prompts, so roughly **60-70k tokens, and about three runs exhausts the
+day**. Budget accordingly: re-running the gate casually is not free, and
+the CV-integration gate costs another 5 calls.
+
+The retry change above is still correct on its own merits — a genuine
+connection failure should not cost a request — but retries cannot help
+against a daily token quota.
+
+---
+
 ## Change log
 
 | Date | Commit | Change |
