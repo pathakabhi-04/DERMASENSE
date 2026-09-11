@@ -52,6 +52,18 @@ def _is_infrastructure_failure(reason: str | None) -> bool:
     return bool(reason) and any(m in reason for m in INFRA_FALLBACK_MARKERS)
 from src.rag.vectorstore.faiss_store import FAISSVectorStore
 
+# Groq's free tier caps TOKENS PER MINUTE (8,000), not just per day.
+# A gate call costs roughly 3-5k tokens once the evidence block and the
+# model's reasoning are counted, so firing 34 calls back-to-back
+# guarantees 429s partway through -- which is what made three earlier
+# runs look like network failures.
+#
+# The adapter retries, but its backoff tops out at ~30s total and a TPM
+# window can need a full minute. Pacing here is the right place: a real
+# user request never bursts 34 calls, so this is a harness concern, not
+# a product one.
+SECONDS_BETWEEN_CALLS = 12.0
+
 INDEX_PATH = Path("data/rag/indexes/medical_v0.1")
 CASES_PATH = Path("src/rag/retrieval/retrieval_cases.json")
 STRESS_PATH = Path("src/rag/retrieval/low_similarity_cases.json")
@@ -134,6 +146,8 @@ def main() -> int:
     rows, log, unreachable = [], [], []
 
     for index, query in enumerate(queries, start=1):
+        if index > 1:
+            time.sleep(SECONDS_BETWEEN_CALLS)
         evidence = pipeline.evidence_formatter.get_evidence(query)
         answer = pipeline.answer(query)
         time.sleep(REQUEST_SPACING_S)
@@ -229,6 +243,7 @@ def _run_criterion3_stress(pipeline: RagAnswerPipeline, log: list) -> bool:
 
     passed, drifted, errored = 0, [], []
     for index, case in enumerate(cases, start=1):
+        time.sleep(SECONDS_BETWEEN_CALLS)
         query = case["query"]
         evidence = pipeline.evidence_formatter.get_evidence(query)
         answer = pipeline.answer(query)
@@ -263,10 +278,8 @@ def _run_criterion3_stress(pipeline: RagAnswerPipeline, log: list) -> bool:
             "hedges": hedges, "answer": answer.text,
         })
 
-    binding = len(cases) - len(drifted) - len(unreachable)
-    if unreachable:
-        print(f"\n  LLM unreachable for {len(unreachable)} queries -- excluded; "
-              "re-run when the network is stable.") - len(errored)
+    binding = len(cases) - len(drifted) - len(errored)
+
     if errored:
         print(f"\n  {len(errored)} query(s) never reached the LLM -- not a "
               "criterion-3 result:")
@@ -279,7 +292,7 @@ def _run_criterion3_stress(pipeline: RagAnswerPipeline, log: list) -> bool:
             print(f"    {score:.4f}  {query}")
     print(f"  stated uncertainty            : {passed}/{binding}")
 
-    ok = binding > 0 and passed == binding and not unreachable
+    ok = binding > 0 and passed == binding and not errored
     print(f"\n  CRITERION 3 STRESS: {'PASS' if ok else 'FAIL'}")
     return ok
 
