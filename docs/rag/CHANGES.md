@@ -534,6 +534,26 @@ with no implementation and a rule that fires on 25% of the corpus.
 
 ---
 
+## 17. Criterion 3 stress set — a finding, not a fix (2026-09-11)
+
+**ADDED** — `src/rag/retrieval/low_similarity_cases.json`, 18 queries
+below the 0.45 threshold, kept out of `retrieval_cases.json` so §6's
+fixed sample stays unchanged.
+
+Result: the hedging instruction works (4/4 delivered answers hedged),
+but **12 of 16 correct refusals are rejected by the grounding check**
+and replaced with unrelated corpus text.
+
+**CHANGED (wording only):** the fallback no longer calls weakly-related
+evidence "relevant".
+
+**NOT CHANGED:** the grounding check itself. Every candidate fix trades
+away real protection, and our bar for narrowing a safety rule — proving
+no true positive is lost — cannot be met here. Raised in
+`../rag_safety_findings.md` §3 with a recommendation.
+
+---
+
 ## Change log
 
 | Date | Commit | Change |

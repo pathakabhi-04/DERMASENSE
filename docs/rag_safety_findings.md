@@ -285,3 +285,86 @@ unmodified.
 Everything we've changed is in `src/rag/`, documented in
 `docs/rag/CHANGES.md`, with the reasoning and measurements in the
 commit messages.
+
+---
+
+# 3. Correct refusals are discarded by the grounding check (2026-09-11)
+
+**Not fixed. Raised, because unlike §1 and §2 we cannot prove a fix
+without trading away real protection.**
+
+## What we measured
+
+Spec §6's criterion 3 binds on only one of the 16 gate queries, so we
+built an 18-query low-similarity stress set (`low_similarity_cases.json`
+— dermatology questions the corpus genuinely does not cover, all
+measured below the 0.45 threshold).
+
+| | |
+|---|---|
+| reached the LLM | 16/18 (2 API errors) |
+| **grounding check rejected the answer** | **12/16** |
+| delivered to the user | 4/16 |
+| of those, hedged correctly | **4/4** |
+
+**The hedging instruction works.** Every answer that survived the
+safety layer stated its uncertainty. Criterion 3 is not the failure.
+
+## The failure
+
+The chain is self-defeating:
+
+1. Retrieval scores low, so the prompt tells the model to say the
+   evidence does not address the question.
+2. The model complies and says exactly that.
+3. That compliant answer has almost no lexical overlap with the
+   *irrelevant* chunks that were retrieved.
+4. `check_source_presence` rejects it as ungrounded.
+5. The fallback fires and shows the user those irrelevant chunks.
+
+Asked **"How is impetigo treated?"**, the user was shown basal cell
+carcinoma chemotherapy dosing, under the heading *"Here is the relevant
+evidence directly"*.
+
+**We punish the model for obeying our own instruction, then show the
+user something worse than what we discarded.**
+
+## What we did change
+
+Only the wording. The fallback no longer calls weakly-related evidence
+"relevant" — it now says the sources do not appear to cover the question
+and the material is background only. That removes the false claim, but
+the user still gets corpus text instead of a clear "we don't have
+information on this".
+
+## Why we stopped there
+
+The grounding check exists to stop the model inventing medical claims
+(§5.2). An answer that declines to make claims is safe by construction —
+but "makes no claims" is not something the check can detect, and every
+fix we considered gives something up:
+
+- **Relax grounding when retrieval is low-similarity.** Clean, but it
+  opens the exact hole §5.2 closes: the model could answer about
+  impetigo from its own training knowledge and pass.
+- **Accept hedging language as satisfying grounding.** An answer can
+  hedge *and* then make an unsupported claim in the next sentence.
+- **Short-circuit below some score and return a deterministic refusal.**
+  Cleanest, but the thresholds overlap: your case 11 ("How should I
+  clean an abrasion?") scores 0.3415 and *is* answerable, while "acne
+  scars" scores 0.4466 and is not. No split separates them.
+
+Our bar for narrowing a safety rule was proving no true positive is
+lost. We met it in §2 and cannot meet it here, so this is yours to
+decide.
+
+## Our recommendation
+
+Short-circuit, with the refusal generated deterministically rather than
+by the LLM — no generation means nothing to ground, and the failure mode
+disappears instead of being managed. It needs a second, lower threshold
+calibrated on queries you consider genuinely uncovered, which is a
+judgement about your corpus that we should not make alone.
+
+Reproduce with `python -m src.rag.evaluate_phase1_gate`; per-answer
+output lands in `evaluation/rag/criterion3_stress.json`.
