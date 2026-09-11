@@ -253,7 +253,8 @@ Suite: **90 pass**, up from their 53. None of their 53 were modified.
 | `_SENTENCE_SPLIT_RE` | Hypothesised as the banned-phrase cause; **tested and disproved** — a newline-aware splitter flags the identical cases. Recorded so nobody retries it |
 | `EvidenceFormatter`, retriever, index, chunking, embeddings | Correct as delivered; §7 rightly defers optimization |
 | ~~`top_score` → uncertainty~~ | **Now CHANGED — see §15 below** |
-| Corpus, `retrieval_cases.json`, Phase 1 gate | Theirs |
+| Corpus, `retrieval_cases.json` | Theirs |
+| ~~Phase 1 gate~~ | **Now RUN — see §16 below** |
 | 6-class vs 8-class taxonomy | Jointly open (§18); still not guessed at |
 
 ---
@@ -492,6 +493,44 @@ deleted the `RETRIEVED EVIDENCE` section outright — prompts were going
 out with no evidence at all. Two of *their* original prompt-builder
 tests failed immediately and localised it. Their tests earned their
 keep; the fix was restoring the section, not weakening the tests.
+
+---
+
+## 16. Phase 1 gate run — PASS 16/16 (2026-09-11)
+
+**ADDED** — `src/rag/evaluate_phase1_gate.py`.
+
+Spec §6's gate had never been executed: it was deferred over Gemini's
+20-request/day cap, the provider then changed to Groq, and it was never
+revisited. It is now runnable, and it passes.
+
+| Criterion (§6, verbatim) | Result |
+|---|---|
+| cites at least one real retrieved source | 16/16 |
+| no banned-phrase diagnostic claim | 16/16 |
+| states uncertainty when retrieval was low-similarity | 16/16 |
+| **passing all three** | **16/16 — GATE PASS** |
+
+No answer fell back. Fixed sample is their own 16 `retrieval_cases.json`
+queries, reused for continuity as §6 requires.
+
+**Two honest caveats.**
+
+*Criterion 3 is weakly exercised.* Only 1 of 16 queries is
+low-similarity (case 11, 0.3415), so the criterion binds once and is
+vacuously true for the other 15. It did pass on the case that matters —
+the answer says the sources "do not cover every possible situation" —
+but one binding case is thin evidence that the mechanism generalises.
+
+*Hedge detection is a keyword heuristic* over the answer text. It can
+show hedging language is present, not that the hedge is apt. Every
+answer is written to `evaluation/rag/phase1_gate_answers.json` so a
+result can be read rather than trusted.
+
+Both criteria 2 and 3 only pass because of earlier changes: the
+banned-phrase narrowing (§10) and the `top_score` wiring (§15). Run
+against the baseline as delivered, this gate would have had a criterion
+with no implementation and a rule that fires on 25% of the corpus.
 
 ---
 
