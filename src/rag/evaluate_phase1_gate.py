@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 from src.rag.embeddings.embedder import SentenceTransformerEmbedder
@@ -40,11 +41,26 @@ from src.rag.prompts.prompt_builder import PromptBuilder
 from src.rag.retrieval.evidence import EvidenceFormatter
 from src.rag.retrieval.retriever import MedicalRetriever
 from src.rag.safety.grounding_check import check_banned_phrases
+
+# A fallback caused by the LLM being unreachable says nothing about
+# answer quality. Counting it as a criterion failure produced a "GATE:
+# FAIL" during a DNS outage that looked exactly like a regression.
+INFRA_FALLBACK_MARKERS = ("LLM generation failed",)
+
+
+def _is_infrastructure_failure(reason: str | None) -> bool:
+    return bool(reason) and any(m in reason for m in INFRA_FALLBACK_MARKERS)
 from src.rag.vectorstore.faiss_store import FAISSVectorStore
 
 INDEX_PATH = Path("data/rag/indexes/medical_v0.1")
 CASES_PATH = Path("src/rag/retrieval/retrieval_cases.json")
+STRESS_PATH = Path("src/rag/retrieval/low_similarity_cases.json")
 LOG_PATH = Path("evaluation/rag/phase1_gate_answers.json")
+
+# 34 back-to-back requests hit Groq's rate limit (HTTP 429) and produced
+# eight fallbacks that said nothing about answer quality. Spacing them is
+# cheaper than re-running and misreading the result.
+REQUEST_SPACING_S = 3.0
 
 # Language that acknowledges the evidence may not settle the question.
 HEDGE_MARKERS = (
@@ -78,13 +94,17 @@ def main() -> int:
     print(f"Loading embedding model and index... ({len(queries)} fixed queries)")
     pipeline = build_pipeline()
 
-    rows, log = [], []
+    rows, log, unreachable = [], [], []
 
     for index, query in enumerate(queries, start=1):
         evidence = pipeline.evidence_formatter.get_evidence(query)
         answer = pipeline.answer(query)
+        time.sleep(REQUEST_SPACING_S)
         low = evidence.is_low_similarity
         hedges = [h for h in HEDGE_MARKERS if h in answer.text.lower()]
+        infra = _is_infrastructure_failure(answer.fallback_reason)
+        if infra:
+            unreachable.append(index)
 
         checks = {
             "1_cites_source": (
@@ -118,6 +138,12 @@ def main() -> int:
         mark = "PASS" if passed == len(rows) else "FAIL"
         print(f"  {mark}  {name:<28} {passed}/{len(rows)}")
 
+    if unreachable:
+        print(f"\n  INCONCLUSIVE: the LLM was unreachable for {len(unreachable)} "
+              f"of {len(rows)} queries {unreachable}.")
+        print("  Those answers are the deterministic fallback, so the criteria "
+              "below describe\n  the network, not the pipeline. Re-run.")
+
     total = sum(all(r.values()) for r in rows)
     low_n = sum(entry["low_similarity"] for entry in log)
     fb_n = sum(entry["used_fallback"] for entry in log)
@@ -130,9 +156,95 @@ def main() -> int:
     LOG_PATH.write_text(json.dumps(log, indent=2), encoding="utf-8")
     print(f"  answers written to       {LOG_PATH}")
 
-    gate = total == len(rows)
-    print(f"\n  GATE: {'PASS' if gate else 'FAIL'}")
-    return 0 if gate else 1
+    gate = total == len(rows) and not unreachable
+    verdict = "PASS" if gate else ("INCONCLUSIVE" if unreachable else "FAIL")
+    print(f"\n  GATE (spec section 6): {verdict}")
+
+    stress_ok = _run_criterion3_stress(pipeline, log)
+
+    LOG_PATH.write_text(json.dumps(log, indent=2), encoding="utf-8")
+    return 0 if (gate and stress_ok) else 1
+
+
+def _run_criterion3_stress(pipeline: RagAnswerPipeline, log: list) -> bool:
+    """
+    Exercise criterion 3 on queries that actually trigger it.
+
+    Reported separately from the gate, and deliberately NOT folded into
+    it: section 6 fixes the sample at the 16 retrieval-eval queries, and
+    redefining someone else's gate to include our own questions would
+    make a passing result mean something different from what the spec
+    says it means.
+
+    It still affects the exit code, because a criterion that only holds
+    on its single original case is not demonstrated to work.
+    """
+
+    if not STRESS_PATH.exists():
+        return True
+
+    spec = json.loads(STRESS_PATH.read_text(encoding="utf-8"))
+    cases = spec["cases"]
+
+    print("\n" + "=" * 70)
+    print(f"CRITERION 3 STRESS SET ({len(cases)} low-similarity queries)")
+    print("=" * 70)
+
+    passed, drifted, errored = 0, [], []
+    for index, case in enumerate(cases, start=1):
+        query = case["query"]
+        evidence = pipeline.evidence_formatter.get_evidence(query)
+        answer = pipeline.answer(query)
+        time.sleep(REQUEST_SPACING_S)
+        hedges = [h for h in HEDGE_MARKERS if h in answer.text.lower()]
+
+        # A query that no longer scores low tests nothing; say so rather
+        # than counting it as a pass.
+        if answer.used_fallback and answer.fallback_reason and (
+            "generation failed" in answer.fallback_reason
+        ):
+            # The LLM never answered, so this says nothing about hedging.
+            errored.append((query, answer.fallback_reason))
+            mark = "ERROR"
+        elif not evidence.is_low_similarity:
+            drifted.append((query, evidence.top_score))
+            mark = "DRIFT"
+        elif hedges:
+            passed += 1
+            mark = "PASS "
+        else:
+            mark = "FAIL "
+
+        print(f"  [{index:2}] {evidence.top_score:.4f} {mark} "
+              f"fallback={str(answer.used_fallback):5} {query[:42]}")
+        log.append({
+            "set": "criterion3_stress", "query": query,
+            "top_score": evidence.top_score,
+            "low_similarity": evidence.is_low_similarity,
+            "used_fallback": answer.used_fallback,
+            "fallback_reason": answer.fallback_reason,
+            "hedges": hedges, "answer": answer.text,
+        })
+
+    binding = len(cases) - len(drifted) - len(unreachable)
+    if unreachable:
+        print(f"\n  LLM unreachable for {len(unreachable)} queries -- excluded; "
+              "re-run when the network is stable.") - len(errored)
+    if errored:
+        print(f"\n  {len(errored)} query(s) never reached the LLM -- not a "
+              "criterion-3 result:")
+        for query, reason in errored[:3]:
+            print(f"    {reason[:76]}  ({query[:34]})")
+    print(f"\n  binding (still low-similarity): {binding}/{len(cases)}")
+    if drifted:
+        print("  drifted above the threshold -- replace these:")
+        for query, score in drifted:
+            print(f"    {score:.4f}  {query}")
+    print(f"  stated uncertainty            : {passed}/{binding}")
+
+    ok = binding > 0 and passed == binding and not unreachable
+    print(f"\n  CRITERION 3 STRESS: {'PASS' if ok else 'FAIL'}")
+    return ok
 
 
 if __name__ == "__main__":

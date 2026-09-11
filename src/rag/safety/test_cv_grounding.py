@@ -249,3 +249,58 @@ class ContainmentMetricTests(unittest.TestCase):
                 cv_context=context, cv_threshold=0.99,
             )
         )
+
+
+class UncoveredQuestionFallbackTests(unittest.TestCase):
+    """
+    An uncovered question must not be answered with the least-unrelated
+    text in the corpus, presented as "the relevant evidence".
+
+    Found by stress-testing criterion 3: "How is impetigo treated?"
+    (top_score 0.2622) returned FDA dosing instructions for basal cell
+    carcinoma chemotherapy. Retrieval has no score floor, so it always
+    returns its top-k however poorly they match.
+    """
+
+    def _weak(self) -> EvidenceBundle:
+        return EvidenceBundle(chunks=[
+            EvidenceChunk(
+                score=0.2622,
+                document_id="AAD_BASAL_CELL_CARCINOMA_001",
+                title="Basal cell carcinoma: From symptoms to treatments",
+                text=(
+                    "Imiquimod is FDA-approved to treat superficial basal cell "
+                    "carcinoma. Patients usually apply imiquimod once a day for "
+                    "6 weeks or longer."
+                ),
+            )
+        ])
+
+    def test_unrelated_evidence_is_not_shown(self):
+        text = build_fallback_answer(self._weak())
+        self.assertNotIn("Imiquimod", text)
+        self.assertNotIn("relevant evidence directly", text)
+
+    def test_user_is_told_the_sources_do_not_cover_it(self):
+        text = build_fallback_answer(self._weak())
+        self.assertIn("don't cover this question", text)
+        self.assertIn("healthcare professional", text)
+
+    def test_usable_evidence_is_still_shown(self):
+        """The guard must not suppress evidence that genuinely matched."""
+        strong = EvidenceBundle(chunks=[
+            EvidenceChunk(0.7471, "AAD_AK", "Actinic keratosis",
+                          "AK appears as a rough, scaly patch.")
+        ])
+        text = build_fallback_answer(strong)
+        self.assertIn("rough, scaly patch", text)
+
+    def test_cv_assessment_still_reaches_the_user(self):
+        """
+        Spec 5.4 is unconditional: CV evidence is safety-relevant and must
+        arrive even when retrieval returned nothing usable.
+        """
+        context = parse_cv_assessment(json.loads(FIXTURES.read_text())[0]["payload"])
+        text = build_fallback_answer(self._weak(), cv_context=context)
+        self.assertIn("HIGH", text)
+        self.assertNotIn("Imiquimod", text)

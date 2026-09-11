@@ -390,24 +390,42 @@ def build_fallback_answer(
 
     cv_block = render_cv_context(cv_context)
 
-    if evidence.is_empty and not cv_block:
+    # Evidence that barely matched must NOT be introduced as "the
+    # relevant evidence". Retrieval returns its top-k with no minimum
+    # score, so for a question the corpus does not cover, those chunks
+    # are merely the least-unrelated text available.
+    #
+    # Measured before this guard existed: "How is impetigo treated?"
+    # (top_score 0.2622) returned FDA dosing instructions for basal cell
+    # carcinoma chemotherapy, introduced as "Here is the relevant
+    # evidence directly". Three individually-correct behaviours composed
+    # into that -- retrieval has no score floor, the model correctly said
+    # the sources do not cover impetigo, and the grounding check
+    # correctly rejected that sentence, because a statement about the
+    # ABSENCE of evidence cannot lexically overlap the evidence.
+    #
+    # The fix belongs here, not in the grounding check: letting an answer
+    # skip grounding by claiming to have no evidence would be a loophole
+    # any hallucination could use.
+    evidence_is_usable = not evidence.is_empty and not evidence.is_low_similarity
+
+    if not evidence_is_usable and not cv_block:
         return (
-            "A full explanation isn't available right now, and no "
-            "relevant medical evidence was found for this question. "
-            "Please consult a healthcare professional."
+            "A full explanation isn't available right now, and the medical "
+            "sources available to me don't cover this question. Please "
+            "consult a healthcare professional."
         )
 
     parts = ["A full explanation isn't available right now."]
 
     if cv_block:
+        # CV context describes THIS patient and is safety-relevant, so it
+        # reaches the user whatever retrieval returned (spec 5.4).
         parts.append(
-            "Here is the assessment of your photo, and the relevant "
-            "medical information, directly:\n\n" + cv_block
-            if not evidence.is_empty
-            else "Here is the assessment of your photo directly:\n\n" + cv_block
+            "Here is the assessment of your photo directly:\n\n" + cv_block
         )
 
-    if not evidence.is_empty:
+    if evidence_is_usable:
         parts.append(
             (
                 "Relevant medical information:\n\n"
@@ -417,6 +435,12 @@ def build_fallback_answer(
             + evidence.format_for_prompt()
             + "\n\n"
             + evidence.format_sources_line()
+        )
+    else:
+        parts.append(
+            "The medical sources available to me don't cover this question, "
+            "so I haven't included them here. Please consult a healthcare "
+            "professional."
         )
 
     return "\n\n".join(parts)

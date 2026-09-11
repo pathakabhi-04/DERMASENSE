@@ -1,0 +1,26 @@
+{
+  "purpose": "Exercise spec section 6's third pass criterion -- 'states uncertainty explicitly whenever retrieval returned low-similarity evidence'. The fixed 16-query gate set contains only ONE low-similarity query (case 11, 0.3415), so that criterion binds once and is vacuously true for the other 15. One binding case is thin evidence that the mechanism generalises.",
+  "not_a_retrieval_eval_set": "These have no expected_documents, because the point is that the corpus has no good answer. They are dermatology and first-aid questions a real user might plausibly ask that this corpus does not cover. Keep them OUT of retrieval_cases.json: that file is the collaborator's fixed evaluation set and section 6 requires reusing it unchanged.",
+  "threshold": 0.45,
+  "measured": "2026-09-11 against medical_v0.1 (156 chunks). Scores drift if the corpus changes; a query that rises above the threshold should be replaced, not silently kept.",
+  "cases": [
+    { "query": "What is vitiligo?", "top_score": 0.1971 },
+    { "query": "How is impetigo treated?", "top_score": 0.2622 },
+    { "query": "What causes hair loss in women?", "top_score": 0.2763 },
+    { "query": "What causes cold sores?", "top_score": 0.3116 },
+    { "query": "What causes hives?", "top_score": 0.3145 },
+    { "query": "What causes excessive sweating?", "top_score": 0.3172 },
+    { "query": "What causes warts?", "top_score": 0.3276 },
+    { "query": "What is shingles?", "top_score": 0.3462 },
+    { "query": "How do I treat a fungal nail infection?", "top_score": 0.3472 },
+    { "query": "What should I do for a bee sting?", "top_score": 0.3637 },
+    { "query": "What is cellulitis?", "top_score": 0.3673 },
+    { "query": "How should I care for a piercing?", "top_score": 0.3695 },
+    { "query": "What is rosacea and how is it managed?", "top_score": 0.3837 },
+    { "query": "How do I treat dandruff?", "top_score": 0.4074 },
+    { "query": "How is athlete's foot treated?", "top_score": 0.4092 },
+    { "query": "How do I treat an ingrown toenail?", "top_score": 0.4224 },
+    { "query": "What causes eczema flare-ups?", "top_score": 0.4285 },
+    { "query": "How do I get rid of acne scars?", "top_score": 0.4466 }
+  ]
+}
