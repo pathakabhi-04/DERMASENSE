@@ -47,7 +47,45 @@ to tell whether a change helped.
 
 ---
 
-## Step 2 — Retrain with melanoma actually represented
+## ⚠️ Step 2 as originally written is largely REFUTED by prior work
+
+Re-reading the repo's own experiment record (2026-09-12) closed most of
+what this step proposed. Recording it here so the GPU spend is not made
+twice:
+
+| Proposed | Status | Evidence |
+|---|---|---|
+| Class-weighted loss | **already tried, rejected** | `experiments/isic2019_resnet50_weighted.md`: val +0.0099 but frozen test 0.576770 → 0.575637, "did not demonstrate a meaningful improvement in held-out generalization" |
+| Weight melanoma up | **misconceived** | ISIC weighting *down*-weights MEL (0.4457) — MEL is 17.7% of ISIC, not rare |
+| More capacity | **already tried, no effect on MEL** | MEL recall: resnet18 0.5646, resnet50 0.5405, resnet50-weighted 0.5661 |
+| Reweighting / SupCon on the overlap | **already tried, rejected** | `project_state.md`: "representation overlap confirmed, not fixable by reweighting/SupCon alone. Accepted as a known limitation." |
+| Threshold on malignant probability | **already settled, and beaten** | `phase4_safety_policy/`: reviewing all `MONITOR` catches 100% of dangerous failures at 18.8% review rate; probability thresholds reach 43% at best |
+
+Also corrected: the shipped safety gate routes every `MONITOR` to
+`REVIEW` (`src/risk/safety_gate.py:67`), so melanomas landing in
+`MONITOR` reach a human, not the user. See
+`docs/product_scope_and_readiness.md` §1.
+
+**What remains untried**, and is therefore where any GPU spend belongs:
+
+1. **A malignant/benign head.** Nothing in any doc attempts it. The
+   product asks "does this need a doctor?", which is a strictly easier
+   question than the 6-way one, and the 6-way objective is what the
+   evidence says is misaligned.
+2. **Domain-appropriate data.** Every number in this repo is dermoscopy
+   or clinical photography. None is a phone photo.
+
+**Test before training:** of the 78 melanomas receiving <5% malignant
+probability (`analysis/quality/mel_sensitivity/threshold_vs_retraining.md`),
+does a binary head separate them? Extracted features already exist in
+`analysis/scc_bcc/*.npz`, so this is answerable with no training at all.
+If a binary probe cannot separate them either, the information is absent
+from the representation and no head will fix it — which would redirect
+the effort to data rather than objective.
+
+---
+
+## Step 2 (original) — Retrain with melanoma actually represented
 
 **Cost:** days. **Expected effect: the largest available.**
 

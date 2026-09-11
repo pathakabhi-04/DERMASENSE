@@ -28,22 +28,48 @@ its test split. The 95% confidence interval is roughly 30–93%. We do not
 actually know the melanoma recall; we know it is somewhere in a range
 that includes "very bad".
 
-### Why this matters more than it sounds
+### Why this matters more than it sounds — with an important correction
 
 Trace a melanoma misread as `NEV` through `src/risk/action_mapping.py`:
 
 ```
 MEL photographed -> classified NEV -> MONITOR -> risk_category LOW
-                                  -> "low risk, keep an eye on it"
 ```
 
-The Phase 4 gate routes `MONITOR -> REVIEW`, which is the right instinct
-— but a reviewer is a *person*. In an unsupervised consumer app there is
-no reviewer, and `LOW` reaches the user unchallenged.
+**Correction (2026-09-12).** An earlier draft of this section said `LOW`
+"reaches the user unchallenged". That is wrong about the shipped system
+and the error is worth recording rather than quietly deleting.
+
+`src/risk/safety_gate.py:67` routes **every** `MONITOR` action to
+`REVIEW`, unconditionally. That policy was chosen deliberately in Phase
+4 after comparing alternatives, and the comparison
+(`analysis/product_eval/phase4_safety_policy/`) shows why:
+
+| policy | review rate | dangerous failures caught |
+|---|---:|---:|
+| `low_risk_high_risk_prob_ge_0.10` | 4.5% | 43% |
+| `global_confidence_lt_0.90` | 67.6% | 57% |
+| **`low_risk_prediction_review`** (shipped) | **18.8%** | **100%** |
+
+Reviewing every `MONITOR` catches 100% of high-risk→MONITOR errors *by
+construction*, at a lower review rate than any confidence-threshold
+policy achieving even 57%. The design is sound and already settled.
+
+**So the real exposure is narrower and different in kind.** It is not
+"the model tells melanoma patients they are fine". It is:
+
+> ~28% of melanomas land in a review queue, and the product is only as
+> safe as that queue actually being staffed and worked through.
+
+That is an operational and staffing dependency, not a model defect. It
+becomes a model defect only if `MONITOR` is ever auto-released — which
+is precisely the change an unsupervised consumer app would be tempted to
+make, and must not.
 
 **A reassuring false negative is the one output that can kill someone.**
 It is strictly worse than no app: it can stop a person seeing a doctor
-they would otherwise have seen.
+they would otherwise have seen. The gate exists so that output cannot be
+produced without a human first looking.
 
 ---
 
@@ -96,6 +122,23 @@ says plainly when the corpus doesn't cover a question.
 A system with 55% sensitivity can be honest about uncertainty. It cannot
 be reassuring. Drop the `LOW` risk label from anything user-facing until
 the sensitivity supports it.
+
+**Restated precisely, given §1's correction.** The shipped gate already
+prevents `MONITOR` from being auto-released, so the rule is not asking
+for a new safety mechanism — it is asking that the existing one never be
+relaxed, and that the *narrow* product simply not have a reassuring
+output to relax toward:
+
+- **Never auto-release `MONITOR`.** The gate does this today. An
+  unsupervised deployment is the scenario that breaks it.
+- **If there is no reviewer, there is no `LOW`.** A product without a
+  review queue must show "we can't tell — see a clinician" for what
+  would have been `MONITOR`, not silence and not reassurance.
+
+That second point is what makes the narrow product shippable without a
+clinical staffing commitment: capture assistance, change tracking and a
+clinician summary have no reassuring output to begin with, so they do
+not depend on a review queue existing.
 
 ---
 
