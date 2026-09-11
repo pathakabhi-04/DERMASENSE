@@ -1,5 +1,13 @@
 # The backbone already knows. The 6-class head is throwing it away.
 
+> **⚠️ SUPERSEDED IN PART (2026-09-12).** The out-of-fold numbers below
+> were optimistic. Fitted properly on ISIC val and evaluated on untouched
+> ISIC test, the referral head reaches **0.8498 melanoma at 39.7% benign
+> referral — it does NOT clear the ≥0.90 target** this document claimed.
+> The qualitative finding stands (the signal is present and the 6-class
+> head discards it); the magnitude does not. See
+> `referral_head_result.md`.
+
 **Date:** 2026-09-12 · **Script:** `scripts/probe_binary_separability.py`
 **Cost:** no GPU, no training of any network. Seconds of logistic regression
 on features cached during the SCC/BCC investigation.
