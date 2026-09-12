@@ -36,7 +36,7 @@ class RealFixtureTests(unittest.TestCase):
     def test_all_five_fixtures_parse(self):
         self.assertEqual(len(self.contexts), 5)
         for c in self.contexts:
-            self.assertEqual(c.contract_version, "1.1")
+            self.assertIn(c.contract_version, {"1.1", "1.2"})
 
     def test_1_first_visit_does_not_claim_a_comparison(self):
         c = self.contexts[0]
@@ -77,8 +77,12 @@ class RealFixtureTests(unittest.TestCase):
         c = self.contexts[4]
         self.assertIn("LOW_CROP_BLUR", c.quality_flags)
         self.assertEqual(c.risk_category, "MEDIUM")
-        self.assertFalse(c.requires_review)
         self.assertIn("blurred", c.format_for_prompt())
+        # `requires_review` is deliberately NOT asserted here. It used to
+        # be False, and CV-4b (contract 1.2) can now set it -- but that is
+        # the referral head, not the quality flag. Quality flags remain
+        # disclosure-only, which is what risk_category above tests.
+        self.assertNotIn("REFERRAL_HEAD_RAISED_FROM_LOW", c.quality_flags)
 
     def test_rendered_confidence_is_calibrated_never_raw_softmax(self):
         """The defect CV-8 v1.1 fixed, asserted from the RAG side too."""
