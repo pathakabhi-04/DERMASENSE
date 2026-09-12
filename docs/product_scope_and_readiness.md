@@ -177,16 +177,19 @@ Four gates, in order. None is optional.
    images and ISIC dermoscopy are not what a user's camera produces.
    Current numbers will not survive that shift, and validating on the
    training distribution proves nothing about deployment. **No longer
-   just asserted** — measured directionally on biopsy-proven clinical
-   photography (DDI/DDI-2, 25 melanomas), and the finding is broader
-   than CV-4b alone: CV-4b's malignant-vs-benign AUC drops from 0.9050
-   (ISIC dermoscopy) to 0.5742, near chance, but the shipped 6-class
-   classifier ALSO degrades on this same data — melanoma routing
-   0.7180 (ISIC, in-domain) → 0.3200 (clinical photos), worse than
-   either in-domain figure or CV-4b on the identical images. This
-   implicates the shared representation, not just one linear head.
-   See `analysis/quality/mel_sensitivity/referral_head_on_ddi.md` and
-   `native_classifier_on_ddi.md`.
+   just asserted** — measured across three independent clinical-photo
+   sources (DDI, DDI-2, Fitzpatrick17k; 108 melanomas combined). Two
+   distinct findings, not one: CV-4b's (the referral head's)
+   malignant-vs-benign AUC collapses on **every** source tested
+   (0.59–0.69, vs 0.9050 on ISIC) — a general, reproducible transfer
+   failure. The shipped 6-class classifier's failure is **not**
+   general — severe on DDI/DDI-2 (melanoma routing 0.72→0.25–0.33) but
+   much milder on Fitzpatrick17k (0.69, close to in-domain) — so
+   source-specific capture/curation differences, not the shared
+   backbone broadly, are the leading open question there. See
+   `analysis/quality/mel_sensitivity/domain_shift_second_source.md`
+   (start here) and the two single-source docs it supersedes in scope
+   (`referral_head_on_ddi.md`, `native_classifier_on_ddi.md`).
 3. **No reassurance, ever** (§2.4), until sensitivity supports it.
 4. **Regulatory.** Anything returning a risk category on a skin lesion
    is Software as a Medical Device. FDA/CE has a defined pathway; it
