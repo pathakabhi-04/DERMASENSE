@@ -124,6 +124,30 @@ that, deliberately, per the section above).
   the raw numbers, without this module fabricating a threshold to
   summarize them into the JSON contract's `quality_flags`.
 
+## How CV-4b (the referral head) affects risk_category
+
+A **floor, not a ratchet**: if the referral head says this lesion needs a
+clinician, `risk_category` may not be LOW, and `requires_review` becomes
+True. MEDIUM and HIGH are left alone.
+
+Why a floor rather than the one-step escalation CV-7 uses: the head was
+measured on exactly this question -- "referred or not" -- at 0.9024
+melanoma routing for 39.4% benign referral. It has no calibrated claim
+about *degree* of risk, so promoting MEDIUM to HIGH on its say-so would
+assert something the measurement does not support. Preventing LOW is
+precisely what it was validated to do.
+
+The harm being fixed is specific. The shipped path infers referral from
+the 6-way argmax, so a melanoma that loses argmax to NEV becomes MONITOR
+-> LOW. The safety gate already sends MONITOR to REVIEW, so a clinician
+still sees it -- but the USER is told LOW risk, and that is the failure
+this closes. On the ISIC2019 test split the head routes 601 of 666
+melanomas versus 478 under argmax.
+
+The head is advisory and never touches `native_class`: narration still
+comes from CV-4. Referral and diagnosis are deliberately separate signals
+now, because deriving one from the other is what lost the melanomas.
+
 ## The one real design decision: how CV-7 affects risk_category
 
 A **one-way escalation ratchet**, never a de-escalation:
@@ -174,6 +198,8 @@ from src.temporal.delta import TemporalVerdict
 from src.temporal.pipeline import TemporalResult
 
 if TYPE_CHECKING:
+    from src.risk.referral_head import ReferralDecision
+
     # Import deferred to type-checking only: src.inference.orchestrator
     # imports assess_risk/RiskAssessment from this module, so a runtime
     # import here would be circular.
@@ -192,6 +218,9 @@ _BASE_RISK_CATEGORY: dict[ProductAction, RiskCategory] = {
     ProductAction.MONITOR: RiskCategory.LOW,
     ProductAction.UNKNOWN: RiskCategory.HIGH,
 }
+
+# CV-4b floor: a referred lesion is never presented as LOW.
+_REFERRAL_FLOOR = RiskCategory.MEDIUM
 
 _ESCALATE_ONE_STEP: dict[RiskCategory, RiskCategory] = {
     RiskCategory.LOW: RiskCategory.MEDIUM,
@@ -236,7 +265,7 @@ _NO_COMPARISON_TEMPORAL: dict[str, Any] = {
 # value). 1.1 added this field itself plus the `risk_reason` fixes
 # described in the module docstring. Consumers should fail loudly on an
 # unrecognized MAJOR, and may proceed on a higher MINOR.
-CONTRACT_VERSION = "1.1"
+CONTRACT_VERSION = "1.2"
 
 
 @dataclass(frozen=True)
@@ -311,6 +340,7 @@ def assess_risk(
     lesion_id: str,
     temporal: TemporalResult | None = None,
     extra_quality_flags: tuple[str, ...] = (),
+    referral: "ReferralDecision | None" = None,
 ) -> RiskAssessment:
     """
     Converge CV-4 (via `candidate`) and CV-7 (via `temporal`) into one
@@ -343,6 +373,15 @@ def assess_risk(
     risk_category = _ESCALATE_ONE_STEP[base_category] if escalated else base_category
     requires_review = candidate.requires_review or escalated
 
+    # CV-4b floor, applied after CV-7 so the two cannot cancel out.
+    referral_raised = False
+    if referral is not None and referral.refer:
+        requires_review = True
+        if risk_category is RiskCategory.LOW:
+            risk_category = _REFERRAL_FLOOR
+            referral_raised = True
+            quality_flags.append("REFERRAL_HEAD_RAISED_FROM_LOW")
+
     # CV-6's CALIBRATED confidence, never `candidate.confidence` (the raw
     # max softmax) -- see the module docstring's "risk_reason is consumed
     # downstream" section. These differ by up to ~7 points on real data.
@@ -350,6 +389,11 @@ def assess_risk(
         f"{candidate.predicted_class} -> {candidate.product_action.value} "
         f"({candidate.calibrated_confidence:.0%} confidence)"
     )
+    if referral_raised:
+        reason += (
+            "; raised from LOW because the referral head flagged this "
+            "lesion as needing clinical review"
+        )
     if escalated:
         # `magnitude` is a unitless threshold-relative ratio, meaningless
         # to a reader without the threshold constants -- stated

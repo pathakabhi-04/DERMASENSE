@@ -100,6 +100,7 @@ from src.quality.capture_guidance import (
 from src.quality.signals import blur_signal, contrast_signal
 from src.risk.action_mapping import ProductAction
 from src.risk.convergence import RiskAssessment, assess_risk
+from src.risk.referral_head import DEFAULT_HEAD_PATH, ReferralHead
 from src.temporal.calibration import RulerCalibration
 from src.temporal.measurement import LesionMeasurement
 from src.risk.safety_gate import GateDecision
@@ -298,6 +299,26 @@ class PipelineResult:
         }
 
 
+def _load_referral_head(path: "str | Path | None") -> ReferralHead | None:
+    """
+    Load CV-4b if it is present.
+
+    Absent, the pipeline behaves exactly as it did before the head
+    existed. A missing file is therefore not an error -- it is the
+    rollback path, and it must stay silent so an environment without
+    the checkpoint still produces valid assessments.
+    """
+
+    if path is None:
+        return None
+
+    path = Path(path)
+    if not path.exists():
+        return None
+
+    return ReferralHead.load(path)
+
+
 def _resolve_temporal_pairing(
     num_candidates: int, prior_evidence: Any | None
 ) -> tuple[bool, str | None]:
@@ -361,11 +382,15 @@ class DermaSensePipeline:
         device: str | torch.device = "cpu",
         crop_margin: float = CROP_MARGIN,
         calibration_temperature: float = DEFAULT_TEMPERATURE,
+        referral_head: ReferralHead | None = None,
     ):
         self.device = torch.device(device)
         self.router = router
         self.segmenter = segmenter
         self.classifier = classifier
+        # CV-4b. Optional on purpose: absent, CV-8 behaves exactly as
+        # before, so the head can be rolled back by deleting a file.
+        self.referral_head = referral_head
         self.detector = detector
         # CV-6 evidence (docs/cv6_uncertainty_spec.md). Opt-in: None
         # unless additional_ensemble_checkpoints was passed to
@@ -396,6 +421,7 @@ class DermaSensePipeline:
         classifier_checkpoint: str | Path,
         detector_weights: str | Path | None = None,
         additional_ensemble_checkpoints: tuple[str | Path, ...] | None = None,
+        referral_head_path: str | Path | None = DEFAULT_HEAD_PATH,
         compute_gradcam: bool = False,
         device: str | torch.device = "cpu",
         crop_margin: float = CROP_MARGIN,
@@ -435,6 +461,7 @@ class DermaSensePipeline:
             )
 
         return cls(
+            referral_head=_load_referral_head(referral_head_path),
             router=load_router_checkpoint(str(router_checkpoint), device),
             segmenter=load_segmentation_model(segmentation_checkpoint, device),
             ensemble_classifiers=ensemble_classifiers,
@@ -496,6 +523,26 @@ class DermaSensePipeline:
         """Run the primary CV-4 classifier on an RGB crop."""
         return self.classifier.predict(self._cv4_tensor(crop_rgb))
 
+    def _refer_crop(self, crop_rgb: np.ndarray):
+        """
+        Score the CV-4b referral head on the same crop CV-4 sees.
+
+        Uses the identical tensor so the head is applied to exactly the
+        representation it was fitted on. Returns None when no head is
+        loaded, which leaves CV-8 behaving as it did before -- the head
+        is additive, and a missing one must not change a risk category.
+        """
+
+        if self.referral_head is None:
+            return None
+
+        with torch.no_grad():
+            features = self.classifier.model.extract_features(
+                self._cv4_tensor(crop_rgb).unsqueeze(0).to(self.device)
+            )
+
+        return self.referral_head.decide(features.cpu().numpy().reshape(-1))
+
     def _run_candidate(
         self,
         image_bgr: np.ndarray,
@@ -519,6 +566,7 @@ class DermaSensePipeline:
         x1, y1, x2, y2 = px_box
         crop_rgb = cv2.cvtColor(image_bgr[y1:y2, x1:x2], cv2.COLOR_BGR2RGB)
         prediction = self._classify_crop(crop_rgb)
+        referral = self._refer_crop(crop_rgb)
 
         # Crop-quality evidence (docs/cv4_domain_evidence_spec.md):
         # computed on the exact crop CV-4 saw, using CV-1's existing
@@ -589,6 +637,7 @@ class DermaSensePipeline:
             lesion_id=lesion_id,
             temporal=temporal,
             extra_quality_flags=(temporal_skip_reason,) if temporal_skip_reason else (),
+            referral=referral,
         )
         return dataclasses.replace(candidate, risk_assessment=risk_assessment)
 

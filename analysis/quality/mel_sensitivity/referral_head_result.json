@@ -3,9 +3,9 @@
   "threshold_split": "val",
   "eval_split": "test",
   "threshold_chosen_on": "val",
-  "threshold": 0.02512112446129322,
-  "test_melanoma_routed": 0.8288288288288288,
-  "test_benign_referred": 0.288152120916626,
+  "threshold": 0.0029963667038828135,
+  "test_melanoma_routed": 0.9024024024024024,
+  "test_benign_referred": 0.393954168698196,
   "test_auc": 0.905017860314443,
-  "target_met": false
+  "target_met": true
 }

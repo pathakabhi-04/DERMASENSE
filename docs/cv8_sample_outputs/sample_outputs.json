@@ -3,7 +3,7 @@
     "description": "first visit -- no prior image supplied at all",
     "source": "data/raw/pad_ufes/images/imgs_part_1/PAT_106_158_270.png",
     "payload": {
-      "contract_version": "1.1",
+      "contract_version": "1.2",
       "lesion_id": "first-visit-example",
       "diagnosis": {
         "native_class": "BCC",
@@ -34,7 +34,7 @@
       },
       "uncertainty": {
         "confidence": 0.4401590868670385,
-        "requires_review": false
+        "requires_review": true
       },
       "quality_flags": [
         "NO_TEMPORAL_COMPARISON"
@@ -48,7 +48,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/General/General18_Lesion7_visit2.jpg"
     },
     "payload": {
-      "contract_version": "1.1",
+      "contract_version": "1.2",
       "lesion_id": "General18_Lesion7",
       "diagnosis": {
         "native_class": "ACK",
@@ -91,7 +91,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/HighRisk/HighRisk37_Lesion6_visit2.jpg"
     },
     "payload": {
-      "contract_version": "1.1",
+      "contract_version": "1.2",
       "lesion_id": "HighRisk37_Lesion6",
       "diagnosis": {
         "native_class": "NEV",
@@ -134,7 +134,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/General/General151_Lesion3_visit2.jpg"
     },
     "payload": {
-      "contract_version": "1.1",
+      "contract_version": "1.2",
       "lesion_id": "General151_Lesion3",
       "diagnosis": {
         "native_class": "ACK",
@@ -165,7 +165,7 @@
       },
       "uncertainty": {
         "confidence": 0.4116161495445477,
-        "requires_review": false
+        "requires_review": true
       },
       "quality_flags": [
         "DEGENERATE_MASK",
@@ -180,7 +180,7 @@
       "later": "866990d01449152d_NIMARE-A11453_A11453/data/Dermoscopic Images/HighRisk/HighRisk274_Lesion16_visit3.jpg"
     },
     "payload": {
-      "contract_version": "1.1",
+      "contract_version": "1.2",
       "lesion_id": "HighRisk274_Lesion16",
       "diagnosis": {
         "native_class": "ACK",
@@ -211,7 +211,7 @@
       },
       "uncertainty": {
         "confidence": 0.5236418142462375,
-        "requires_review": false
+        "requires_review": true
       },
       "quality_flags": [
         "LOW_CROP_BLUR"

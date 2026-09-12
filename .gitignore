@@ -58,3 +58,7 @@ data/rag/indexes/
 
 # RAG evaluation outputs (regenerate with: python -m src.rag.evaluate_cv_integration)
 evaluation/rag/
+
+# Referral head (CV-4b): small JSON weights, tracked despite checkpoints/
+!checkpoints/referral_head/
+!checkpoints/referral_head/*.json
