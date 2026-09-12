@@ -176,7 +176,11 @@ Four gates, in order. None is optional.
 2. **Prospective validation on real phone photos.** PAD-UFES clinical
    images and ISIC dermoscopy are not what a user's camera produces.
    Current numbers will not survive that shift, and validating on the
-   training distribution proves nothing about deployment.
+   training distribution proves nothing about deployment. **No longer
+   just asserted** — measured directionally on biopsy-proven clinical
+   photography (DDI/DDI-2, 25 melanomas): CV-4b's malignant-vs-benign
+   AUC drops from 0.9050 (ISIC dermoscopy) to 0.5742, near chance. See
+   `analysis/quality/mel_sensitivity/referral_head_on_ddi.md`.
 3. **No reassurance, ever** (§2.4), until sensitivity supports it.
 4. **Regulatory.** Anything returning a risk category on a skin lesion
    is Software as a Medical Device. FDA/CE has a defined pathway; it

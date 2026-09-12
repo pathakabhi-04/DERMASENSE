@@ -1,0 +1,1318 @@
+is_malignant,is_melanoma,source,disease,referred,probability
+False,False,DDI,acrochordon,True,0.05408724640867619
+False,False,DDI,actinic-keratosis,False,0.002991750129176261
+False,False,DDI,angioma,False,1.8676876648137866e-05
+False,False,DDI,arteriovenous-hemangioma,False,2.2790984624040393e-05
+True,False,DDI,basal-cell-carcinoma,True,0.9999998984215853
+True,False,DDI,basal-cell-carcinoma,True,0.9999973112337645
+True,False,DDI,basal-cell-carcinoma,True,0.9999681881567521
+True,False,DDI,basal-cell-carcinoma,True,0.9999999980319987
+True,False,DDI,basal-cell-carcinoma,True,0.01710307443919199
+True,False,DDI,basal-cell-carcinoma,False,6.47607736878223e-05
+True,False,DDI,basal-cell-carcinoma,True,0.39379116750399246
+True,False,DDI,basal-cell-carcinoma-nodular,True,0.999985820354109
+True,False,DDI,basal-cell-carcinoma-nodular,True,0.11245744497206284
+True,False,DDI,basal-cell-carcinoma-nodular,True,0.9585039614362139
+True,False,DDI,basal-cell-carcinoma-nodular,False,0.00042188285684773144
+True,False,DDI,basal-cell-carcinoma-nodular,True,0.99233644548905
+True,False,DDI,basal-cell-carcinoma-nodular,False,3.0733135995511956e-05
+True,False,DDI,basal-cell-carcinoma-superficial,True,0.5789532133887803
+False,False,DDI,condyloma-accuminatum,True,0.9999997551134652
+False,False,DDI,dermatofibroma,True,0.9204458315643573
+False,False,DDI,dermatofibroma,True,0.15823325098898222
+False,False,DDI,dermatofibroma,True,0.7643786915983436
+False,False,DDI,dermatofibroma,True,0.8811281397351897
+False,False,DDI,dermatofibroma,True,0.009178917070766724
+False,False,DDI,dermatofibroma,True,0.9999941363727816
+False,False,DDI,dysplastic-nevus,False,4.212529162226815e-06
+False,False,DDI,dysplastic-nevus,False,0.0017765767175877295
+False,False,DDI,eccrine-poroma,True,0.9999943327225341
+False,False,DDI,eccrine-poroma,True,0.9736618146867505
+False,False,DDI,eccrine-poroma,True,0.6488441319884137
+False,False,DDI,epidermal-cyst,False,0.0001687562775238663
+False,False,DDI,epidermal-cyst,True,0.12495817956968754
+False,False,DDI,epidermal-cyst,True,0.3124106292651139
+False,False,DDI,epidermal-cyst,False,2.4801776671800082e-08
+False,False,DDI,epidermal-cyst,True,0.9999814997634582
+False,False,DDI,epidermal-cyst,True,0.29726143952820333
+False,False,DDI,epidermal-cyst,True,0.9883000605398741
+False,False,DDI,epidermal-cyst,True,0.9998925123547094
+False,False,DDI,epidermal-cyst,True,0.5715821006450099
+False,False,DDI,epidermal-cyst,True,0.9711640846431365
+False,False,DDI,epidermal-cyst,False,0.00047195196618387425
+False,False,DDI,epidermal-cyst,True,0.011032150295189773
+False,False,DDI,epidermal-cyst,True,0.007735582878116217
+False,False,DDI,epidermal-cyst,True,0.09882723090992825
+False,False,DDI,epidermal-cyst,True,0.4424714639788828
+False,False,DDI,epidermal-cyst,True,0.5642325523153752
+False,False,DDI,inverted-follicular-keratosis,True,0.023171279365435348
+False,False,DDI,inverted-follicular-keratosis,True,0.9959398083368038
+True,False,DDI,kaposi-sarcoma,True,0.03133732090014803
+True,False,DDI,kaposi-sarcoma,True,0.8925688328776358
+True,False,DDI,kaposi-sarcoma,True,0.9988462592454613
+False,False,DDI,lipoma,True,0.7217194803418577
+False,False,DDI,lipoma,True,0.9693168688926206
+False,False,DDI,lipoma,True,0.9677836686009541
+False,False,DDI,melanocytic-nevi,False,5.027696638209619e-05
+False,False,DDI,melanocytic-nevi,False,0.0020367556380380103
+False,False,DDI,melanocytic-nevi,True,0.9998688068474215
+False,False,DDI,melanocytic-nevi,True,0.9968131174779626
+False,False,DDI,melanocytic-nevi,True,0.9999756360501748
+False,False,DDI,melanocytic-nevi,True,0.8483590000785127
+False,False,DDI,melanocytic-nevi,False,0.0005904080535427174
+False,False,DDI,melanocytic-nevi,True,0.24228843300263772
+False,False,DDI,melanocytic-nevi,True,0.10621603445454765
+False,False,DDI,melanocytic-nevi,True,0.9972896071894403
+False,False,DDI,melanocytic-nevi,False,0.001135289497556194
+False,False,DDI,melanocytic-nevi,True,0.007310554510076143
+False,False,DDI,melanocytic-nevi,True,0.7148829346789906
+False,False,DDI,melanocytic-nevi,True,0.9999173792303022
+False,False,DDI,melanocytic-nevi,True,0.9999981776052018
+False,False,DDI,melanocytic-nevi,True,0.005902449724851707
+False,False,DDI,melanocytic-nevi,True,0.5292043838905307
+False,False,DDI,melanocytic-nevi,False,0.002648132849615842
+False,False,DDI,melanocytic-nevi,True,0.999999996696308
+False,False,DDI,melanocytic-nevi,True,0.8782504370967875
+False,False,DDI,melanocytic-nevi,True,0.9999510378255471
+False,False,DDI,melanocytic-nevi,True,0.9949773625184568
+False,False,DDI,melanocytic-nevi,True,0.9935303934443617
+False,False,DDI,melanocytic-nevi,False,4.5013641270276925e-07
+False,False,DDI,melanocytic-nevi,True,0.09613573265638753
+False,False,DDI,melanocytic-nevi,True,0.9048940979263678
+False,False,DDI,melanocytic-nevi,True,0.9998713712687666
+False,False,DDI,melanocytic-nevi,False,3.6309060683980486e-06
+False,False,DDI,melanocytic-nevi,False,5.4020965166519765e-06
+False,False,DDI,melanocytic-nevi,False,4.243135959313024e-06
+False,False,DDI,melanocytic-nevi,True,0.00580687145922889
+False,False,DDI,melanocytic-nevi,True,0.9990191887993202
+False,False,DDI,melanocytic-nevi,True,0.5089347141905914
+False,False,DDI,melanocytic-nevi,True,0.9450755614155076
+False,False,DDI,melanocytic-nevi,False,2.0606741728458877e-06
+False,False,DDI,melanocytic-nevi,False,8.53222530244622e-06
+False,False,DDI,melanocytic-nevi,True,0.011541148484697226
+False,False,DDI,melanocytic-nevi,True,0.0032785455012380566
+False,False,DDI,melanocytic-nevi,True,0.4026212851675093
+False,False,DDI,melanocytic-nevi,True,0.999959722965306
+False,False,DDI,melanocytic-nevi,True,0.003374273001853727
+False,False,DDI,melanocytic-nevi,False,2.799993977761751e-07
+False,False,DDI,melanocytic-nevi,True,0.14916195846305205
+False,False,DDI,melanocytic-nevi,False,0.0019192628371914094
+False,False,DDI,melanocytic-nevi,True,0.031148956999636063
+False,False,DDI,melanocytic-nevi,True,0.6137562828633875
+False,False,DDI,melanocytic-nevi,True,0.022762652551423963
+True,True,DDI,melanoma,True,0.04525701759299126
+True,True,DDI,melanoma,False,2.4893900072200025e-08
+True,True,DDI,melanoma-acral-lentiginous,True,0.9989083739486895
+True,True,DDI,melanoma-acral-lentiginous,True,0.011268951554357089
+True,True,DDI,melanoma-acral-lentiginous,True,0.9998317293481884
+True,True,DDI,melanoma-acral-lentiginous,True,0.9993147522449708
+True,False,DDI,metastatic-carcinoma,True,0.9999800000198139
+False,False,DDI,molluscum-contagiosum,False,7.298971449116523e-06
+False,False,DDI,molluscum-contagiosum,True,0.9832358468894109
+False,False,DDI,molluscum-contagiosum,True,0.9996540621263912
+True,False,DDI,mycosis-fungoides,True,0.9987500248238446
+True,False,DDI,mycosis-fungoides,True,0.9756743740402506
+True,False,DDI,mycosis-fungoides,True,0.8958880041518398
+False,False,DDI,neurofibroma,True,0.9654837791742839
+False,False,DDI,neurofibroma,True,0.9945073730179355
+False,False,DDI,neurofibroma,True,0.999942570098696
+False,False,DDI,neurofibroma,True,0.26152872298353935
+False,False,DDI,neurofibroma,False,2.1891036969778446e-05
+False,False,DDI,neurofibroma,False,4.555182860391794e-06
+False,False,DDI,nevus-lipomatosus-superficialis,True,0.7816194352965911
+False,False,DDI,nevus-lipomatosus-superficialis,True,0.7536938673782948
+True,True,DDI,nodular-melanoma-(nm),True,0.9316581137222161
+False,False,DDI,pigmented-spindle-cell-nevus-of-reed,True,0.7152006929272995
+False,False,DDI,prurigo-nodularis,True,0.2646300799245358
+False,False,DDI,prurigo-nodularis,True,0.01872459257641357
+False,False,DDI,pyogenic-granuloma,True,0.00846688384931986
+False,False,DDI,pyogenic-granuloma,True,0.27000202037652327
+False,False,DDI,pyogenic-granuloma,True,0.012652679140180605
+False,False,DDI,seborrheic-keratosis,True,0.9856434626058143
+False,False,DDI,seborrheic-keratosis,True,0.24641270063019016
+False,False,DDI,seborrheic-keratosis,True,0.0480429977335612
+False,False,DDI,seborrheic-keratosis,True,0.9976409115878219
+False,False,DDI,seborrheic-keratosis,True,0.9998948789858482
+False,False,DDI,seborrheic-keratosis,True,0.14098912709743353
+False,False,DDI,seborrheic-keratosis,True,0.004343164746994468
+False,False,DDI,seborrheic-keratosis,True,0.999440533427055
+False,False,DDI,seborrheic-keratosis,True,0.7800521041946862
+False,False,DDI,seborrheic-keratosis,True,0.9968523931462547
+False,False,DDI,seborrheic-keratosis,True,0.005893107940301693
+False,False,DDI,seborrheic-keratosis,True,0.0038336817334022315
+False,False,DDI,seborrheic-keratosis,True,0.9977183082269729
+False,False,DDI,seborrheic-keratosis,True,0.10544397290238114
+False,False,DDI,seborrheic-keratosis,True,0.999646950790579
+False,False,DDI,seborrheic-keratosis,True,0.06319073868780337
+False,False,DDI,seborrheic-keratosis,True,0.9871501026954469
+False,False,DDI,seborrheic-keratosis,True,0.886190779335383
+False,False,DDI,seborrheic-keratosis,True,0.12860877436814422
+False,False,DDI,seborrheic-keratosis,True,0.734515996218113
+False,False,DDI,seborrheic-keratosis,True,0.32052464170448325
+False,False,DDI,seborrheic-keratosis-irritated,True,0.08134911842619762
+False,False,DDI,seborrheic-keratosis-irritated,True,0.06682887603847942
+False,False,DDI,seborrheic-keratosis-irritated,False,0.0020969382848119375
+False,False,DDI,seborrheic-keratosis-irritated,True,0.003930021110474943
+False,False,DDI,seborrheic-keratosis-irritated,True,0.9996368820181206
+False,False,DDI,seborrheic-keratosis-irritated,True,0.9939038575208836
+False,False,DDI,seborrheic-keratosis-irritated,True,0.9492184591971256
+False,False,DDI,seborrheic-keratosis-irritated,True,0.985846567089804
+False,False,DDI,seborrheic-keratosis-irritated,False,6.291889415807421e-05
+True,False,DDI,squamous-cell-carcinoma,True,0.9985550416086526
+True,False,DDI,squamous-cell-carcinoma,True,0.18321869744936892
+True,False,DDI,squamous-cell-carcinoma,True,0.6167009512775942
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,0.0004820493082141259
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9631224577525599
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.30052480306511303
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.0054463471507501336
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.00907857045868026
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9999912426466934
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9889865944177197
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,2.947059611535391e-09
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.016862275872060777
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,0.0010237426629008514
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9996218407568954
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.035973200816061805
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.857916171629213
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,9.143953030716636e-06
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.01725487642518852
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.201139767104507
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.11227111582272231
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.2638397575506242
+False,False,DDI,syringocystadenoma-papilliferum,True,0.9999974727482966
+False,False,DDI,trichofolliculoma,True,0.8145960700702317
+False,False,DDI,verruca-vulgaris,True,0.00674316564905357
+False,False,DDI,verruca-vulgaris,True,0.5880096802236134
+False,False,DDI,verruca-vulgaris,True,0.9553951268466583
+False,False,DDI,verruca-vulgaris,False,1.58102356134083e-06
+False,False,DDI,verruca-vulgaris,True,0.010160268111156508
+False,False,DDI,verruca-vulgaris,True,0.0033746622568532644
+False,False,DDI,verruca-vulgaris,True,0.3573277729644438
+False,False,DDI,verruca-vulgaris,False,2.850433417985765e-08
+False,False,DDI,verruca-vulgaris,True,0.9999911913180243
+False,False,DDI,verruca-vulgaris,True,0.9980335380939936
+False,False,DDI,verruca-vulgaris,False,2.0157461660699476e-05
+False,False,DDI,verruca-vulgaris,True,0.17029582560122178
+False,False,DDI,verruca-vulgaris,False,0.000179418053601548
+False,False,DDI,verruca-vulgaris,True,0.9970174720372583
+False,False,DDI,verruca-vulgaris,False,0.00030349655403278373
+False,False,DDI,verruca-vulgaris,False,1.5179975533415809e-06
+False,False,DDI,verruca-vulgaris,True,0.013121407071994266
+False,False,DDI,verruca-vulgaris,True,0.998221069092491
+False,False,DDI,verruca-vulgaris,True,0.13055964368801287
+False,False,DDI,verruca-vulgaris,True,0.9999390690704554
+False,False,DDI,verruca-vulgaris,True,0.057427869649307114
+False,False,DDI,verruca-vulgaris,False,0.0010791208602995155
+False,False,DDI,verruca-vulgaris,True,0.03720311151773878
+False,False,DDI,verruca-vulgaris,True,0.03157867851263357
+False,False,DDI,verruca-vulgaris,True,0.007225719389916418
+False,False,DDI,verruca-vulgaris,True,0.015092862910411417
+False,False,DDI,abscess,True,0.9993446470336117
+False,False,DDI,acquired-digital-fibrokeratoma,True,0.999935042998245
+False,False,DDI,acral-melanotic-macule,True,0.9968605621005029
+False,False,DDI,acrochordon,True,0.9999999449750622
+False,False,DDI,acrochordon,True,0.9999773329753985
+False,False,DDI,acrochordon,False,2.2732148059282358e-07
+False,False,DDI,acrochordon,False,3.623074488976948e-06
+False,False,DDI,acrochordon,True,0.7354917555367121
+False,False,DDI,acrochordon,True,0.03080136373782008
+False,False,DDI,acrochordon,True,0.895401329022211
+False,False,DDI,actinic-keratosis,True,0.21057139391769414
+False,False,DDI,actinic-keratosis,True,0.9999989149837638
+False,False,DDI,actinic-keratosis,True,0.9168368318579916
+False,False,DDI,angioma,True,0.9999994171993513
+False,False,DDI,angioma,False,0.0027384059648647165
+False,False,DDI,angioma,False,6.551912460506614e-06
+False,False,DDI,angioma,True,0.004703674343203423
+False,False,DDI,angioma,True,0.9999186597688582
+False,False,DDI,angioma,False,7.949024392738887e-08
+False,False,DDI,angioma,True,0.48976137736865555
+False,False,DDI,angioma,True,0.006057731776956969
+False,False,DDI,angioma,True,0.7193037635397641
+True,False,DDI,basal-cell-carcinoma,True,0.3068733979944145
+True,False,DDI,basal-cell-carcinoma,False,0.0004141621704382487
+True,False,DDI,basal-cell-carcinoma,True,0.003712295494273247
+True,False,DDI,basal-cell-carcinoma,True,0.9999986471465453
+True,False,DDI,basal-cell-carcinoma,True,0.9999999999911915
+True,False,DDI,basal-cell-carcinoma,True,0.999999937899707
+True,False,DDI,basal-cell-carcinoma,True,0.9999999996727773
+True,False,DDI,basal-cell-carcinoma,True,0.9999999999999809
+True,False,DDI,basal-cell-carcinoma,True,0.9999999839579674
+True,False,DDI,basal-cell-carcinoma,True,0.09179582937464159
+True,False,DDI,basal-cell-carcinoma,True,0.9999758850181621
+True,False,DDI,basal-cell-carcinoma,True,0.9996438286095669
+True,False,DDI,basal-cell-carcinoma,True,0.9999999961686337
+True,False,DDI,basal-cell-carcinoma,True,0.5264020861941948
+True,False,DDI,basal-cell-carcinoma,True,0.9996867463551726
+True,False,DDI,basal-cell-carcinoma,True,0.9948257651382032
+True,False,DDI,basal-cell-carcinoma,True,0.9999987455354948
+True,False,DDI,basal-cell-carcinoma,True,0.2193133522842203
+True,False,DDI,basal-cell-carcinoma,True,0.9980682418634202
+True,False,DDI,basal-cell-carcinoma,True,0.014160365357402015
+True,False,DDI,basal-cell-carcinoma,True,0.9324526069458323
+True,False,DDI,basal-cell-carcinoma,True,0.02534658855396246
+True,False,DDI,basal-cell-carcinoma,True,0.998653890533904
+True,False,DDI,basal-cell-carcinoma,True,0.15098879076250107
+True,False,DDI,basal-cell-carcinoma,False,5.226424978289278e-08
+True,False,DDI,basal-cell-carcinoma,True,0.6624951433179056
+True,False,DDI,basal-cell-carcinoma,True,0.9999982585748038
+True,False,DDI,basal-cell-carcinoma,True,0.41522496998911307
+True,False,DDI,basal-cell-carcinoma,True,0.9999968072646406
+True,False,DDI,basal-cell-carcinoma,False,9.086797278033675e-06
+True,False,DDI,basal-cell-carcinoma,True,0.02798655081749411
+True,False,DDI,basal-cell-carcinoma,True,0.9999999421481769
+True,False,DDI,basal-cell-carcinoma,False,0.0004515178148043299
+True,False,DDI,basal-cell-carcinoma,True,0.99997890514918
+True,False,DDI,basal-cell-carcinoma-superficial,False,6.777171790018166e-05
+True,False,DDI,blastic-plasmacytoid-dendritic-cell-neoplasm,True,0.9999460524460646
+False,False,DDI,blue-nevus,True,0.6955626978501869
+False,False,DDI,blue-nevus,True,0.9999794893033642
+False,False,DDI,blue-nevus,True,0.1218149551112095
+False,False,DDI,blue-nevus,True,0.3781370353288215
+False,False,DDI,cellular-neurothekeoma,True,0.9998938559796636
+False,False,DDI,chondroid-syringoma,True,0.9926597507434121
+False,False,DDI,clear-cell-acanthoma,True,0.9999998194319801
+False,False,DDI,coccidioidomycosis,True,0.9917601631782629
+False,False,DDI,dermatofibroma,True,0.1416121687980916
+False,False,DDI,dermatofibroma,False,0.0001394883993658139
+False,False,DDI,dermatofibroma,True,0.030937224174876904
+False,False,DDI,dermatofibroma,True,0.32396461811758104
+False,False,DDI,dermatofibroma,True,0.005181897809308923
+False,False,DDI,dermatofibroma,True,0.006090987636477876
+False,False,DDI,dermatofibroma,True,0.9984008657689735
+False,False,DDI,dermatofibroma,False,7.258664425510584e-06
+False,False,DDI,dermatofibroma,True,0.17015515164984119
+False,False,DDI,dermatofibroma,True,0.03702932275050989
+False,False,DDI,dermatomyositis,True,0.9999999540935128
+False,False,DDI,dysplastic-nevus,True,0.8995244403014829
+False,False,DDI,dysplastic-nevus,False,4.395711076593473e-12
+False,False,DDI,dysplastic-nevus,True,0.853124253274527
+False,False,DDI,dysplastic-nevus,False,3.0958821784209316e-05
+False,False,DDI,dysplastic-nevus,True,0.9997629513457991
+False,False,DDI,dysplastic-nevus,False,2.5329365997660797e-06
+False,False,DDI,dysplastic-nevus,False,1.1253063426700689e-06
+False,False,DDI,dysplastic-nevus,True,0.9409438601173764
+False,False,DDI,dysplastic-nevus,True,0.9989594814760167
+False,False,DDI,dysplastic-nevus,True,0.3745086058185355
+False,False,DDI,dysplastic-nevus,False,0.00010435025991462562
+False,False,DDI,dysplastic-nevus,False,0.0008014428575081026
+False,False,DDI,dysplastic-nevus,False,0.0012847526653370636
+False,False,DDI,dysplastic-nevus,True,0.006876701982066551
+False,False,DDI,eccrine-poroma,False,0.00015790538966232694
+False,False,DDI,epidermal-cyst,True,0.7739493028847025
+False,False,DDI,epidermal-cyst,True,0.9983433813627703
+False,False,DDI,epidermal-cyst,False,7.723238375004723e-06
+False,False,DDI,epidermal-cyst,True,0.005000089716202942
+False,False,DDI,epidermal-cyst,True,0.27326417302481415
+False,False,DDI,fibrous-papule,True,0.9545820735438474
+False,False,DDI,fibrous-papule,True,0.9999999668170272
+False,False,DDI,foreign-body-granuloma,False,0.0005573458231790642
+False,False,DDI,glomangioma,True,0.9999939376829683
+False,False,DDI,graft-vs-host-disease,True,0.9969649255827776
+False,False,DDI,graft-vs-host-disease,True,0.9996888793617345
+False,False,DDI,hyperpigmentation,True,0.7730128829428172
+False,False,DDI,inverted-follicular-keratosis,False,0.00013075261453375405
+True,False,DDI,kaposi-sarcoma,False,0.0005550002387379332
+True,False,DDI,leukemia-cutis,False,1.1775726604103548e-05
+False,False,DDI,lichenoid-keratosis,True,0.9999719121270999
+False,False,DDI,lipoma,True,0.9999976067394681
+False,False,DDI,melanocytic-nevi,False,4.983164652284603e-05
+False,False,DDI,melanocytic-nevi,False,7.790882892951751e-06
+False,False,DDI,melanocytic-nevi,True,0.9999061471162692
+False,False,DDI,melanocytic-nevi,True,0.19585766443078412
+False,False,DDI,melanocytic-nevi,False,1.8788757379914207e-05
+False,False,DDI,melanocytic-nevi,False,0.0023161652394917426
+False,False,DDI,melanocytic-nevi,False,6.221920174966137e-06
+False,False,DDI,melanocytic-nevi,False,0.0008586316877419863
+False,False,DDI,melanocytic-nevi,True,0.008552584929845704
+False,False,DDI,melanocytic-nevi,True,0.9552426786200959
+False,False,DDI,melanocytic-nevi,False,1.7695412648668127e-05
+False,False,DDI,melanocytic-nevi,True,0.1008796492739353
+False,False,DDI,melanocytic-nevi,True,0.560708456364211
+False,False,DDI,melanocytic-nevi,True,0.9954978977827649
+False,False,DDI,melanocytic-nevi,True,0.9999999191185397
+False,False,DDI,melanocytic-nevi,True,0.9997639478023822
+False,False,DDI,melanocytic-nevi,True,0.02044958028271114
+False,False,DDI,melanocytic-nevi,False,0.00032450500184447563
+False,False,DDI,melanocytic-nevi,False,0.0003740469792227609
+False,False,DDI,melanocytic-nevi,True,0.9982145670063377
+False,False,DDI,melanocytic-nevi,False,0.0019986373000809026
+False,False,DDI,melanocytic-nevi,True,0.3480488539105139
+False,False,DDI,melanocytic-nevi,True,0.009124513546296864
+False,False,DDI,melanocytic-nevi,False,0.0016153757276010483
+False,False,DDI,melanocytic-nevi,True,0.9997865075567941
+False,False,DDI,melanocytic-nevi,True,0.9976640163529672
+False,False,DDI,melanocytic-nevi,True,0.9999998497329335
+False,False,DDI,melanocytic-nevi,True,0.2662546213704485
+False,False,DDI,melanocytic-nevi,True,0.9999287098926387
+False,False,DDI,melanocytic-nevi,True,0.0035666424653411394
+False,False,DDI,melanocytic-nevi,False,9.260269992281118e-05
+False,False,DDI,melanocytic-nevi,True,0.9994657840374737
+False,False,DDI,melanocytic-nevi,True,0.049356408097212916
+False,False,DDI,melanocytic-nevi,False,0.001354523662188322
+False,False,DDI,melanocytic-nevi,True,0.014849221716860225
+False,False,DDI,melanocytic-nevi,False,8.987438177351018e-09
+False,False,DDI,melanocytic-nevi,True,0.7029424721207742
+False,False,DDI,melanocytic-nevi,False,2.302399490634454e-06
+False,False,DDI,melanocytic-nevi,False,0.0020640493752932263
+False,False,DDI,melanocytic-nevi,True,0.15829154967031006
+False,False,DDI,melanocytic-nevi,True,0.4277077805466569
+False,False,DDI,melanocytic-nevi,False,0.0001042920315785335
+False,False,DDI,melanocytic-nevi,True,0.02722425995455038
+False,False,DDI,melanocytic-nevi,True,0.9990075947587401
+False,False,DDI,melanocytic-nevi,True,0.5830016922227984
+False,False,DDI,melanocytic-nevi,True,0.06769142179428095
+False,False,DDI,melanocytic-nevi,False,0.0016501369937008627
+False,False,DDI,melanocytic-nevi,True,0.875166424056395
+False,False,DDI,melanocytic-nevi,False,0.002096478445037693
+True,True,DDI,melanoma,False,0.0008039266086962647
+True,True,DDI,melanoma,False,1.6839591522390334e-05
+True,True,DDI,melanoma,True,0.9995837603142959
+True,True,DDI,melanoma,True,0.9807335325762968
+True,True,DDI,melanoma-in-situ,False,0.0014372508770525466
+True,True,DDI,melanoma-in-situ,True,0.9928093143776305
+True,True,DDI,melanoma-in-situ,True,0.7343090951420294
+True,False,DDI,metastatic-carcinoma,True,0.1241091048788049
+True,False,DDI,metastatic-carcinoma,True,0.13564962885133797
+True,False,DDI,mycosis-fungoides,True,0.039281130991096806
+True,False,DDI,mycosis-fungoides,True,0.9731497110600049
+True,False,DDI,mycosis-fungoides,True,0.6962259657712611
+False,False,DDI,nevus-lipomatosus-superficialis,True,0.5141131718975938
+False,False,DDI,nevus-lipomatosus-superficialis,False,1.563307371527658e-06
+False,False,DDI,onychomycosis,True,0.03995183491045149
+False,False,DDI,prurigo-nodularis,False,0.00045858211468876236
+False,False,DDI,prurigo-nodularis,False,0.00022735153849852863
+False,False,DDI,pyogenic-granuloma,True,0.9999995033008762
+False,False,DDI,pyogenic-granuloma,True,0.9900846074172804
+False,False,DDI,pyogenic-granuloma,True,0.9999650786120614
+False,False,DDI,pyogenic-granuloma,True,0.9982524245308907
+False,False,DDI,pyogenic-granuloma,True,0.9999640415059653
+False,False,DDI,pyogenic-granuloma,True,0.9999999997009636
+False,False,DDI,reactive-lymphoid-hyperplasia,True,0.8915423076144764
+True,False,DDI,sebaceous-carcinoma,True,0.9994248727538161
+False,False,DDI,seborrheic-keratosis,True,0.993796012852735
+False,False,DDI,seborrheic-keratosis,True,0.9995115853988106
+False,False,DDI,seborrheic-keratosis,True,0.9998217947345799
+False,False,DDI,seborrheic-keratosis,True,0.5463748328434805
+False,False,DDI,seborrheic-keratosis,True,0.9028437993347127
+False,False,DDI,seborrheic-keratosis,False,0.001589168077488011
+False,False,DDI,seborrheic-keratosis,False,0.0015735526780324563
+False,False,DDI,seborrheic-keratosis,True,0.013038154166010263
+False,False,DDI,seborrheic-keratosis,True,0.9999892124558792
+False,False,DDI,seborrheic-keratosis,True,0.9204269262946246
+False,False,DDI,seborrheic-keratosis,True,0.8716742131328681
+False,False,DDI,seborrheic-keratosis,False,5.252580443354239e-06
+False,False,DDI,seborrheic-keratosis,False,0.0001864028630427133
+False,False,DDI,seborrheic-keratosis,True,0.9956143753675321
+False,False,DDI,seborrheic-keratosis,True,0.08349613857750629
+False,False,DDI,seborrheic-keratosis,False,0.00032204283416448676
+False,False,DDI,seborrheic-keratosis,False,0.00026455643744738305
+False,False,DDI,seborrheic-keratosis,True,0.9665695835760334
+False,False,DDI,seborrheic-keratosis-irritated,True,0.9993334401534556
+False,False,DDI,solar-lentigo,False,0.0022240623797275434
+False,False,DDI,solar-lentigo,True,0.20150861578222204
+False,False,DDI,solar-lentigo,True,0.9979112910076039
+False,False,DDI,solar-lentigo,True,0.9440614610611235
+True,False,DDI,squamous-cell-carcinoma,True,0.575067396628049
+True,False,DDI,squamous-cell-carcinoma,True,0.999839735789211
+True,False,DDI,squamous-cell-carcinoma,True,0.9999989669237807
+True,False,DDI,squamous-cell-carcinoma,True,0.9999999977109826
+True,False,DDI,squamous-cell-carcinoma,True,0.27277997077064386
+True,False,DDI,squamous-cell-carcinoma,False,0.0007370145643566634
+True,False,DDI,squamous-cell-carcinoma,True,0.9940585092844973
+True,False,DDI,squamous-cell-carcinoma,True,0.9980401453569329
+True,False,DDI,squamous-cell-carcinoma,True,0.9999890112431713
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.24226141266541937
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,0.0009466904557873202
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.5468901823827765
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,0.0023060272905069284
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9975667247323765
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.7082058783161257
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,2.668937338630461e-05
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.051348256447263554
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.7519106137999222
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9191856329916164
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.9999988901431524
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.5370928003266701
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.8849719407134531
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.15721005747434647
+False,False,DDI,tinea-pedis,True,0.9999931713663787
+False,False,DDI,trichilemmoma,True,0.8984093744595911
+False,False,DDI,trichilemmoma,True,0.9542659685434651
+False,False,DDI,verruca-vulgaris,True,0.4505566703230521
+False,False,DDI,verruca-vulgaris,False,2.476283478010709e-06
+False,False,DDI,verruca-vulgaris,False,1.171023508235968e-05
+False,False,DDI,verruca-vulgaris,True,0.638118723832316
+False,False,DDI,verruca-vulgaris,True,0.9999999924777095
+False,False,DDI,verruca-vulgaris,True,0.3200181815846368
+False,False,DDI,verruca-vulgaris,True,0.5103703445896562
+False,False,DDI,xanthogranuloma,True,0.9999857340665267
+False,False,DDI,xanthogranuloma,True,0.0038805082476961955
+False,False,DDI,abrasions-ulcerations-and-physical-injuries,True,0.005115057385631461
+False,False,DDI,abrasions-ulcerations-and-physical-injuries,True,0.9999999942235354
+False,False,DDI,abrasions-ulcerations-and-physical-injuries,True,0.9976871902078062
+False,False,DDI,acne-cystic,True,0.9998421504010319
+False,False,DDI,acquired-digital-fibrokeratoma,True,0.9987258406929068
+False,False,DDI,acrochordon,True,0.01228173595106615
+False,False,DDI,acrochordon,False,1.7198806866284894e-09
+False,False,DDI,acrochordon,True,0.011482185408458655
+False,False,DDI,acrochordon,False,5.3360695565601275e-05
+False,False,DDI,acrochordon,True,0.9997977745959982
+False,False,DDI,acrochordon,True,0.9974152201735351
+False,False,DDI,acrochordon,False,1.171612027287364e-07
+False,False,DDI,acrochordon,True,0.0456444112743391
+False,False,DDI,acrochordon,True,0.9999922958270848
+False,False,DDI,acrochordon,True,0.984857581281906
+False,False,DDI,acrochordon,True,0.9999495357696471
+False,False,DDI,angioleiomyoma,False,1.89374350766964e-09
+False,False,DDI,angioma,False,0.0009545136155804717
+False,False,DDI,arteriovenous-hemangioma,True,0.01961783495478984
+False,False,DDI,arteriovenous-hemangioma,True,0.9999977491664743
+True,False,DDI,atypical-spindle-cell-nevus-of-reed,True,0.844894538850083
+False,False,DDI,benign-keratosis,True,0.22790273454738158
+False,False,DDI,benign-keratosis,True,0.9134763326497436
+False,False,DDI,benign-keratosis,True,0.22196657599128558
+False,False,DDI,blue-nevus,True,0.9999987406562446
+False,False,DDI,blue-nevus,False,0.0011385031050640394
+False,False,DDI,condyloma-accuminatum,True,0.5394053394267174
+False,False,DDI,dermatofibroma,False,6.288484219696667e-07
+False,False,DDI,dermatofibroma,True,0.007259012705191236
+False,False,DDI,dermatofibroma,True,0.00557101759187067
+False,False,DDI,dermatofibroma,False,4.0227699027953523e-07
+False,False,DDI,dermatofibroma,True,0.999989762574615
+False,False,DDI,dermatofibroma,False,0.002568588399662807
+False,False,DDI,eccrine-poroma,True,0.9949876229303645
+False,False,DDI,eccrine-poroma,True,0.9999668534715899
+False,False,DDI,eccrine-poroma,False,8.465034417115575e-05
+False,False,DDI,eccrine-poroma,True,0.9813061412933435
+False,False,DDI,eccrine-poroma,True,0.9919132064461794
+False,False,DDI,eccrine-poroma,True,0.27645261250243536
+False,False,DDI,eczema-spongiotic-dermatitis,True,0.9128232463519849
+False,False,DDI,eczema-spongiotic-dermatitis,True,0.9853822291210608
+False,False,DDI,eczema-spongiotic-dermatitis,True,0.28232090545617056
+False,False,DDI,eczema-spongiotic-dermatitis,True,0.9999888764021326
+False,False,DDI,epidermal-cyst,True,0.01042320212638535
+False,False,DDI,epidermal-cyst,True,0.011122562781280243
+False,False,DDI,epidermal-cyst,False,4.547781806283934e-06
+False,False,DDI,epidermal-cyst,True,0.008338528241337417
+False,False,DDI,epidermal-cyst,True,0.9405457246037036
+False,False,DDI,epidermal-cyst,False,0.000857069021391567
+False,False,DDI,epidermal-cyst,True,0.9975667956194204
+False,False,DDI,epidermal-cyst,True,0.9333966737989947
+False,False,DDI,epidermal-cyst,True,0.9999999995877862
+False,False,DDI,epidermal-cyst,True,0.996965748132047
+False,False,DDI,epidermal-cyst,False,3.3669222384277805e-09
+False,False,DDI,epidermal-cyst,True,0.9995757871151055
+False,False,DDI,epidermal-cyst,True,0.14829727155728964
+False,False,DDI,epidermal-cyst,True,0.015130991506115259
+False,False,DDI,epidermal-nevus,True,0.9999998840021908
+False,False,DDI,focal-acral-hyperkeratosis,True,0.9326964362378445
+False,False,DDI,folliculitis,True,0.3137264966220865
+False,False,DDI,foreign-body-granuloma,False,0.0001586566852079334
+False,False,DDI,hematoma,True,0.02303865575735599
+False,False,DDI,hyperpigmentation,True,0.445672353824839
+False,False,DDI,hyperpigmentation,True,0.9999997939557848
+False,False,DDI,inverted-follicular-keratosis,True,0.768829145671834
+False,False,DDI,inverted-follicular-keratosis,True,0.8312294955836483
+True,False,DDI,kaposi-sarcoma,True,0.9999999895515114
+True,False,DDI,kaposi-sarcoma,True,0.17196202840973407
+False,False,DDI,keloid,False,7.18585729707937e-10
+False,False,DDI,lipoma,True,0.9999997744705345
+False,False,DDI,lipoma,False,9.172295004581543e-08
+False,False,DDI,lymphocytic-infiltrations,True,0.999999156278137
+False,False,DDI,melanocytic-nevi,False,8.264971242029004e-07
+False,False,DDI,melanocytic-nevi,True,0.47608727911798215
+False,False,DDI,melanocytic-nevi,True,0.8326243013755158
+False,False,DDI,melanocytic-nevi,True,0.9998810565487295
+False,False,DDI,melanocytic-nevi,True,0.005637867052848668
+False,False,DDI,melanocytic-nevi,True,0.03643802152860549
+False,False,DDI,melanocytic-nevi,True,0.23696130591627965
+False,False,DDI,melanocytic-nevi,False,8.98157982510589e-11
+False,False,DDI,melanocytic-nevi,True,0.10288275066894755
+False,False,DDI,melanocytic-nevi,True,0.36267819953041835
+False,False,DDI,melanocytic-nevi,True,0.9575360430500529
+False,False,DDI,melanocytic-nevi,True,0.9999506546436221
+False,False,DDI,melanocytic-nevi,False,0.00018171464607474053
+False,False,DDI,melanocytic-nevi,True,0.6327135569239388
+False,False,DDI,melanocytic-nevi,True,0.9833170140735282
+False,False,DDI,melanocytic-nevi,True,0.9999248818549346
+False,False,DDI,melanocytic-nevi,True,0.653599018444671
+False,False,DDI,melanocytic-nevi,True,0.9999999890030907
+False,False,DDI,melanocytic-nevi,True,0.9999931416046639
+False,False,DDI,melanocytic-nevi,True,0.9217521422813233
+False,False,DDI,melanocytic-nevi,True,0.0038676560506736546
+False,False,DDI,melanocytic-nevi,True,0.7640555283668697
+False,False,DDI,melanocytic-nevi,True,0.010231829242755078
+True,True,DDI,melanoma,True,0.9308285411459567
+True,True,DDI,melanoma-acral-lentiginous,True,0.07719088151566039
+True,True,DDI,melanoma-acral-lentiginous,True,0.008340546078148532
+True,True,DDI,melanoma-acral-lentiginous,True,0.012714504494590167
+True,True,DDI,melanoma-in-situ,True,0.9997445333428069
+True,True,DDI,melanoma-in-situ,True,0.010615453278933127
+True,True,DDI,melanoma-in-situ,False,0.001328444526012846
+True,False,DDI,metastatic-carcinoma,True,0.9939889680337396
+True,False,DDI,metastatic-carcinoma,True,0.9999847734883748
+False,False,DDI,molluscum-contagiosum,False,1.586310320958842e-05
+False,False,DDI,molluscum-contagiosum,True,0.008239557215868434
+False,False,DDI,molluscum-contagiosum,False,9.111424291366927e-09
+False,False,DDI,morphea,True,0.10925870897854766
+True,False,DDI,mycosis-fungoides,True,0.926158959288161
+True,False,DDI,mycosis-fungoides,False,1.3641931460536025e-06
+True,False,DDI,mycosis-fungoides,True,0.9724717785634116
+True,False,DDI,mycosis-fungoides,True,0.3914122511742747
+True,False,DDI,mycosis-fungoides,True,0.7570047578229723
+True,False,DDI,mycosis-fungoides,True,0.9999999236795492
+True,False,DDI,mycosis-fungoides,True,0.9928010876189547
+True,False,DDI,mycosis-fungoides,True,0.9999999960950534
+True,False,DDI,mycosis-fungoides,True,0.9999999497326041
+True,False,DDI,mycosis-fungoides,True,0.9999895094619174
+True,False,DDI,mycosis-fungoides,False,1.825225937547238e-05
+True,False,DDI,mycosis-fungoides,True,0.01779807749758259
+True,False,DDI,mycosis-fungoides,True,0.01680914652520049
+True,False,DDI,mycosis-fungoides,True,0.9997219212976376
+True,False,DDI,mycosis-fungoides,True,0.9999999481385384
+True,False,DDI,mycosis-fungoides,True,0.9999999957895196
+True,False,DDI,mycosis-fungoides,True,0.9999999992232393
+True,False,DDI,mycosis-fungoides,True,0.49775861703344443
+True,False,DDI,mycosis-fungoides,True,0.18067874151248947
+True,False,DDI,mycosis-fungoides,True,0.9996736809181321
+True,False,DDI,mycosis-fungoides,True,0.999999990288969
+True,False,DDI,mycosis-fungoides,True,0.9895737500623824
+True,False,DDI,mycosis-fungoides,True,0.968525270525985
+True,False,DDI,mycosis-fungoides,True,0.9974402872471334
+True,False,DDI,mycosis-fungoides,True,0.999086172749556
+True,False,DDI,mycosis-fungoides,True,0.9891372503255382
+False,False,DDI,neurofibroma,False,0.0007559660579042349
+False,False,DDI,neurofibroma,True,0.9635652918694904
+False,False,DDI,neurofibroma,True,0.029120205549348535
+False,False,DDI,neurofibroma,False,2.0254671716458255e-08
+False,False,DDI,neurofibroma,True,0.9171405499461984
+False,False,DDI,neurofibroma,True,0.6698710567696692
+False,False,DDI,neuroma,True,0.9998824522994343
+False,False,DDI,nevus-lipomatosus-superficialis,True,0.5659810425028481
+False,False,DDI,nevus-lipomatosus-superficialis,False,0.0010386059409815283
+False,False,DDI,onychomycosis,True,0.999999999977873
+False,False,DDI,prurigo-nodularis,True,0.9999999597918273
+False,False,DDI,pyogenic-granuloma,True,0.9940486578267506
+False,False,DDI,pyogenic-granuloma,True,0.9999953819423698
+False,False,DDI,pyogenic-granuloma,True,0.9999530505662239
+False,False,DDI,pyogenic-granuloma,True,0.9982203707096674
+False,False,DDI,pyogenic-granuloma,True,0.989025868143171
+False,False,DDI,scar,True,0.1373500437983999
+False,False,DDI,scar,True,0.9999999893780397
+False,False,DDI,seborrheic-keratosis,True,0.9975791182824995
+False,False,DDI,seborrheic-keratosis,True,0.0798633948831995
+False,False,DDI,seborrheic-keratosis,True,0.032033716304951804
+False,False,DDI,seborrheic-keratosis,True,0.9637159424838717
+False,False,DDI,seborrheic-keratosis,True,0.9748471129962872
+False,False,DDI,seborrheic-keratosis,True,0.9997656101473787
+False,False,DDI,seborrheic-keratosis,True,0.00798292000891755
+False,False,DDI,seborrheic-keratosis,False,1.8666028395822624e-06
+False,False,DDI,seborrheic-keratosis,False,0.0024751782999703742
+False,False,DDI,seborrheic-keratosis,True,0.19777009081439248
+False,False,DDI,seborrheic-keratosis,False,1.5360484517558305e-07
+False,False,DDI,seborrheic-keratosis,True,0.9900142096798242
+False,False,DDI,seborrheic-keratosis,True,0.9989488272537524
+False,False,DDI,seborrheic-keratosis,True,0.7324704847283844
+False,False,DDI,seborrheic-keratosis,True,0.9998702457369919
+False,False,DDI,seborrheic-keratosis,False,5.877020573397947e-06
+False,False,DDI,seborrheic-keratosis,True,0.004118494421179759
+False,False,DDI,seborrheic-keratosis,True,0.5523412839381256
+False,False,DDI,seborrheic-keratosis,False,2.756214642857307e-06
+False,False,DDI,seborrheic-keratosis-irritated,True,0.08750035328796886
+False,False,DDI,seborrheic-keratosis-irritated,False,9.349414352186076e-05
+False,False,DDI,seborrheic-keratosis-irritated,False,9.272010555754078e-06
+False,False,DDI,seborrheic-keratosis-irritated,True,0.9556371869424749
+True,False,DDI,squamous-cell-carcinoma,True,0.9980066343970257
+True,False,DDI,squamous-cell-carcinoma,True,0.9999969264843073
+True,False,DDI,squamous-cell-carcinoma,True,0.9993275396554593
+True,False,DDI,squamous-cell-carcinoma,True,0.999999997406029
+True,False,DDI,squamous-cell-carcinoma,True,0.9924150924775922
+True,False,DDI,squamous-cell-carcinoma-in-situ,True,0.9997525749704491
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,1.3293616149488722e-06
+True,False,DDI,squamous-cell-carcinoma-in-situ,False,0.0011798608215786073
+True,False,DDI,squamous-cell-carcinoma-keratoacanthoma,True,0.2507164671669643
+True,False,DDI,subcutaneous-t-cell-lymphoma,True,0.9999965273126904
+False,False,DDI,syringocystadenoma-papilliferum,True,0.9999922645402789
+False,False,DDI,trichilemmoma,True,0.9999994192385802
+False,False,DDI,trichofolliculoma,True,0.9997624894937212
+False,False,DDI,verruca-vulgaris,True,0.9405166669494827
+False,False,DDI,verruca-vulgaris,True,0.960725869591841
+False,False,DDI,verruca-vulgaris,False,0.0004159576821579843
+False,False,DDI,verruca-vulgaris,True,0.982208976902055
+False,False,DDI,verruca-vulgaris,True,0.9999999942393545
+False,False,DDI,verruca-vulgaris,True,0.934367610379338
+False,False,DDI,verruca-vulgaris,True,0.9999406951812523
+False,False,DDI,verruca-vulgaris,True,0.9984252216492879
+False,False,DDI,verruca-vulgaris,True,0.9999889704240179
+False,False,DDI,verruca-vulgaris,True,0.9861479623149813
+False,False,DDI,verruca-vulgaris,False,0.00037093316229976634
+False,False,DDI,verruca-vulgaris,True,0.9999511574118503
+False,False,DDI,verruca-vulgaris,True,0.590874872122136
+False,False,DDI,verruca-vulgaris,True,0.8849214213798607
+False,False,DDI,verruca-vulgaris,True,0.9999926714665303
+False,False,DDI,verruca-vulgaris,True,0.9999161512297332
+False,False,DDI,verruca-vulgaris,True,0.9965022215063868
+False,False,DDI,verruciform-xanthoma,False,0.00038271772574018705
+False,False,DDI,wart,True,0.07344010471755223
+False,False,DDI-2,Acanthosis nigricans,True,0.2639381344765135
+False,False,DDI-2,Acquired digital fibrokeratoma,True,0.02219887803890724
+False,False,DDI-2,Acral junctional melanocytic nevus,True,0.959945549160938
+False,False,DDI-2,Acral junctional melanocytic nevus,True,0.9993887125128769
+False,False,DDI-2,Acral junctional melanocytic nevus,True,0.817772974347747
+False,False,DDI-2,Acral junctional melanocytic nevus,True,0.9999962487930159
+False,False,DDI-2,Acral junctional melanocytic nevus  with special site atypia,True,0.5923932283630202
+False,False,DDI-2,Acral junctional melanocytic nevus with atypia,True,0.9848810438880243
+False,False,DDI-2,Acral junctional melanocytic nevus with special site atypia,True,0.9999557575224901
+False,False,DDI-2,Acrochordon,True,0.2884667336362966
+False,False,DDI-2,Acrochordon,True,0.8951570207467774
+False,False,DDI-2,Acrochordon,True,0.11035091289689201
+False,False,DDI-2,Acrochordon,True,0.9999775828904569
+False,False,DDI-2,Acrochordon,True,0.9999999523534906
+False,False,DDI-2,Acrochordon,False,0.0022468934897725014
+False,False,DDI-2,Acrochordon,True,0.8152953760804936
+False,False,DDI-2,Acrochordon,True,0.9770128758224369
+False,False,DDI-2,Acrochordon,False,0.0018447838460620733
+False,False,DDI-2,Acrochordon,True,0.23486801048936565
+False,False,DDI-2,Acrochordon,True,0.11386008601278669
+False,False,DDI-2,Actinic keratosis,True,0.9059180730830324
+False,False,DDI-2,Actinic keratosis,True,0.9674153786647347
+False,False,DDI-2,Actinic keratosis,True,0.9872500759333844
+False,False,DDI-2,Actinic keratosis,True,0.04122639903134859
+False,False,DDI-2,Acute and chronic inflammation and granulation tissue,True,0.9999953050909974
+False,False,DDI-2,Acute and chronic inflammation and granulation tissue,True,0.9999999736847793
+False,False,DDI-2,Acute and chronic inflammation and granulation tissue with pseudoepitheliomatous hyperplasia,True,0.9998016127453715
+False,False,DDI-2,"Acute febrile neutrophilic dermatosis, subcutaneous variant",True,0.059287243512362746
+False,False,DDI-2,Alopecia areata,True,0.999671969956255
+False,False,DDI-2,Angiokeratoma,True,0.9991698368514559
+False,False,DDI-2,Angiokeratoma,True,0.9818686874070952
+False,False,DDI-2,Angioleiomyoma,True,0.9969038637587814
+False,False,DDI-2,Angioleiomyoma,True,0.9999877426097833
+False,False,DDI-2,Angiolymphoid hyperplasia with eosinophilia,True,0.8665134884089839
+False,False,DDI-2,Angioma,True,0.13711819588322582
+False,False,DDI-2,Angioma,True,0.20616755695774427
+False,False,DDI-2,Angioma,True,0.3467342116106239
+False,False,DDI-2,Angioma,True,0.9999758674886112
+True,False,DDI-2,Angiosarcoma,True,0.0038171533679872897
+False,False,DDI-2,Arthropod bite reaction,True,0.5531892972899404
+False,False,DDI-2,Arthropod bite reaction,True,0.9999868122664055
+False,False,DDI-2,Arthropod bite reaction,True,0.9995966136565
+False,False,DDI-2,Arthropod bite reaction,True,0.9988472792247589
+False,False,DDI-2,Arthropod bite reaction,True,0.9999384219841598
+False,False,DDI-2,Arthropod bite reaction,False,0.0016290013344701143
+False,False,DDI-2,Arthropod bite reaction,True,0.9939031323144508
+False,False,DDI-2,Asteatotic eczema,True,0.009545215549760648
+True,False,DDI-2,"At least squamous cell carcinoma, in situ",True,1.0
+False,False,DDI-2,Atopic dermatitis,True,0.9999394030811085
+False,False,DDI-2,Atopic dermatitis,True,0.9973131107291576
+False,False,DDI-2,Atopic dermatitis,True,0.9995811116392324
+False,False,DDI-2,Atopic vs. contact dermatitis,False,2.6930661685358654e-06
+False,False,DDI-2,Atypical compound melanocytic nevus,False,3.1903489367104005e-05
+False,False,DDI-2,Atypical fibroxanthoma/intradermal pleomorphic sarcoma,False,4.149314363369738e-07
+False,False,DDI-2,Atypical junctional melanocytic proliferation,True,0.6070871694000431
+False,False,DDI-2,Atypical junctional melanocytic proliferation,True,0.9999827753617992
+False,False,DDI-2,Atypical junctional melanocytic proliferation,True,0.6819940227553087
+False,False,DDI-2,"Atypical junctional melanocytic proliferation, favor inflamed junctional melanocytic nevus with severe atypia",False,3.566346793452287e-05
+True,False,DDI-2,"Atypical lymphoid infiltrate, favor mycosis fungoides",False,1.0200491997848778e-05
+False,False,DDI-2,B cell-rich cutaneous lymphoid hyperplasia,True,0.03448226759279832
+True,False,DDI-2,Basal cell carcinoma,True,0.99999936682093
+True,False,DDI-2,Basal cell carcinoma,True,0.05840185318203324
+True,False,DDI-2,Basal cell carcinoma,True,0.9996715527514991
+True,False,DDI-2,Basal cell carcinoma,True,0.9866565564652243
+True,False,DDI-2,Basal cell carcinoma,True,0.11402624908652215
+True,False,DDI-2,"Basal cell carcinoma, nodular type",True,0.06957783538003152
+False,False,DDI-2,Basilar hyperpigmentation,False,0.00021513619970078208
+False,False,DDI-2,Benign keratosis ,False,6.8129885880377865e-06
+False,False,DDI-2,Benign lichenoid keratosis,True,0.9999964777487387
+False,False,DDI-2,Blue nevus ,True,0.5212814503494206
+False,False,DDI-2,Blue nevus ,True,0.9956001645460514
+False,False,DDI-2,Blue nevus ,True,0.9873266383319935
+False,False,DDI-2,Blue nevus ,True,0.8281044232604671
+False,False,DDI-2,Blue nevus ,True,0.9999993049003908
+False,False,DDI-2,Blue nevus ,True,0.9997454319789066
+False,False,DDI-2,Blue nevus ,True,0.9999578848709599
+False,False,DDI-2,Blue nevus ,True,0.9998791639194837
+False,False,DDI-2,Blue nevus ,True,0.45867495533659014
+False,False,DDI-2,Blue nevus ,True,0.9902312662544054
+False,False,DDI-2,Bullous arthropod bite reaction,True,0.9946362715091571
+False,False,DDI-2,Bullous pemphigoid,True,0.9963821632305622
+False,False,DDI-2,Bullous pemphigoid,True,0.02402432693867556
+False,False,DDI-2,Bullous pemphigoid,True,0.16293361569818166
+False,False,DDI-2,Capillary hemangioma,False,7.76698431694059e-06
+False,False,DDI-2,Cavernous hemangioma,True,0.9904722332657474
+False,False,DDI-2,Cellular dermatofibroma,True,0.9173597135450584
+False,False,DDI-2,Cellular dermatofibroma,True,0.08140617265864428
+False,False,DDI-2,Clavus,True,0.8692215687576829
+False,False,DDI-2,Clear cell syringoma,True,0.8595838368441788
+False,False,DDI-2,Combined nevus (junctional and blue nevus),True,0.5795838241049487
+False,False,DDI-2,Comedone,True,0.9923064402797431
+False,False,DDI-2,Compound melanocytic nevus,True,0.7664555878664555
+False,False,DDI-2,Compound melanocytic nevus,True,0.9996537501367069
+False,False,DDI-2,Compound melanocytic nevus,True,0.9999997036879195
+False,False,DDI-2,Compound melanocytic nevus,False,2.7403876045712374e-05
+False,False,DDI-2,Compound melanocytic nevus,True,0.6482108661538345
+False,False,DDI-2,Compound melanocytic nevus,True,0.9999999994207658
+False,False,DDI-2,Compound melanocytic nevus,True,0.9629906582057909
+False,False,DDI-2,Compound melanocytic nevus,True,0.943701158065568
+False,False,DDI-2,Compound melanocytic nevus,False,7.334410459109663e-08
+False,False,DDI-2,Compound melanocytic nevus,True,0.9999999898356623
+False,False,DDI-2,Compound melanocytic nevus with congenital features,False,0.0002194291773264493
+False,False,DDI-2,Compound melanocytic nevus with congenital features,True,0.06081091756813304
+False,False,DDI-2,Compound melanocytic nevus with congenital features,False,5.001623022012171e-05
+False,False,DDI-2,Compound melanocytic nevus with congenital features,True,0.06252648381057714
+False,False,DDI-2,Condyloma acuminatum,True,0.9999999999676592
+False,False,DDI-2,Condyloma acuminatum,True,0.9999842170864524
+False,False,DDI-2,Condyloma acuminatum,False,1.2324696340796388e-07
+False,False,DDI-2,Condyloma acuminatum,True,0.5766928950294558
+False,False,DDI-2,Connective tissue disease,True,0.999989208960248
+False,False,DDI-2,Cutaneous lymphoid hyperplasia,True,0.9999951275956313
+False,False,DDI-2,Dermal scar,True,0.9842040617535951
+False,False,DDI-2,Dermal scar,True,0.9966410619969369
+False,False,DDI-2,Dermal scar,True,0.9818445823412576
+False,False,DDI-2,Dermal scar,True,0.9997840281543848
+False,False,DDI-2,Dermal scar,True,0.9997038653657175
+False,False,DDI-2,Dermal scar,True,0.7649746434485227
+False,False,DDI-2,Dermal scar and ulcer,True,0.6873654101809974
+False,False,DDI-2,Dermal scar with epidermal acanthosis and parakeratosis,True,0.9999999953715455
+False,False,DDI-2,Dermal scar with overlying basal pigmentation,True,0.8112548566729565
+False,False,DDI-2,Dermatofibroma,True,0.9999930335298957
+False,False,DDI-2,Dermatofibroma,True,0.12113434708660921
+False,False,DDI-2,Dermatofibroma,True,0.06624950788822384
+False,False,DDI-2,Dermatofibroma,True,0.9999998502181213
+False,False,DDI-2,Dermatofibroma,True,0.7101716269554759
+False,False,DDI-2,Dermatofibroma,True,0.9753005103414989
+False,False,DDI-2,Dermatofibroma,True,0.999053003458248
+False,False,DDI-2,Dermatofibroma,True,0.9976886054948528
+False,False,DDI-2,Dermatofibroma,False,0.000262462896088027
+False,False,DDI-2,Dermatofibroma,True,0.9966458639409308
+False,False,DDI-2,Dermatofibroma,True,0.02840619035270603
+False,False,DDI-2,Dermatofibroma,True,0.9999718768763622
+False,False,DDI-2,Dermatofibroma,True,0.9962086354732901
+False,False,DDI-2,Dermatofibroma,True,0.9998303877607004
+False,False,DDI-2,Dermatofibroma,False,0.001569175509560614
+False,False,DDI-2,Dermatofibroma,True,0.015900892578166
+False,False,DDI-2,Dermatofibroma,True,0.9832193859396295
+False,False,DDI-2,"Dermatophytosis, tinea corporis",True,0.9999995004227493
+False,False,DDI-2,Desmoplastic trichoepithelioma,True,0.0071113668382453785
+False,False,DDI-2,Diffuse large b-cell lymphoma,True,0.9974706341207693
+False,False,DDI-2,Discoid lupus erythematosus,False,0.00024834984111572956
+False,False,DDI-2,Drug reaction with eosinophilia and systemic symptoms,True,0.010265618878180336
+False,False,DDI-2,Drug reaction with eosinophilia and systemic symptoms,True,0.999995659083895
+False,False,DDI-2,Eccrine poroma,True,0.6640883230715621
+False,False,DDI-2,Eccrine poroma,True,0.1087141240313112
+False,False,DDI-2,Eccrine poroma,True,0.8247763143343241
+False,False,DDI-2,Eccrine poroma,True,0.999876806978709
+False,False,DDI-2,Eccrine poroma,True,0.9999999999290983
+False,False,DDI-2,Eczematous dermatitis,True,0.9999999999417304
+False,False,DDI-2,Eczematous dermatitis secondary to pembrolizumab,True,0.17209168293326288
+False,False,DDI-2,Eczematous dermatitis secondary to pembrolizumab,True,0.9331107753560214
+False,False,DDI-2,Epidermal acanthosis with underlying granulation tissue,True,0.9986285399065119
+False,False,DDI-2,Epidermal cyst,True,0.999994362900182
+False,False,DDI-2,"Epidermal cyst, infundibular type, with rupture",True,0.2311639863398747
+False,False,DDI-2,Epidermal ulcer,True,0.9964012423801422
+False,False,DDI-2,Epidermal ulceration with dermal hemorrhage and mixed inflammation,True,0.9999967317260599
+False,False,DDI-2,Epidermal ulceration with mixed dermal inflammation,True,0.997120804215719
+False,False,DDI-2,Epidermal ulceration with mixed inflammation,True,0.2479037749562341
+False,False,DDI-2,Epidermal ulceration with underlying granulation tissue and mixed inflammation,True,0.9999999999894156
+True,False,DDI-2,Epithelioid angiosarcoma,True,0.3395887043233636
+False,False,DDI-2,Eruptive vellus hair cyst,True,0.8314817765449884
+False,False,DDI-2,Extranodal rosai-dorfman disease,False,0.0027699271354630177
+False,False,DDI-2,Fixed drug eruption,True,0.9956874555750127
+False,False,DDI-2,Follicular cyst,True,0.9999545866991884
+False,False,DDI-2,Follicular cyst (infundibular type),True,0.9929086467410493
+False,False,DDI-2,Follicular cyst (infundibular type) with yeast forms,True,0.0048972654782911225
+False,False,DDI-2,"Follicular cyst, infundibular type",False,4.594402090755792e-07
+False,False,DDI-2,"Follicular cyst, infundibular type",True,0.047241838633471936
+False,False,DDI-2,"Follicular cyst, infundibular type",True,0.9971354547773841
+False,False,DDI-2,"Follicular cyst, infundibular type",True,0.4891854719717094
+False,False,DDI-2,"Follicular cyst, infundibular type",True,0.9664733575019521
+False,False,DDI-2,"Follicular cyst, infundibular type",False,1.6873315790147823e-07
+False,False,DDI-2,"Follicular cyst, infundibular type",True,0.9999422367370185
+False,False,DDI-2,Folliculitis,True,0.6419089992765606
+False,False,DDI-2,Folliculitis,False,5.633351114841467e-05
+False,False,DDI-2,Folliculitis,True,0.9998352376908706
+False,False,DDI-2,Folliculitis,True,0.06643873590878037
+False,False,DDI-2,Folliculitis,True,0.9999741666744058
+False,False,DDI-2,Folliculitis,True,0.9999999999877609
+False,False,DDI-2,Folliculitis,True,0.9999999999113052
+False,False,DDI-2,Foreign body reaction,True,0.9996016974716031
+False,False,DDI-2,Full-thickness epidermal necrosis with mixed inflammatory infiltrate and puncture wound,True,0.9999504203667274
+False,False,DDI-2,Graft versus host disease,True,0.9988388236989869
+False,False,DDI-2,Graft versus host disease,True,0.9999999992595008
+False,False,DDI-2,Graft versus host disease,True,0.9622793881998817
+False,False,DDI-2,Graft versus host disease,True,0.9999718791326686
+False,False,DDI-2,Graft versus host disease ,True,0.9999999595183388
+False,False,DDI-2,Graft versus host disease ,True,0.9926155388937298
+False,False,DDI-2,Granulation tissue,True,0.1932096997894785
+False,False,DDI-2,Guttate psoriasis,False,2.1850236335612507e-06
+False,False,DDI-2,Hemangioma,False,0.0019993417191344846
+False,False,DDI-2,Hemangioma,True,0.04220744906518545
+True,False,DDI-2,High grade neuroendocrine carcinoma,True,0.9985835108455731
+True,False,DDI-2,High grade neuroendocrine carcinoma,True,0.999987275415106
+False,False,DDI-2,Hyperplastic actinic keratosis,True,0.9978939914839253
+False,False,DDI-2,Hyperplastic actinic keratosis with adnexal extension,True,0.16542669511364075
+False,False,DDI-2,Hypertrophic actinic keratosis,True,0.008579794272597413
+False,False,DDI-2,Hypertrophic scar,False,0.00047912425078552195
+False,False,DDI-2,Hypertrophic scar,True,0.3370395351255216
+False,False,DDI-2,Hypertrophic scar with focal granulomatous inflammation and naked hair shafts,True,0.9965249855445153
+False,False,DDI-2,IgG4-related disease,False,1.5182206990205852e-07
+False,False,DDI-2,Inflamed compound melanocytic nevus,True,0.008113553001305144
+False,False,DDI-2,Inflamed hyperplastic actinic keratosis,True,0.4494771183330678
+False,False,DDI-2,Inflamed macular seborrheic keratosis with prominent pigment dropout,False,9.503473918434661e-06
+False,False,DDI-2,Inflamed mildly dysplastic compound melanocytic nevus,True,0.9977830003443894
+False,False,DDI-2,Inflamed mildly dysplastic compound melanocytic nevus,False,0.001088927334236431
+False,False,DDI-2,Inflamed moderately dysplastic compound melanocytic nevus,True,0.0071356505696829565
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.9271071426055373
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.6927846888563526
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.8608430841016482
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.10448920342847773
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.14328931398144779
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.003615128990055677
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.003175878300438656
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.9913337959899132
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.01008420757793825
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.0047345589697302725
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.04555161671612533
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.9999980669328181
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.009115626367213237
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.9720686336024769
+False,False,DDI-2,Inflamed solar lentigo,True,0.9281791272613512
+False,False,DDI-2,Inflamed solar lentigo,False,0.0010525487178769726
+False,False,DDI-2,Interstitial granulomatous drug reaction,True,0.9995453793106116
+False,False,DDI-2,Intracorneal hemorrhage,True,0.997246564788122
+False,False,DDI-2,Intracorneal hemorrhage ,True,0.8649917462879209
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.9999907804584317
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.9397940412756207
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.05282427437227542
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.18275040409308269
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.005600008654902428
+False,False,DDI-2,Intradermal melanocytic nevus,False,0.0003783239235033952
+False,False,DDI-2,Intradermal melanocytic nevus,False,0.0007218614616757587
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.06573954562979265
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.999951910275337
+False,False,DDI-2,Intradermal melanocytic nevus,False,0.0023677288856639354
+False,False,DDI-2,Intradermal melanocytic nevus,False,1.6984578961864844e-10
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.522727375177642
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.9975445405711127
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.7201767544767557
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.09559117879379023
+False,False,DDI-2,Intradermal melanocytic nevus,False,7.948830766451993e-05
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.9943985822792317
+False,False,DDI-2,Intradermal melanocytic nevus,False,6.223715109818513e-07
+False,False,DDI-2,Intradermal melanocytic nevus,False,0.0015540530501245396
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.6240431815696211
+False,False,DDI-2,Intradermal melanocytic nevus,False,0.0006222072989820877
+False,False,DDI-2,Intradermal melanocytic nevus,False,6.1984044109695795e-06
+False,False,DDI-2,Intradermal melanocytic nevus,False,0.000356448339298472
+False,False,DDI-2,Intradermal melanocytic nevus,False,2.38745027036912e-05
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.7341043636166107
+False,False,DDI-2,Intradermal melanocytic nevus and ruptured follicule/epidermal cyst,True,0.9857640409993149
+False,False,DDI-2,Intradermal melanocytic nevus with broad dermal scar,True,0.9999998238247896
+False,False,DDI-2,Intradermal melanocytic nevus with congenital features,False,1.937017571743492e-05
+False,False,DDI-2,Intradermal melanocytic nevus with congenital features,True,0.2855196184967894
+False,False,DDI-2,Intradermal melanocytic nevus with congenital-type features,False,3.989089432141388e-09
+True,False,DDI-2,Invasive squamous cell carcinoma,True,0.9999995280393121
+False,False,DDI-2,Inverted follicular keratosis,True,0.9726273322679628
+False,False,DDI-2,Irritant contact dermatitis,True,0.9999826013705787
+False,False,DDI-2,Irritated intradermal melanocytic nevus,True,0.012426006200610651
+False,False,DDI-2,Irritated seborrheic keratosis,True,0.4391841853011502
+False,False,DDI-2,Junctional melanocytic nevus,True,0.7875009787391895
+False,False,DDI-2,Junctional melanocytic nevus,True,0.967208466426015
+False,False,DDI-2,Junctional melanocytic nevus with special site atypia,True,0.8740043574390515
+False,False,DDI-2,Junctional melanocytic nevus with special site atypia,True,0.9989412077353493
+False,False,DDI-2,Keloid,True,0.5062591747766345
+False,False,DDI-2,Keloid,True,0.07275478609087102
+False,False,DDI-2,Keloid,True,0.046819715176928726
+False,False,DDI-2,Lentiginous junctional melanocytic nevus,False,0.0008147526657933251
+False,False,DDI-2,Lentiginous junctional melanocytic nevus,True,0.9999481935409985
+False,False,DDI-2,Lentiginous junctional melanocytic nevus,True,0.9323338034849185
+True,False,DDI-2,Leukemia cutis,True,0.0038221319655328094
+True,False,DDI-2,Leukemia cutis,True,0.7124573656997282
+True,False,DDI-2,Leukemia cutis,True,0.8096183228338959
+True,False,DDI-2,Leukemia cutis,True,0.9998211111324624
+False,False,DDI-2,Leukocytoclastic vasculitis,True,0.9914794779117468
+False,False,DDI-2,Leukocytoclastic vasculitis,False,0.0005534720597500885
+False,False,DDI-2,Leukocytoclastic vasculitis,True,0.0036802838886492214
+False,False,DDI-2,Lichen planus,True,0.6754978987078857
+False,False,DDI-2,Lichen planus,True,0.9934327879234565
+False,False,DDI-2,Lichen planus pigmentosus,True,0.9999951753127113
+False,False,DDI-2,Lichen simplex chronicus,True,0.9658283843268448
+False,False,DDI-2,Lichenoid dermatitis,True,0.8049839862615041
+False,False,DDI-2,Lichenoid dermatitis,True,0.6254360063874512
+False,False,DDI-2,Lichenoid dermatitis,True,0.9999997567917754
+False,False,DDI-2,Lichenoid keratosis,True,0.2978762465665711
+False,False,DDI-2,Lichenoid keratosis,True,0.9999353493009205
+False,False,DDI-2,Lichenoid keratosis,True,0.38223242508567323
+False,False,DDI-2,Lobular capillary hemangioma,True,0.6377488924135004
+False,False,DDI-2,Lymphangiectasia,True,0.9767270249447795
+False,False,DDI-2,Lymphangioma circumscriptum,True,0.9952451040124889
+False,False,DDI-2,Lymphatic proliferation,True,0.8472713410646742
+True,False,DDI-2,Lymphomatoid papulosis,True,0.998204896098663
+True,False,DDI-2,Lymphomatoid papulosis,True,0.045725424723296194
+False,False,DDI-2,Macular seborrheic keratosis,True,0.5269641134666422
+True,True,DDI-2,Malignant melanoma in situ,True,0.94425231960104
+True,True,DDI-2,Malignant melanoma in situ,False,2.2537268033374566e-05
+False,False,DDI-2,Melanocyte activation,True,0.02454092372504446
+False,False,DDI-2,Melanocytic nevus,True,0.003068213580066874
+False,False,DDI-2,Melanocytic nevus,True,0.9999999923821891
+False,False,DDI-2,Melanocytic nevus,True,0.9213143931449207
+False,False,DDI-2,Melanocytic nevus,False,2.244156072776059e-05
+False,False,DDI-2,Melanocytic nevus,True,0.03589774238745075
+False,False,DDI-2,Melanocytic nevus,True,0.9999999182653978
+False,False,DDI-2,Melanocytic nevus,True,0.011102790286939708
+False,False,DDI-2,Melanocytic nevus,True,0.9999993429208117
+False,False,DDI-2,Melanocytic nevus,True,0.9999990887345731
+False,False,DDI-2,Melanonychia,True,0.8523960885008117
+True,False,DDI-2,Metastatic adenocarcinoma,True,0.29320486085918934
+True,False,DDI-2,Metastatic breast carcinoma,True,0.9999999999282494
+True,False,DDI-2,Metastatic breast carcinoma,True,0.9999578706692467
+True,False,DDI-2,Metastatic leiomyosarcoma,True,0.9999991471318523
+True,False,DDI-2,Metastatic leiomyosarcoma,True,0.9999999997994973
+True,True,DDI-2,Metastatic melanoma,True,0.9998610815590216
+True,False,DDI-2,Metastatic ovarian carcinoma,True,0.8234630900854701
+True,False,DDI-2,Metastatic ovarian carcinoma,True,0.9904953556929228
+False,False,DDI-2,Mild lichenoid dermatitis ,True,0.00573060224227189
+False,False,DDI-2,"Mild spongiotic dermatitis with mild, focal basal vacuolar change",True,0.9971306590591803
+False,False,DDI-2,"Mild spongiotic dermatitis with mild, focal basal vacuolar change",False,1.2359095530739336e-08
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,True,0.004501289165947769
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,False,0.00020464860335440635
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,True,0.8524891886164961
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,True,0.8666133325310358
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,True,0.7500005701056027
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,True,0.3463646581919183
+False,False,DDI-2,Mildly dysplastic junctional melanocytic nevus,True,0.991048224288436
+False,False,DDI-2,Mildly dysplastic junctional melanocytic nevus,True,0.00354619170974131
+False,False,DDI-2,Mildly dysplastic junctional melanocytic nevus,True,0.036863135971518156
+False,False,DDI-2,Mildly dysplastic junctional melanocytic nevus,True,0.3644675938587097
+False,False,DDI-2,Mildly dysplastic junctional melanocytic nevus,False,0.0008826582264687833
+False,False,DDI-2,Mixed inflammation and abscess formation,True,0.9930553451528963
+False,False,DDI-2,Moderately dysplastic compound melanocytic nevus,False,0.0012666909418223107
+False,False,DDI-2,Moderately dysplastic compound melanocytic nevus,True,0.012206233530573386
+False,False,DDI-2,Moderately dysplastic compound melanocytic nevus,True,0.022311621319588554
+False,False,DDI-2,Moderately dysplastic junctional melanocytic nevus,True,0.003163010272617929
+False,False,DDI-2,Moderately dysplastic junctional melanocytic nevus,True,0.0119175654604231
+False,False,DDI-2,Molluscum contagiosum,True,0.04290957652000757
+False,False,DDI-2,Molluscum contagiosum,False,3.7821193023883927e-07
+False,False,DDI-2,Mucosal melanotic macule,True,0.9999888576395761
+False,False,DDI-2,Myrmecia wart,True,0.9997678023290409
+False,False,DDI-2,Myrmecia wart ,True,0.729536744444656
+False,False,DDI-2,Myrmecial verruca,True,0.07974625216045653
+True,False,DDI-2,NK/T-cell lymphoma,True,0.9493272394186639
+True,False,DDI-2,Neuroendocrine (merkel cell) carcinoma,True,0.2160921635916909
+False,False,DDI-2,Neurofibroma,True,0.05621632669367745
+False,False,DDI-2,Neurofibroma,True,0.9999999999999991
+False,False,DDI-2,Neurofibroma with reactive changes,True,0.2718606136370931
+False,False,DDI-2,Neutrophilic folliculitis,True,0.999999652748844
+False,False,DDI-2,Nevus lipomatosus,True,0.6712274232883149
+False,False,DDI-2,Nevus lipomatosus,True,0.060090367187679364
+False,False,DDI-2,Nevus of ito,False,3.049418324555904e-05
+False,False,DDI-2,Nevus sebaceous,True,0.9999975622759679
+False,False,DDI-2,No significant histopathological abnormality,True,0.9999983192366023
+False,False,DDI-2,No significant histopathological abnormality ,True,0.9999963281071104
+False,False,DDI-2,Nummular dermatitis,True,0.8950004417651352
+False,False,DDI-2,Onychodystrophy,True,0.9999954010839213
+False,False,DDI-2,Onychodystrophy with bacterial cocci and yeast forms present,True,0.9957246638514209
+False,False,DDI-2,Onychomycosis,True,0.985340112335521
+False,False,DDI-2,Onychomycosis,True,0.9893779190860041
+False,False,DDI-2,Organizing thrombus with papillary endothelial hyperplasia/masson's tumor,True,0.012676793196095177
+False,False,DDI-2,Palmoplantar pustulosis,False,5.92823702433672e-09
+False,False,DDI-2,Perifollicular lymphohistiocytic infiltrate,True,0.03860102792357345
+False,False,DDI-2,Perifollicular lymphohistiocytic inflammation,True,0.02480503879628748
+True,False,DDI-2,Pigmented basal cell carcinoma,True,0.9999990294862839
+True,False,DDI-2,"Pigmented basal cell carcinoma, nodular type",True,0.12370725719808696
+False,False,DDI-2,Pigmented purpuric dermatosis,True,0.7861336149963302
+False,False,DDI-2,Pigmented seborrheic keratosis,True,0.022988833677631434
+False,False,DDI-2,Pigmented seborrheic keratosis,False,0.0014742088481685032
+False,False,DDI-2,Pigmented seborrheic keratosis,True,0.997432429096191
+False,False,DDI-2,Pigmented seborrheic keratosis,True,0.9502086804213037
+False,False,DDI-2,Pigmented seborrheic keratosis,True,0.9995934753581597
+False,False,DDI-2,Pigmented seborrheic keratosis,True,0.965939411837861
+False,False,DDI-2,Pigmented seborrheic keratosis,False,1.9482706240019013e-08
+False,False,DDI-2,Pigmented seborrheic keratosis,True,0.7257625651955413
+False,False,DDI-2,Pigmented spindle cell nevus (reed nevus),True,0.3935578710604466
+False,False,DDI-2,Pilomatricoma,True,0.9563865610869943
+False,False,DDI-2,Pilomatricoma,True,0.9999939350327695
+False,False,DDI-2,Pilomatricoma with rupture,True,0.9999916236327133
+False,False,DDI-2,Pityriasis rosea,True,0.9555347120400679
+True,False,DDI-2,Poorly differentiated carcinoma skin,True,0.9999977982378988
+False,False,DDI-2,Porokeratosis ,True,0.9999999999997478
+False,False,DDI-2,Port-wine stain,True,0.9993899750276913
+False,False,DDI-2,Post-inflammatory hyperpigmentation,False,0.0008267245529591321
+False,False,DDI-2,Post-inflammatory hyperpigmentation,False,1.136110290498947e-06
+False,False,DDI-2,Post-inflammatory hyperpigmentation,True,0.9997040587556472
+True,False,DDI-2,Primary cutaneous anaplastic large cell lymphoma,False,4.123913744572099e-05
+True,False,DDI-2,Primary cutaneous marginal zone lymphoma,True,0.05543018047377326
+False,False,DDI-2,Prurigo nodularis,False,0.00033593939499261245
+False,False,DDI-2,Prurigo nodularis,True,0.9958343634250603
+False,False,DDI-2,Prurigo nodularis,True,0.9855164429580615
+False,False,DDI-2,Prurigo nodularis,False,1.289393651690146e-05
+False,False,DDI-2,Prurigo nodularis,True,0.9999999999568749
+False,False,DDI-2,Prurigo nodularis,True,0.18914421712977383
+False,False,DDI-2,Psorasiform dermatitis,False,5.194948271155654e-05
+False,False,DDI-2,Psoriasiform dermatitis,True,0.9950732283280823
+False,False,DDI-2,Psoriasiform dermatitis with eosinophils secondary to pembrolizumab,True,0.9906470463468778
+False,False,DDI-2,"Psoriasiform dermatitis, favor psoriasis",True,0.9056278916959597
+False,False,DDI-2,"Psoriasiform dermatitis, favor psoriasis",True,0.999993273463554
+False,False,DDI-2,"Psoriasiform dermatitis, slightly favor guttate psoriasis",True,0.5473373077641848
+False,False,DDI-2,Psoriasis,True,0.06588539486885459
+False,False,DDI-2,Psoriasis,True,0.9999999999994846
+False,False,DDI-2,Psoriasis,True,0.9999999566212995
+False,False,DDI-2,Psoriasis,True,0.851026639430267
+False,False,DDI-2,Pyogenic granuloma,True,0.9792340081046134
+False,False,DDI-2,Pyogenic granuloma,True,0.2091969896925395
+False,False,DDI-2,Pyogenic granuloma,True,0.9997172154076974
+False,False,DDI-2,Pyogenic granuloma,True,0.5576413237767521
+False,False,DDI-2,Pyogenic granuloma,True,0.6338222632914592
+False,False,DDI-2,Pyogenic granuloma,True,0.9999970368196683
+False,False,DDI-2,Reactive changes consisting of perieccrine lymphoid infiltrate,True,0.9994933111537188
+False,False,DDI-2,Reactive changes consisting of superficial and deep superficial perivascular dermatitis with eosinophils,True,0.9999948031332299
+False,False,DDI-2,Reactive dermatitis consistent with drug eruption,True,0.5888399743228803
+False,False,DDI-2,Reactive/spongiotic dermatitis,True,0.9821805688896202
+False,False,DDI-2,Reticulohistiocytoma,False,0.0005201906074020967
+False,False,DDI-2,Ruptured epidermal inclusion cyst,False,6.810052818923768e-05
+False,False,DDI-2,Ruptured follicle,True,0.49211295071806943
+False,False,DDI-2,Ruptured follicle/epidermal cyst,True,0.9999999362755231
+False,False,DDI-2,Ruptured follicle/epidermal cyst,True,0.30902176944965015
+False,False,DDI-2,Ruptured follicle/epidermal cyst,False,3.7435191374818976e-05
+False,False,DDI-2,Ruptured follicle/epidermal cyst,True,0.017173175897592746
+False,False,DDI-2,Ruptured follicle/epidermal cyst,False,0.00011946080678173948
+False,False,DDI-2,Ruptured follicular cyst,True,0.3850129734322057
+False,False,DDI-2,Ruptured folliculitis,True,0.0032131885402993557
+False,False,DDI-2,Scarring alopecia,True,0.9999964529480009
+False,False,DDI-2,Scrotal calcinosis,False,1.1085569026636778e-05
+False,False,DDI-2,Scrotal calcinosis,True,0.9999984886469488
+False,False,DDI-2,Scrotal calcinosis,True,0.9999999999999536
+False,False,DDI-2,Sebaceous adenoma,True,0.9651844725731913
+False,False,DDI-2,Sebaceous adenoma,True,0.11362439968534248
+False,False,DDI-2,Sebaceous hyperplasia,True,0.9999234932450899
+False,False,DDI-2,Sebaceous hyperplasia,True,0.9996964263583421
+False,False,DDI-2,Sebaceous hyperplasia,False,0.0005199468328825167
+False,False,DDI-2,Sebaceous hyperplasia,False,0.0006202867790420569
+False,False,DDI-2,Sebaceous hyperplasia,True,0.9994683461221288
+False,False,DDI-2,Sebaceous hyperplasia,True,0.9800029670503579
+False,False,DDI-2,Seborrheic keratosis,True,0.9997226560848808
+False,False,DDI-2,Seborrheic keratosis,True,0.8056272286747396
+False,False,DDI-2,Seborrheic keratosis,True,0.5638715216519651
+False,False,DDI-2,Seborrheic keratosis,False,0.00011908363842458171
+False,False,DDI-2,Seborrheic keratosis,True,0.9921838577321939
+False,False,DDI-2,Seborrheic keratosis,True,0.9999997437638094
+False,False,DDI-2,Seborrheic keratosis,True,0.9677599290044919
+False,False,DDI-2,Seborrheic keratosis,True,0.9999999868977287
+False,False,DDI-2,Seborrheic keratosis,True,0.6123604781467425
+False,False,DDI-2,Seborrheic keratosis,True,0.9993848115708694
+False,False,DDI-2,Seborrheic keratosis,False,1.8314345253761464e-05
+False,False,DDI-2,Seborrheic keratosis,False,0.00045632246167641015
+False,False,DDI-2,Seborrheic keratosis,True,0.9999996632783231
+False,False,DDI-2,Seborrheic keratosis,True,0.9990446804835121
+False,False,DDI-2,Seborrheic keratosis,True,0.9998966820752975
+False,False,DDI-2,Seborrheic keratosis,True,0.04872206575174043
+False,False,DDI-2,Seborrheic keratosis,True,0.8459017458392325
+False,False,DDI-2,Seborrheic keratosis,True,0.999999999787706
+False,False,DDI-2,Seborrheic keratosis,False,0.0010742019223233938
+False,False,DDI-2,Seborrheic keratosis,True,0.992216545180945
+False,False,DDI-2,Seborrheic keratosis,True,0.9995102164129809
+False,False,DDI-2,Seborrheic keratosis,False,2.4773256204107145e-07
+False,False,DDI-2,Seborrheic keratosis,True,0.9890955484754463
+False,False,DDI-2,Seborrheic keratosis,True,0.9960949286269235
+False,False,DDI-2,Seborrheic keratosis,True,0.9999993488660873
+False,False,DDI-2,Seborrheic keratosis,True,0.004334335910166839
+True,False,DDI-2,Severely dysplastic compound melanocytic nevus,True,0.7693432566927731
+False,False,DDI-2,Severely dysplastic compound melanocytic proliferation,True,0.4147783163695728
+False,False,DDI-2,Severely dysplastic junctional melanocytic nevus ,True,0.9999977054400305
+False,False,DDI-2,Solar elastosis with dermal hemorrhage,False,5.936946293548018e-08
+False,False,DDI-2,Solar lentigo,True,0.022624882443127357
+False,False,DDI-2,Solar lentigo,True,0.008643135181619917
+False,False,DDI-2,Solar lentigo,True,0.9894992956901271
+False,False,DDI-2,Sparse folliculitis,True,0.9851030660041443
+False,False,DDI-2,"Spongiotic and interface dermatitis with extravasated erythrocytes, vascular ectasia, and rare eosinophils",True,0.9722547404826444
+False,False,DDI-2,Spongiotic dermatitis,True,0.6612053905860227
+False,False,DDI-2,Spongiotic dermatitis,False,3.0082505705270916e-07
+False,False,DDI-2,Spongiotic dermatitis,True,0.4999678774570258
+False,False,DDI-2,Spongiotic dermatitis,False,1.7962542939114168e-05
+False,False,DDI-2,Spongiotic dermatitis,True,0.9999985331476371
+False,False,DDI-2,Spongiotic dermatitis with eosinophils,True,0.9918080759599107
+False,False,DDI-2,Spongiotic dermatitis with eosinophils,False,0.00035990735396719683
+False,False,DDI-2,Spongiotic dermatitis with eosinophils,True,0.9999995307785844
+False,False,DDI-2,Spongiotic dermatitis with eosinophils,True,0.9852329519043843
+False,False,DDI-2,Spongiotic dermatitis with eosinophils,True,0.9999974580934485
+False,False,DDI-2,Spongiotic dermatitis with eosinophils and intraepidermal neutrophils,True,0.9926142005703629
+False,False,DDI-2,Spongiotic dermatitis with eosinophils and underlying folliculitis,True,0.9999999999992473
+False,False,DDI-2,Spongiotic dermatitis with eosinophils and underlying folliculitis,True,0.9984008272148787
+False,False,DDI-2,Spongiotic dermatitis with serum crust skin,True,0.9999999430615868
+True,False,DDI-2,Squamous cell carcinoma,True,0.9999770707015634
+True,False,DDI-2,Squamous cell carcinoma,True,0.9999985669433324
+True,False,DDI-2,Squamous cell carcinoma,True,0.982053373693794
+True,False,DDI-2,Squamous cell carcinoma,True,0.9999320536409961
+True,False,DDI-2,Squamous cell carcinoma ,True,0.8734358441478758
+True,False,DDI-2,Squamous cell carcinoma in situ,True,0.6084203160276064
+True,False,DDI-2,Squamous cell carcinoma in situ,True,0.9997004461713698
+True,False,DDI-2,Squamous cell carcinoma in situ,True,0.9999957493240769
+True,False,DDI-2,Squamous cell carcinoma in situ,True,0.7455599468125568
+True,False,DDI-2,Squamous cell carcinoma in situ,True,0.9999791954852206
+True,False,DDI-2,"Squamous cell carcinoma, at least in-situ",True,0.9999994892297133
+True,False,DDI-2,"Squamous cell carcinoma, in situ",True,0.9992305348397182
+True,False,DDI-2,"Squamous cell carcinoma, in situ",True,0.9992049539243381
+True,False,DDI-2,"Squamous cell carcinoma, in situ",True,0.9999990338505358
+True,False,DDI-2,"Squamous cell carcinoma, in situ",True,0.9999996005952237
+True,False,DDI-2,"Squamous cell carcinoma, in situ ",True,0.999999940777665
+True,False,DDI-2,"Squamous cell carcinoma, in-situ",True,0.03871899572493098
+True,False,DDI-2,"Squamous cell carcinoma, keratoacanthoma type",True,0.9999809604861101
+False,False,DDI-2,Superficial perivascular dermatitis,True,1.0
+False,False,DDI-2,Superficial perivascular dermatitis with eosinophils ,True,0.029370901689421445
+False,False,DDI-2,Superficial perivascular dermatitis with eosinophils ,True,0.9955497123738858
+False,False,DDI-2,Syringoma,True,0.6666523415187651
+False,False,DDI-2,Talon noir,False,1.345861968171844e-06
+False,False,DDI-2,Tattoo,True,0.9999999999149956
+False,False,DDI-2,Telangiectasia macularis eruptiva perstans,False,0.001871520100944626
+False,False,DDI-2,Tinea corporis,True,0.9999999999999729
+False,False,DDI-2,Toxic erythema of chemotherapy,True,0.9971660422160807
+False,False,DDI-2,Traumatized acrochordon with follicular induction and myxoid changes,True,0.9999946493917146
+False,False,DDI-2,Traumatized intradermal melanocytic nevus,True,0.9214339849112788
+False,False,DDI-2,Traumatized intradermal melanocytic nevus,True,0.9999455955788656
+False,False,DDI-2,Traumatized seborrheic keratosis,True,0.9998805610507361
+False,False,DDI-2,Trichoepithelioma,True,0.6560040238229186
+False,False,DDI-2,Ulcerated dermatofibroma,True,0.9995314830331651
+False,False,DDI-2,"Ulceration, granulation tissue, and necrosis",True,0.9999999997075286
+False,False,DDI-2,Urticaria,True,0.9944058241037838
+False,False,DDI-2,Urticaria,True,0.9684095816731102
+False,False,DDI-2,Urticaria,True,0.991959101065812
+False,False,DDI-2,Vacuolar interface drug eruption,True,0.009702362086188075
+False,False,DDI-2,Vascular proliferation,True,0.9665852925715891
+False,False,DDI-2,Verruca plana,True,0.042007148373675744
+False,False,DDI-2,Verruca plana,True,0.9999999998268829
+False,False,DDI-2,Verruca vulgaris,False,3.689903466915881e-07
+False,False,DDI-2,Verruca vulgaris,True,0.7452504776414769
+False,False,DDI-2,Verruca vulgaris,True,0.999999828805731
+False,False,DDI-2,Verruca vulgaris,True,0.999999999575331
+False,False,DDI-2,Verruca vulgaris,False,5.150233647086924e-05
+False,False,DDI-2,Verruca vulgaris,False,0.0004811802548069065
+False,False,DDI-2,Verruca vulgaris,True,0.42799009795778165
+False,False,DDI-2,Verruca vulgaris,True,0.9999999916014451
+False,False,DDI-2,Verruca vulgaris,True,0.954777839145204
+False,False,DDI-2,Verruca vulgaris,True,0.8401904336343549
+False,False,DDI-2,Verruca vulgaris,False,0.00043218818686772774
+False,False,DDI-2,Verruca vulgaris,True,0.999992237660512
+False,False,DDI-2,Verruca vulgaris,True,0.21915802655054378
+False,False,DDI-2,Verruca vulgaris,True,0.7797239439767841
+False,False,DDI-2,Verruca vulgaris,True,0.0067334196810976835
+False,False,DDI-2,Verruca vulgaris,True,0.9989391909673754
+False,False,DDI-2,Verruca vulgaris,False,1.1796651909481188e-05
+False,False,DDI-2,Verruca vulgaris,True,0.2991607294214607
+False,False,DDI-2,Verruca vulgaris,True,0.999915672036435
+False,False,DDI-2,Verruca vulgaris,False,8.713790180198826e-05
+False,False,DDI-2,Verruca vulgaris,True,0.25680797403454064
+False,False,DDI-2,Verruca vulgaris,True,0.9952762956280605
+False,False,DDI-2,Verruca vulgaris,True,0.9999998019449111
+False,False,DDI-2,Verruca vulgaris,True,0.5847224699435122
+False,False,DDI-2,Verruca vulgaris arising in nevus sebaceous,True,0.9999987990494433
+False,False,DDI-2,Verruciform xanthoma,True,0.9972711596962522
+False,False,DDI-2,Warty dyskeratoma,True,0.9999999994946835
+True,False,DDI-2,"Well-differentiated squamous cell carcinoma, keratoacanthoma type",True,0.10004031946721621
+False,False,DDI-2,Xanthogranuloma,False,0.0011937804572871966
+False,False,DDI-2,Acquired digital fibrokeratoma,True,0.04103369422915766
+False,False,DDI-2,Acral compound melanocytic nevus,True,0.9999962468889285
+False,False,DDI-2,Acrochordon,True,0.9991080995949027
+False,False,DDI-2,Actinic keratosis,True,0.9999990151196211
+False,False,DDI-2,Actinic keratosis,False,9.284241394857751e-06
+False,False,DDI-2,Actinic keratosis,True,0.9999990238731125
+False,False,DDI-2,"Actinic keratosis, dermal scar",True,0.004881725276423862
+False,False,DDI-2,Angioma,True,0.9884203719637839
+True,False,DDI-2,Angiosarcoma,True,0.9954772836244162
+False,False,DDI-2,Arteriovenous hemangioma,True,0.9999999958007146
+False,False,DDI-2,Atopic dermatitis,False,0.002908776866096183
+True,False,DDI-2,Basal cell carcinoma,True,0.9999995891455533
+True,False,DDI-2,Basal cell carcinoma,True,0.8593047998272381
+True,False,DDI-2,"Basal cell carcinoma, nodular type",True,0.8665292255064277
+True,False,DDI-2,"Basal cell carcinoma, nodular type",True,0.9999999841003357
+False,False,DDI-2,Benign reactive changes consisting of epidermal hyperplasia and dermal vascular ectasia,True,0.9999999999582783
+False,False,DDI-2,Benign reactive changes consisting of epidermal hyperplasia and vascular ectasia with erosion and mixed dermal inflammation,False,0.00015203999981955175
+False,False,DDI-2,Blue nevus ,True,0.9834731285702053
+False,False,DDI-2,Bullous arthropod bite reaction,True,0.9999617841195884
+False,False,DDI-2,Clear cell acanthoma,True,0.9978923000317089
+False,False,DDI-2,Combined nevus (conventional and blue nevus),True,0.9999999691406166
+False,False,DDI-2,Dermal scar,True,0.9796408489461899
+False,False,DDI-2,Dermal scar with focal keloidal collagen,True,0.9999999894549071
+False,False,DDI-2,Dermal scar with ruptured follicle/epidermal cyst,True,0.999531031572468
+False,False,DDI-2,Dermatofibroma,True,0.9998998452758856
+False,False,DDI-2,Digital fibromyxoma,True,0.9995991738663089
+False,False,DDI-2,Eccrine poroma,True,0.5174420019981782
+False,False,DDI-2,Eccrine poroma,True,0.42632415254304096
+False,False,DDI-2,"Epidermal cyst with rupture, infundibular type",False,0.00012585839909243592
+True,False,DDI-2,Extranodal NK/T-cell lymphoma,True,0.9993660592725182
+False,False,DDI-2,Folliculitis,True,0.999686828530606
+False,False,DDI-2,"Graft versus host disease,  sclerotic",True,0.4292302377965662
+False,False,DDI-2,Granuloma faciale,True,0.6220746575609524
+False,False,DDI-2,Hyperplastic actinic keratosis,True,0.9915671321607866
+False,False,DDI-2,Hyperplastic actinic keratosis,True,0.9998767416191859
+False,False,DDI-2,Hyperplastic actinic keratosis,True,0.00420758055495526
+False,False,DDI-2,Hypertrophic actinic keratosis,True,0.9999992601405685
+False,False,DDI-2,Hypertrophic lichen planus,True,0.711092074709165
+False,False,DDI-2,Inflamed actinic keratosis,True,0.8133793658165434
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.2569620389063126
+False,False,DDI-2,Inflamed seborrheic keratosis,True,0.9999995003681512
+False,False,DDI-2,Inflamed seborrheic keratosis ,True,0.9616889016918748
+False,False,DDI-2,Inflamed verruca vulgaris,True,0.9999989555480691
+False,False,DDI-2,Inflamed verrucous keratosis,True,0.007753477354049148
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.29694596160087783
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.12610411616664183
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.9953325561234017
+False,False,DDI-2,Intradermal melanocytic nevus,True,0.9854075120734864
+False,False,DDI-2,Intradermal melanocytic nevus overlying a ruptured cyst,True,0.03985976771049939
+False,False,DDI-2,"Intradermal melanocytic nevus, congenital pattern",True,0.9997654240304862
+False,False,DDI-2,Inverted follicular keratosis,True,0.9999999999964644
+False,False,DDI-2,Irritated seborrheic keratosis,True,0.6274147292347012
+True,False,DDI-2,Kaposi sarcoma,True,0.9999490456732751
+False,False,DDI-2,Lipoma,True,0.09540744530134351
+True,True,DDI-2,"Malignant melanoma in-situ, acral lentiginous type",True,0.07203615935405444
+False,False,DDI-2,Melanocyte proliferation,True,0.9999999690203317
+False,False,DDI-2,Mildly dysplastic compound melanocytic nevus,True,0.7635571018262844
+False,False,DDI-2,Morpheaform scleroderma,True,0.9999996455316265
+False,False,DDI-2,Neurofibroma,True,0.01836162168982142
+False,False,DDI-2,Neurofibroma,True,0.8939528949710092
+False,False,DDI-2,Neurofibroma,False,0.0022147471099910896
+False,False,DDI-2,Neurofibroma,True,0.12718548464502094
+False,False,DDI-2,Neurofibroma,False,3.8768176264051914e-07
+False,False,DDI-2,Neurofibroma,True,0.9377558175885063
+False,False,DDI-2,Neurofibroma,False,0.0005293774479330752
+False,False,DDI-2,Neutrophil lobular panniculitis with hemorrhage,True,0.9386896393982965
+False,False,DDI-2,Onychodystrophy,True,0.9380776329772471
+False,False,DDI-2,Pigmented actinic keratosis,True,0.0515007085896323
+True,False,DDI-2,Pigmented basal cell carcinoma,True,0.9999940103627591
+True,False,DDI-2,Pigmented basal cell carcinoma,True,0.9999999743131132
+True,False,DDI-2,"Pigmented basal cell carcinoma, nodular type",True,0.9999897659000797
+False,False,DDI-2,Pigmented purpuric dermatosis,True,0.12769940915389486
+False,False,DDI-2,Pityriasis lichenoides,True,0.6801932999239659
+False,False,DDI-2,Pityriasis rubra pilaris,True,0.9758992905481598
+False,False,DDI-2,Porokeratosis with adnexal involvement,True,0.2989236964745308
+False,False,DDI-2,Prurigo nodularis,True,0.013006949264364076
+False,False,DDI-2,Pyogenic granuloma,True,0.5648128830293397
+False,False,DDI-2,Ruptured digital mucous cyst,True,0.9778397984740901
+False,False,DDI-2,Ruptured follicle,True,0.8679162647060845
+False,False,DDI-2,Ruptured follicle/epidermal cyst,True,0.9994821062813148
+False,False,DDI-2,Ruptured follicle/epidermal cyst,True,0.999997919859098
+False,False,DDI-2,Ruptured hair follicle or ruptured follicular cyst,True,0.9830462213115757
+False,False,DDI-2,Seborrheic keratosis,True,0.9984427115168351
+False,False,DDI-2,Seborrheic keratosis,True,0.8142828701927581
+False,False,DDI-2,Seborrheic keratosis,True,0.9992394433522009
+False,False,DDI-2,Seborrheic keratosis,True,0.9870677869586505
+False,False,DDI-2,Seborrheic keratosis,True,0.15658793966123638
+False,False,DDI-2,Seborrheic keratosis,True,0.9999999996270192
+False,False,DDI-2,Seborrheic keratosis,True,0.6234545875979495
+False,False,DDI-2,Seborrheic keratosis,True,0.9998307420599636
+False,False,DDI-2,Seborrheic keratosis,False,5.2259807156179665e-05
+False,False,DDI-2,Seborrheic keratosis,True,0.9969739825731708
+False,False,DDI-2,Septal and lobular panniculitis with lymphocytic vasculitis ,True,0.9752800789981472
+False,False,DDI-2,Solar lentigo,True,0.3517506905893306
+False,False,DDI-2,Solar lentigo,True,0.9985397620716807
+False,False,DDI-2,Spongiotic dermatitis,False,0.0014332730961380913
+False,False,DDI-2,Spongiotic dermatitis,True,0.05628859956893571
+False,False,DDI-2,Spongiotic dermatitis ,True,0.9999996209783222
+True,False,DDI-2,Squamous cell carcinoma,True,0.999986005265304
+True,False,DDI-2,"Squamous cell carcinoma, in situ",True,0.48100157589244874
+True,False,DDI-2,"Squamous cell carcinoma, in-situ",True,0.0033113399547397542
+False,False,DDI-2,Traumatized seborrheic keratosis,True,0.20576047693967167
+False,False,DDI-2,Traumatized seborrheic keratosis,True,0.9986133193356116
+False,False,DDI-2,Ulcerated actinic keratosis,True,0.9999999121427234
+False,False,DDI-2,Verruca vulgaris,True,0.9999687866441949
+False,False,DDI-2,Verruca vulgaris,True,0.9999980363061757
+False,False,DDI-2,Verruca vulgaris,False,1.2889635949607463e-05
