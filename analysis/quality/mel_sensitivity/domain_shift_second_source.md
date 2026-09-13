@@ -52,18 +52,19 @@ Fitzpatrick17k images (sampled: 353-526px wide, 33-61KB) are systematically
 176-412KB) -- if raw image quality drove the difference, DDI should
 transfer better, not worse. It does the opposite.
 
-**Not confirmed, offered as the most plausible remaining hypothesis:**
-Fitzpatrick17k's atlas images are curated teaching examples -- selected,
-likely cropped and framed by the atlas's own editors to show a lesion
-clearly. DDI/DDI-2 are less-curated real clinical patient photography.
-If atlas curation happens to produce framing/composition closer to how
-ISIC/PAD-UFES training images were captured (lesion-centered, consistent
-scale) than genuine patient photos do, that would explain better transfer
-to Fitzpatrick without meaning the backbone is more deployment-ready --
-it would mean Fitzpatrick is a *less* representative stand-in for
-uncontrolled real-world capture than DDI is, not a better one. This is a
-hypothesis, not verified here; a direct visual/composition audit of both
-sources would be needed to confirm it, and is not done in this check.
+**Tested directly in a follow-up audit and NOT confirmed** (see
+`domain_composition_audit.md`): the hypothesis was that Fitzpatrick17k's
+atlas images are curated teaching examples -- selected, likely cropped
+and framed by the atlas's own editors to show a lesion clearly -- while
+DDI/DDI-2 are less-curated real clinical patient photography, and that
+this framing difference explained the better transfer. Measured directly
+using CV-3's own segmentation: DDI actually has the *largest* lesion-to-
+frame area ratio of the four sources compared (including the model's own
+training-domain reference), and Fitzpatrick has the *highest*
+mask-touches-border rate -- both the opposite of what this hypothesis
+predicted. The explanation for the native classifier's source-dependence
+remains open, and is not blocking for the CV-4b work below, which is a
+separate, already-settled finding.
 
 ## What this changes about the retraining/adaptation scoping question
 
