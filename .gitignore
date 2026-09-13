@@ -31,6 +31,10 @@ data/raw/pad_ufes/images/
 # Raw datasets and dataset metadata
 data/raw/
 
+# Pre-resized training copies (1.7 GB, rebuildable from raw via
+# scripts/preresize_cv4b_dataset.py)
+data/processed/cv4b_finetune_256/
+
 # Model checkpoints / trained weights
 checkpoints/
 artifacts/**/*.pt

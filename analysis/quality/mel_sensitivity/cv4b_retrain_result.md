@@ -5,6 +5,29 @@
 **Plan:** `cv4b_retrain_scope.md` (read that first — this reports against
 the rule it pre-committed, not a rule chosen after seeing the number)
 
+## Correction (2026-09-13, same day): this split leaks patients
+
+Found while designing the backbone fine-tune
+(`docs/cv4b_backbone_finetune_design.md` §4), and recorded here rather
+than quietly regenerating the numbers.
+
+`cv4b_retrain_split.csv` splits DDI-2 **by image**, but DDI-2 has repeat
+patients — 89 patients contribute 204 of its 661 images. **25 of the 132
+held-out DDI-2 test images below come from patients that also appear in
+the training portion.** Two photos of the same patient are not
+independent samples.
+
+The bias runs optimistic, so the conclusion drawn here — *the bar was
+not met* — is not overturned by it; the true non-ISIC figure is if
+anything slightly worse than the 0.7333 reported. But 0.7333 is a
+contaminated number and should be cited as such. DDI-2 was also the
+weakest source in the table (AUC 0.6211), which bounds how much the leak
+could have flattered the combined figure.
+
+`scripts/build_cv4b_splits.py` supersedes this split with a
+patient-grouped one that asserts no group and no image spans two splits.
+Everything below is left as originally written and measured.
+
 ## Result
 
 | | AUC | melanoma routed | benign referred |

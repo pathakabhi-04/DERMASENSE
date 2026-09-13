@@ -1,0 +1,428 @@
+"""
+CV-4b backbone fine-tune. Implements `docs/cv4b_backbone_finetune_design.md`
+exactly; read that first. This script does not re-decide anything the
+design pre-committed (what trains, mixing ratio, selection metric,
+augmentation, decision rule).
+
+Trains ResNet-50 layer4 + a binary referral head on ISIC (refer-vs-benign)
+mixed with clinical photos (malignant-vs-benign), oversampled so clinical
+images are ~50% of each batch despite being ~6% of the data.
+
+The test split is NEVER read here. `evaluate_cv4b_finetune.py` does that
+once, afterwards, against the selected checkpoint.
+
+    PYTHONPATH=. python3 scripts/finetune_cv4b_backbone.py --fold pooled
+    PYTHONPATH=. python3 scripts/finetune_cv4b_backbone.py --fold loso_atlas --resume
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import random
+from dataclasses import dataclass
+from pathlib import Path
+
+import numpy as np
+import torch
+from PIL import Image
+from sklearn.metrics import roc_auc_score
+from torch import nn
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
+
+from src.data.dataset import CVDataset
+from src.data.transforms import (
+    ImageTransformConfig,
+    build_eval_transform,
+    build_train_transform,
+)
+from src.models.native_classifier import (
+    DermaSenseNativeClassifier,
+    NativeClassifierConfig,
+)
+from src.training.reproducibility import seed_everything
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_CHECKPOINT = REPO_ROOT / "checkpoints/archive/pad_ufes_c1_partial_finetune_seed42_best.pt"
+SPLITS = REPO_ROOT / "analysis/quality/mel_sensitivity/cv4b_finetune_splits.csv"
+RUN_ROOT = REPO_ROOT / "checkpoints/cv4b_finetune"
+
+# ISIC's referral-need label (design §"label harmonization" in the scope doc).
+REFER = ("MEL", "BCC", "SCC", "AK")
+BENIGN = ("NV", "BKL")
+
+FEATURE_DIM = 2048
+NON_ISIC_BATCH_FRACTION = 0.5  # design §6
+
+# design §7 -- targeted at the colour/white-balance hypothesis the
+# composition audit left open, not a uniform turn-up.
+TRAIN_TRANSFORM_CONFIG = ImageTransformConfig(
+    image_size=224,
+    color_jitter_brightness=0.35,
+    color_jitter_contrast=0.35,
+    color_jitter_saturation=0.35,
+    color_jitter_hue=0.08,
+    random_resized_crop_enabled=True,
+    random_resized_crop_scale_min=0.7,
+    random_resized_crop_scale_max=1.0,
+    rotation_degrees=15.0,
+)
+
+
+@dataclass(frozen=True)
+class Row:
+    image_path: str
+    label: int  # 1 = refer/malignant
+    source: str  # "isic2019" | "ddi" | "ddi2" | "fitzpatrick17k"
+    is_melanoma: bool
+
+
+class BinaryLesionDataset(Dataset):
+    def __init__(self, rows: list[Row], transform) -> None:
+        self.rows = rows
+        self.transform = transform
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+    def __getitem__(self, index: int) -> dict:
+        row = self.rows[index]
+        with Image.open(row.image_path) as image:
+            tensor = self.transform(image.convert("RGB"))
+        if not torch.isfinite(tensor).all():
+            raise RuntimeError(f"non-finite tensor from {row.image_path}")
+        return {
+            "image": tensor,
+            "label": torch.tensor(float(row.label)),
+            "source_index": index,
+        }
+
+
+def isic_rows(split: str) -> list[Row]:
+    dataset = CVDataset(dataset_id="isic2019", split=split, verify_images=False)
+    rows = []
+    for index in range(len(dataset)):
+        sample = dataset[index]
+        diagnosis = sample.native_diagnosis
+        if diagnosis not in REFER + BENIGN:
+            continue  # DF/VASC have no analogue; excluded, not mapped
+        rows.append(Row(
+            image_path=str(sample.image_path),
+            label=int(diagnosis in REFER),
+            source="isic2019",
+            is_melanoma=diagnosis == "MEL",
+        ))
+    return rows
+
+
+def non_isic_rows(fold: str, split: str) -> list[Row]:
+    import pandas as pd
+
+    table = pd.read_csv(SPLITS)
+    if fold not in table.columns:
+        raise SystemExit(f"unknown fold {fold!r}; available: pooled, loso_atlas, loso_stanford")
+    selected = table[table[fold] == split]
+    return [
+        Row(
+            image_path=row.image_path,
+            label=int(row.is_malignant),
+            source=row.source,
+            is_melanoma=bool(row.is_melanoma),
+        )
+        for row in selected.itertuples()
+    ]
+
+
+PRERESIZED_MANIFEST = REPO_ROOT / "data/processed/cv4b_finetune_256/manifest.csv"
+
+
+def apply_preresized(rows: list[Row]) -> list[Row]:
+    """Swap in the pre-resized copies (design §11). Fails loudly on a
+    missing entry rather than silently training on a mix of resolutions,
+    which would be invisible in the logs and poison the comparison."""
+    import pandas as pd
+
+    if not PRERESIZED_MANIFEST.exists():
+        raise SystemExit(
+            f"--preresized requested but {PRERESIZED_MANIFEST} is absent; "
+            "run scripts/preresize_cv4b_dataset.py first"
+        )
+    mapping = pd.read_csv(PRERESIZED_MANIFEST).set_index("image_path")["resized_path"].to_dict()
+    missing = [row.image_path for row in rows if row.image_path not in mapping]
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} images have no pre-resized copy (e.g. {missing[0]}); "
+            "re-run the pre-resize rather than training on a mixed-resolution set"
+        )
+    return [
+        Row(mapping[row.image_path], row.label, row.source, row.is_melanoma)
+        for row in rows
+    ]
+
+
+def build_model(device: torch.device):
+    """Load the shipped backbone, freeze everything but layer4, attach a
+    fresh binary head. Freeze correctness is asserted, not printed."""
+    model = DermaSenseNativeClassifier(
+        NativeClassifierConfig(backbone="resnet50", pretrained=False, dropout=0.0)
+    )
+    checkpoint = torch.load(SOURCE_CHECKPOINT, map_location="cpu", weights_only=False)
+    state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict"))
+    if state_dict is None:
+        raise RuntimeError(f"no state dict in {SOURCE_CHECKPOINT}")
+    model.load_state_dict(state_dict, strict=True)
+
+    for parameter in model.parameters():
+        parameter.requires_grad = False
+
+    layer4 = dict(model.backbone.features.named_children()).get("7")
+    if layer4 is None:
+        raise RuntimeError("could not locate ResNet-50 layer4 at backbone.features[7]")
+    for parameter in layer4.parameters():
+        parameter.requires_grad = True
+
+    head = nn.Linear(FEATURE_DIM, 1)
+
+    trainable_backbone = sum(p.numel() for p in model.backbone.parameters() if p.requires_grad)
+    layer4_params = sum(p.numel() for p in layer4.parameters())
+    if trainable_backbone != layer4_params:
+        raise RuntimeError(
+            f"freeze mask wrong: {trainable_backbone} trainable backbone params, "
+            f"expected exactly layer4's {layer4_params}"
+        )
+    for name, module in (("pad_ufes", model.pad_ufes_head), ("isic2019", model.isic2019_head)):
+        if any(p.requires_grad for p in module.parameters()):
+            raise RuntimeError(f"{name} head must stay frozen")
+
+    return model.to(device), head.to(device), layer4
+
+
+def make_sampler(rows: list[Row], generator: torch.Generator) -> WeightedRandomSampler:
+    """Weight so non-ISIC is NON_ISIC_BATCH_FRACTION of each batch in
+    expectation. Without this, clinical photos are ~6% of the gradient and
+    the run's most likely outcome is a false negative (design §6)."""
+    is_non_isic = np.array([row.source != "isic2019" for row in rows])
+    n_non_isic = int(is_non_isic.sum())
+    n_isic = len(rows) - n_non_isic
+    if n_non_isic == 0 or n_isic == 0:
+        raise RuntimeError("expected both ISIC and non-ISIC rows in the training mix")
+
+    weights = np.where(
+        is_non_isic,
+        NON_ISIC_BATCH_FRACTION / n_non_isic,
+        (1.0 - NON_ISIC_BATCH_FRACTION) / n_isic,
+    )
+    return WeightedRandomSampler(
+        weights=torch.as_tensor(weights, dtype=torch.double),
+        num_samples=len(rows),
+        replacement=True,
+        generator=generator,
+    )
+
+
+@torch.no_grad()
+def evaluate(model, head, rows: list[Row], device, batch_size: int, workers: int) -> dict:
+    """Per-source malignant-vs-benign AUC on val. Never called on test."""
+    model.eval()
+    head.eval()
+    loader = DataLoader(
+        BinaryLesionDataset(rows, build_eval_transform()),
+        batch_size=batch_size, shuffle=False, num_workers=workers, pin_memory=True,
+    )
+    scores = []
+    for batch in loader:
+        features = model.extract_features(batch["image"].to(device, non_blocking=True))
+        scores.append(torch.sigmoid(head(features).squeeze(1)).cpu().numpy())
+    scores = np.concatenate(scores)
+
+    labels = np.array([row.label for row in rows])
+    sources = np.array([row.source for row in rows])
+
+    def auc_for(mask) -> float:
+        if mask.sum() == 0 or len(set(labels[mask])) < 2:
+            return float("nan")
+        return float(roc_auc_score(labels[mask], scores[mask]))
+
+    non_isic = sources != "isic2019"
+    results = {
+        "isic_auc": auc_for(~non_isic),
+        "non_isic_auc": auc_for(non_isic),
+    }
+    for source in sorted(set(sources[non_isic])):
+        results[f"{source}_auc"] = auc_for(sources == source)
+    return results
+
+
+def rng_state() -> dict:
+    return {
+        "torch": torch.get_rng_state(),
+        "numpy": np.random.get_state(),
+        "python": random.getstate(),
+        "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+    }
+
+
+def restore_rng(state: dict) -> None:
+    torch.set_rng_state(state["torch"])
+    np.random.set_state(state["numpy"])
+    random.setstate(state["python"])
+    if state.get("cuda") is not None and torch.cuda.is_available():
+        torch.cuda.set_rng_state_all(state["cuda"])
+
+
+def save_run_checkpoint(path: Path, **payload) -> None:
+    """Written every epoch, to persistent storage, with optimizer and RNG
+    state -- a rented instance can die mid-run (design §9.6)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    torch.save(payload, temporary)
+    temporary.replace(path)  # atomic: never leave a half-written checkpoint
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fold", default="pooled",
+                        choices=("pooled", "loso_atlas", "loso_stanford"))
+    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--backbone-lr", type=float, default=1e-5)
+    parser.add_argument("--head-lr", type=float, default=1e-4)
+    parser.add_argument("--weight-decay", type=float, default=1e-4)
+    parser.add_argument("--patience", type=int, default=7)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--device", default="auto", choices=("auto", "cuda", "cpu"))
+    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--no-preresized", action="store_true",
+                        help="train on full-resolution originals instead (slow; see design §11)")
+    parser.add_argument("--max-steps", type=int, default=0, help="preflight only; 0 = full epoch")
+    args = parser.parse_args()
+
+    seed_everything(args.seed)
+    device = torch.device(
+        "cuda" if (args.device == "auto" and torch.cuda.is_available()) else
+        ("cuda" if args.device == "cuda" else "cpu")
+    )
+    if args.device == "cuda" and not torch.cuda.is_available():
+        raise SystemExit("cuda requested but unavailable")
+
+    run_dir = RUN_ROOT / args.fold
+    latest_path = run_dir / "latest.pt"
+    best_path = run_dir / "best.pt"
+
+    train_rows = isic_rows("train") + non_isic_rows(args.fold, "train")
+    val_rows = isic_rows("val") + non_isic_rows(args.fold, "val")
+    if not args.no_preresized:
+        train_rows = apply_preresized(train_rows)
+        val_rows = apply_preresized(val_rows)
+        print("using pre-resized 320px dataset (pre-flight check 7 verified fidelity)")
+    print(f"[{args.fold}] train {len(train_rows)} "
+          f"(non-ISIC {sum(r.source != 'isic2019' for r in train_rows)}) | "
+          f"val {len(val_rows)}")
+
+    model, head, layer4 = build_model(device)
+    optimizer = torch.optim.AdamW(
+        [
+            {"params": layer4.parameters(), "lr": args.backbone_lr},
+            {"params": head.parameters(), "lr": args.head_lr},
+        ],
+        weight_decay=args.weight_decay,
+    )
+    criterion = nn.BCEWithLogitsLoss()
+
+    start_epoch = 1
+    best_metric = float("-inf")
+    epochs_without_improvement = 0
+    history = []
+
+    if args.resume and latest_path.exists():
+        checkpoint = torch.load(latest_path, map_location=device, weights_only=False)
+        model.load_state_dict(checkpoint["model"])
+        head.load_state_dict(checkpoint["head"])
+        optimizer.load_state_dict(checkpoint["optimizer"])
+        restore_rng(checkpoint["rng"])
+        start_epoch = checkpoint["epoch"] + 1
+        best_metric = checkpoint["best_metric"]
+        epochs_without_improvement = checkpoint["epochs_without_improvement"]
+        history = checkpoint.get("history", [])
+        print(f"resumed from epoch {checkpoint['epoch']}, best={best_metric:.4f}")
+
+    sampler_generator = torch.Generator()
+    sampler_generator.manual_seed(args.seed)
+    train_loader = DataLoader(
+        BinaryLesionDataset(train_rows, build_train_transform(TRAIN_TRANSFORM_CONFIG)),
+        batch_size=args.batch_size,
+        sampler=make_sampler(train_rows, sampler_generator),
+        num_workers=args.workers,
+        pin_memory=True,
+        drop_last=True,
+    )
+
+    for epoch in range(start_epoch, args.epochs + 1):
+        model.train()
+        # Frozen stages stay in eval mode so their BatchNorm running stats
+        # are not silently updated by training-mode forward passes.
+        for index in range(7):
+            model.backbone.features[index].eval()
+        layer4.train()
+        model.pad_ufes_head.eval()
+        model.isic2019_head.eval()
+        head.train()
+
+        running_loss, seen = 0.0, 0
+        for step, batch in enumerate(train_loader, 1):
+            images = batch["image"].to(device, non_blocking=True)
+            labels = batch["label"].to(device, non_blocking=True)
+
+            optimizer.zero_grad(set_to_none=True)
+            logits = head(model.extract_features(images)).squeeze(1)
+            loss = criterion(logits, labels)
+            if not torch.isfinite(loss):
+                raise RuntimeError("loss became non-finite")
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item() * len(labels)
+            seen += len(labels)
+            if args.max_steps and step >= args.max_steps:
+                break
+
+        metrics = evaluate(model, head, val_rows, device, args.batch_size, args.workers)
+        selection_metric = metrics["non_isic_auc"]  # design §8, NOT macro-F1
+        record = {"epoch": epoch, "train_loss": running_loss / max(seen, 1), **metrics}
+        history.append(record)
+        print(f"epoch {epoch:03d} | loss {record['train_loss']:.4f} | "
+              + " | ".join(f"{k} {v:.4f}" for k, v in metrics.items()))
+
+        improved = selection_metric > best_metric
+        if improved:
+            best_metric = selection_metric
+            epochs_without_improvement = 0
+            save_run_checkpoint(
+                best_path, model=model.state_dict(), head=head.state_dict(),
+                epoch=epoch, metrics=metrics, fold=args.fold, seed=args.seed,
+                source_checkpoint=str(SOURCE_CHECKPOINT),
+                selection_metric="non_isic_val_auc",
+            )
+            print(f"  -> new best non-ISIC val AUC {best_metric:.4f}")
+        else:
+            epochs_without_improvement += 1
+
+        save_run_checkpoint(
+            latest_path, model=model.state_dict(), head=head.state_dict(),
+            optimizer=optimizer.state_dict(), rng=rng_state(), epoch=epoch,
+            best_metric=best_metric, epochs_without_improvement=epochs_without_improvement,
+            history=history, fold=args.fold,
+        )
+        (run_dir / "history.json").write_text(json.dumps(history, indent=2))
+
+        if epochs_without_improvement >= args.patience:
+            print(f"early stop: {args.patience} epochs without improvement")
+            break
+
+    print(f"\nbest non-ISIC val AUC {best_metric:.4f} -> {best_path}")
+    print("test is untouched; run scripts/evaluate_cv4b_finetune.py to use it once")
+
+
+if __name__ == "__main__":
+    main()
