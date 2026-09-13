@@ -1,0 +1,56 @@
+{
+  "split_seed": 20260913,
+  "threshold": 0.009419793263077736,
+  "isic_test": {
+    "source": "ISIC (in-domain)",
+    "n": 3473,
+    "auc": 0.9027166604606446,
+    "mel_routed": 0.8768768768768769,
+    "mel_ci_lo": 0.8497383923081177,
+    "mel_ci_hi": 0.8996925179249882,
+    "n_mel": 666,
+    "benign_referred": 0.36421257922964406
+  },
+  "non_isic_test_combined": {
+    "source": "non-ISIC (combined)",
+    "n": 380,
+    "auc": 0.7333333333333332,
+    "mel_routed": 0.8333333333333334,
+    "mel_ci_lo": 0.6643529481431982,
+    "mel_ci_hi": 0.9266356575964831,
+    "n_mel": 30,
+    "benign_referred": 0.5418181818181819
+  },
+  "non_isic_test_per_source": [
+    {
+      "source": "ddi",
+      "n": 131,
+      "auc": 0.6273499090357794,
+      "mel_routed": 0.6666666666666666,
+      "mel_ci_lo": 0.35419734749908977,
+      "mel_ci_hi": 0.8794184013172571,
+      "n_mel": 9
+    },
+    {
+      "source": "ddi2",
+      "n": 132,
+      "auc": 0.6210653753026635,
+      "mel_routed": 1.0,
+      "mel_ci_lo": 0.20654329147389294,
+      "mel_ci_hi": 1.0,
+      "n_mel": 1
+    },
+    {
+      "source": "fitzpatrick17k",
+      "n": 117,
+      "auc": 0.7795321637426901,
+      "mel_routed": 0.9,
+      "mel_ci_lo": 0.6989617935882066,
+      "mel_ci_hi": 0.9721341060158467,
+      "n_mel": 20
+    }
+  ],
+  "isic_auc_floor": 0.85,
+  "non_isic_auc_target": 0.8,
+  "success": false
+}

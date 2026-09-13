@@ -190,6 +190,14 @@ Four gates, in order. None is optional.
    `analysis/quality/mel_sensitivity/domain_shift_second_source.md`
    (start here) and the two single-source docs it supersedes in scope
    (`referral_head_on_ddi.md`, `native_classifier_on_ddi.md`).
+   A follow-up refit of CV-4b on a broader (ISIC + DDI/DDI-2/Fitzpatrick17k)
+   training distribution recovered real ground (non-ISIC AUC 0.60→0.73)
+   but did not clear its own pre-committed bar (0.80) and increased the
+   non-ISIC benign-referral cost to 54%, so it was **not** shipped — the
+   ISIC-only head stays in production. This points at the frozen
+   backbone's representation, not the head-fitting data, as the next
+   lever, which needs GPU budget not currently allocated. See
+   `analysis/quality/mel_sensitivity/cv4b_retrain_result.md`.
 3. **No reassurance, ever** (§2.4), until sensitivity supports it.
 4. **Regulatory.** Anything returning a risk category on a skin lesion
    is Software as a Medical Device. FDA/CE has a defined pathway; it
