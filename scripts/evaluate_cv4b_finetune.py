@@ -98,7 +98,7 @@ def main() -> None:
         raise SystemExit(f"no selected checkpoint at {best_path}; run the fine-tune first")
 
     payload = torch.load(best_path, map_location=device, weights_only=False)
-    model, head, _ = build_model(device)
+    model, head, _ = build_model(device, args.data_root)
     model.load_state_dict(payload["model"])
     head = nn.Linear(FEATURE_DIM, 1).to(device)
     head.load_state_dict(payload["head"])

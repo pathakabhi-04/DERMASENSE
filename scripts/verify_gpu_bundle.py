@@ -74,6 +74,15 @@ def main() -> None:
         fail(f"{len(missing)} image files listed but absent, e.g. {missing[0]}")
     print(f"PASS  all {len(table)} listed files present")
 
+    # `checkpoints/` is gitignored, so cloning the repo does NOT bring the
+    # checkpoint the fine-tune starts from. Without this check the failure
+    # surfaces only once a GPU is attached and billing.
+    checkpoint = root / info["source_checkpoint"]
+    if not checkpoint.exists():
+        fail(f"source checkpoint {info['source_checkpoint']} missing -- training cannot start "
+             "(it is gitignored, so the repo clone does not provide it)")
+    print(f"PASS  source checkpoint present ({checkpoint.stat().st_size / 1024 / 1024:.0f} MB)")
+
     expected = {}
     for line in (root / "SHA256SUMS").read_text().splitlines():
         digest, _, relative = line.partition("  ")
@@ -96,9 +105,10 @@ def main() -> None:
         fail(f"{len(bad)} file(s) failed checksum -- re-transfer these, e.g. {bad[0]}")
     print(f"PASS  {len(targets)} checksums match")
 
-    if hashlib.sha256((root / "dataset.csv").read_bytes()).hexdigest() != expected.get("dataset.csv"):
-        fail("dataset.csv checksum mismatch -- the label file itself is corrupt")
-    print("PASS  dataset.csv checksum matches")
+    for extra in ("dataset.csv", info["source_checkpoint"]):
+        if hashlib.sha256((root / extra).read_bytes()).hexdigest() != expected.get(extra):
+            fail(f"{extra} checksum mismatch -- corrupt after transfer")
+    print("PASS  dataset.csv and source checkpoint checksums match")
 
     for fold in EXPECTED_FOLDS:
         clinical = table[table["source"] != "isic2019"]

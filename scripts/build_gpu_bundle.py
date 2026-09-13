@@ -130,8 +130,9 @@ def write_checksums(frame: pd.DataFrame) -> Path:
         lines.append(f"{digest}  {relative}")
         if index % 5000 == 0:
             print(f"  hashed {index}/{len(frame)}", flush=True)
-    dataset_digest = hashlib.sha256((BUNDLE_ROOT / "dataset.csv").read_bytes()).hexdigest()
-    lines.append(f"{dataset_digest}  dataset.csv")
+    for extra in ("dataset.csv", f"checkpoint/{SOURCE_CHECKPOINT.name}"):
+        digest = hashlib.sha256((BUNDLE_ROOT / extra).read_bytes()).hexdigest()
+        lines.append(f"{digest}  {extra}")
 
     path = BUNDLE_ROOT / "SHA256SUMS"
     path.write_text("\n".join(lines) + "\n")
@@ -157,6 +158,19 @@ def main() -> None:
     print(f"{len(frame)} images ({(frame['source'] == 'isic2019').sum()} ISIC, "
           f"{(frame['source'] != 'isic2019').sum()} clinical)")
 
+    # The fine-tune starts FROM the shipped checkpoint, and `checkpoints/`
+    # is gitignored -- so cloning the repo on a pod does not bring it. It
+    # ships in the bundle or the run dies on the first line of
+    # build_model(), after the data is uploaded and the GPU is rented.
+    if not SOURCE_CHECKPOINT.exists():
+        raise SystemExit(f"source checkpoint missing: {SOURCE_CHECKPOINT}")
+    checkpoint_destination = BUNDLE_ROOT / "checkpoint" / SOURCE_CHECKPOINT.name
+    checkpoint_destination.parent.mkdir(parents=True, exist_ok=True)
+    if not checkpoint_destination.exists():
+        shutil.copy2(SOURCE_CHECKPOINT, checkpoint_destination)
+    print(f"source checkpoint bundled: {checkpoint_destination.name} "
+          f"({checkpoint_destination.stat().st_size / 1024 / 1024:.0f} MB)")
+
     place_images(frame)
     frame.drop(columns=["source_file"]).to_csv(BUNDLE_ROOT / "dataset.csv", index=False)
 
@@ -172,7 +186,7 @@ def main() -> None:
         "by_source": frame["source"].value_counts().to_dict(),
         "folds": list(FOLDS),
         "git_commit": git_commit(),
-        "source_checkpoint": str(SOURCE_CHECKPOINT.relative_to(REPO_ROOT)),
+        "source_checkpoint": f"checkpoint/{SOURCE_CHECKPOINT.name}",
         "note": "self-contained; relative paths only. See scripts/build_gpu_bundle.py",
     }, indent=2))
 

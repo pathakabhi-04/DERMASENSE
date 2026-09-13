@@ -175,16 +175,34 @@ def bundle_rows(data_root: Path, fold: str, split: str) -> list[Row]:
     return rows
 
 
-def build_model(device: torch.device):
+def resolve_source_checkpoint(data_root: Path | None = None) -> Path:
+    """The fine-tune starts from the shipped checkpoint, which is
+    gitignored -- a fresh clone on a GPU host does not have it. The bundle
+    carries a copy, so prefer that and fall back to the local repo path."""
+    if data_root is not None:
+        bundled = Path(data_root) / "checkpoint" / SOURCE_CHECKPOINT.name
+        if bundled.exists():
+            return bundled
+    if SOURCE_CHECKPOINT.exists():
+        return SOURCE_CHECKPOINT
+    raise SystemExit(
+        f"source checkpoint not found in the bundle or at {SOURCE_CHECKPOINT}. "
+        "Rebuild the bundle (scripts/build_gpu_bundle.py) so it ships with one."
+    )
+
+
+def build_model(device: torch.device, data_root: Path | None = None):
     """Load the shipped backbone, freeze everything but layer4, attach a
     fresh binary head. Freeze correctness is asserted, not printed."""
     model = DermaSenseNativeClassifier(
         NativeClassifierConfig(backbone="resnet50", pretrained=False, dropout=0.0)
     )
-    checkpoint = torch.load(SOURCE_CHECKPOINT, map_location="cpu", weights_only=False)
+    checkpoint = torch.load(
+        resolve_source_checkpoint(data_root), map_location="cpu", weights_only=False
+    )
     state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict"))
     if state_dict is None:
-        raise RuntimeError(f"no state dict in {SOURCE_CHECKPOINT}")
+        raise RuntimeError("no model state dict in the source checkpoint")
     model.load_state_dict(state_dict, strict=True)
 
     for parameter in model.parameters():
@@ -334,7 +352,7 @@ def main() -> None:
           f"(non-ISIC {sum(r.source != 'isic2019' for r in train_rows)}) | "
           f"val {len(val_rows)}")
 
-    model, head, layer4 = build_model(device)
+    model, head, layer4 = build_model(device, args.data_root)
     optimizer = torch.optim.AdamW(
         [
             {"params": layer4.parameters(), "lr": args.backbone_lr},

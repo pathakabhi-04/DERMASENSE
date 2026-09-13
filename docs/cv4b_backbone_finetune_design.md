@@ -466,7 +466,37 @@ PYTHONPATH=. python3 scripts/finetune_cv4b_backbone.py \
   --run-root /workspace/runs --resume
 ```
 
-### 12.3 Things that will bite, in rough order of likelihood
+### 12.3 How much network-volume storage to buy
+
+Measured, not guessed. Checkpoint sizes come from actually saving one.
+
+| item | size | notes |
+|---|---:|---|
+| bundle, untarred | 1.70 GB | 26,739 images at 320px |
+| bundled source checkpoint | 0.09 GB | included in the above tar |
+| `cv4b_bundle.tar` | 1.84 GB | delete after untar |
+| **peak during untar** | **3.5 GB** | tar + extracted tree coexist |
+| repo clone | ~0.1 GB | code only; data is gitignored |
+| `best.pt` per fold | 0.09 GB | model + binary head |
+| `latest.pt` per fold | 0.21 GB | + AdamW state + RNG, for resume |
+| checkpoints, 3 folds | 0.93 GB | |
+| peak during atomic save | +0.21 GB | `.tmp` before rename |
+
+Steady state after untar is ~2.8 GB; the transient peak is ~3.6 GB.
+
+**Buy 20 GB.** That is ~5× the peak, and the reason for the margin is not
+the numbers above — it is that pip may install into the volume rather
+than the container image depending on how the pod is set up, and a CUDA
+PyTorch install is **2.5–3.5 GB on its own**. If it lands on the volume,
+10 GB gets uncomfortable. 20 GB also leaves room to keep `latest.pt` for
+all three folds while a fourth run is in flight.
+
+Do not go below 10 GB. Volume storage is billed continuously even when no
+pod is running, so **delete the volume once the checkpoints are pulled
+down** — that recurring charge, not the GPU hours, is what quietly
+accumulates on an idle account.
+
+### 12.4 Things that will bite, in rough order of likelihood
 
 - **Network volumes are region-locked.** The volume lives in one
   datacenter and only GPUs in that datacenter can mount it. **Confirm the
@@ -483,6 +513,10 @@ PYTHONPATH=. python3 scripts/finetune_cv4b_backbone.py \
   laptop). Decode is the bottleneck (§2), so match it to the pod's vCPUs.
 - **Verify before renting, not after.** `verify_gpu_bundle.py` exits
   non-zero, so chain it: `python scripts/verify_gpu_bundle.py ... && <rent>`.
+- **The source checkpoint is gitignored**, so cloning the repo does *not*
+  bring the 90 MB checkpoint the fine-tune starts from. It now ships
+  inside the bundle and `verify_gpu_bundle.py` checks for it — without
+  that, the failure surfaces only after the GPU is attached and billing.
 - A truncated S3 object still decodes as a valid JPEG — it just decodes
   to *different pixels*. Only the checksum catches that, which is why
   the default verifies all 26,739 files rather than a sample.
