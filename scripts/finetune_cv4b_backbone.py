@@ -53,6 +53,7 @@ BENIGN = ("NV", "BKL")
 
 FEATURE_DIM = 2048
 NON_ISIC_BATCH_FRACTION = 0.5  # design §6
+FOLDS = ("pooled", "loso_atlas", "loso_stanford")
 
 # design §7 -- targeted at the colour/white-balance hypothesis the
 # composition audit left open, not a uniform turn-up.
@@ -133,31 +134,45 @@ def non_isic_rows(fold: str, split: str) -> list[Row]:
     ]
 
 
-PRERESIZED_MANIFEST = REPO_ROOT / "data/processed/cv4b_finetune_256/manifest.csv"
+DEFAULT_BUNDLE = REPO_ROOT / "data/processed/cv4b_bundle"
 
 
-def apply_preresized(rows: list[Row]) -> list[Row]:
-    """Swap in the pre-resized copies (design §11). Fails loudly on a
-    missing entry rather than silently training on a mix of resolutions,
-    which would be invisible in the logs and poison the comparison."""
+def bundle_rows(data_root: Path, fold: str, split: str) -> list[Row]:
+    """Read rows from the portable bundle (scripts/build_gpu_bundle.py).
+
+    This is the ONLY data path used by training and evaluation, locally
+    and on the GPU host alike -- so the configuration validated by
+    pre-flight is the one that runs on the rented card, rather than a
+    second path first exercised when it costs money.
+
+    ISIC rows carry `isic_split`; clinical rows carry a per-fold
+    assignment. Both resolve relative to `data_root`, so nothing depends
+    on this machine's directory layout.
+    """
     import pandas as pd
 
-    if not PRERESIZED_MANIFEST.exists():
+    dataset_csv = Path(data_root) / "dataset.csv"
+    if not dataset_csv.exists():
         raise SystemExit(
-            f"--preresized requested but {PRERESIZED_MANIFEST} is absent; "
-            "run scripts/preresize_cv4b_dataset.py first"
+            f"no bundle at {data_root} (expected dataset.csv). "
+            "Build it with scripts/build_gpu_bundle.py, or point --data-root "
+            "at the network volume copy."
         )
-    mapping = pd.read_csv(PRERESIZED_MANIFEST).set_index("image_path")["resized_path"].to_dict()
-    missing = [row.image_path for row in rows if row.image_path not in mapping]
-    if missing:
-        raise SystemExit(
-            f"{len(missing)} images have no pre-resized copy (e.g. {missing[0]}); "
-            "re-run the pre-resize rather than training on a mixed-resolution set"
-        )
-    return [
-        Row(mapping[row.image_path], row.label, row.source, row.is_melanoma)
-        for row in rows
-    ]
+    table = pd.read_csv(dataset_csv, keep_default_na=False)
+    if fold not in table.columns:
+        raise SystemExit(f"unknown fold {fold!r}; available: {', '.join(FOLDS)}")
+
+    is_isic = table["source"] == "isic2019"
+    selected = table[(is_isic & (table["isic_split"] == split))
+                     | (~is_isic & (table[fold] == split))]
+
+    rows = []
+    for record in selected.itertuples():
+        path = Path(data_root) / record.relative_path
+        rows.append(Row(str(path), int(record.label), record.source, bool(record.is_melanoma)))
+    if not rows:
+        raise SystemExit(f"bundle produced no rows for fold={fold} split={split}")
+    return rows
 
 
 def build_model(device: torch.device):
@@ -293,8 +308,10 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--device", default="auto", choices=("auto", "cuda", "cpu"))
     parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--no-preresized", action="store_true",
-                        help="train on full-resolution originals instead (slow; see design §11)")
+    parser.add_argument("--data-root", type=Path, default=DEFAULT_BUNDLE,
+                        help="bundle directory; on the GPU host this is the network volume copy")
+    parser.add_argument("--run-root", type=Path, default=RUN_ROOT,
+                        help="where checkpoints go; point at persistent storage on a rented pod")
     parser.add_argument("--max-steps", type=int, default=0, help="preflight only; 0 = full epoch")
     args = parser.parse_args()
 
@@ -306,16 +323,13 @@ def main() -> None:
     if args.device == "cuda" and not torch.cuda.is_available():
         raise SystemExit("cuda requested but unavailable")
 
-    run_dir = RUN_ROOT / args.fold
+    run_dir = args.run_root / args.fold
     latest_path = run_dir / "latest.pt"
     best_path = run_dir / "best.pt"
 
-    train_rows = isic_rows("train") + non_isic_rows(args.fold, "train")
-    val_rows = isic_rows("val") + non_isic_rows(args.fold, "val")
-    if not args.no_preresized:
-        train_rows = apply_preresized(train_rows)
-        val_rows = apply_preresized(val_rows)
-        print("using pre-resized 320px dataset (pre-flight check 7 verified fidelity)")
+    train_rows = bundle_rows(args.data_root, args.fold, "train")
+    val_rows = bundle_rows(args.data_root, args.fold, "val")
+    print(f"bundle: {args.data_root}")
     print(f"[{args.fold}] train {len(train_rows)} "
           f"(non-ISIC {sum(r.source != 'isic2019' for r in train_rows)}) | "
           f"val {len(val_rows)}")

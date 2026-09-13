@@ -390,7 +390,109 @@ Also required, and easy to forget until the instance is already running:
 checkpoints written to persistent storage (not the ephemeral disk),
 every epoch, with optimizer and RNG state (§9.6).
 
-## 12. What this design deliberately refuses to do
+## 12. Runbook: RunPod, network volume, data-before-GPU
+
+The ordering principle is **nothing is billed at GPU rates until the data
+is present and verified**. Data transfer, integrity checking and code
+checkout all happen before a GPU is attached.
+
+### 12.1 The portability problem this had to solve first
+
+The split CSV and pre-resize manifest both store **absolute local paths**
+(`/home/abhinav-pathak/...`), and `isic_rows()` resolves ISIC images
+through `CVDataset`, which builds paths against a raw-data root. Shipping
+those as-is to a pod means a crash on the first batch — or worse, needing
+the 19 GB raw ISIC tree present just to construct filenames.
+
+`scripts/build_gpu_bundle.py` produces a flat, relative, self-describing
+bundle instead:
+
+```
+cv4b_bundle/
+  dataset.csv    26,739 rows: relative_path, source, label, is_melanoma,
+                 isic_split, pooled, loso_atlas, loso_stanford
+  images/<source>/<stem>.jpg
+  SHA256SUMS     integrity for the S3 round trip
+  BUNDLE.json    counts + provenance (git commit, source checkpoint)
+```
+
+Nothing on the pod needs `CVDataset`, the raw datasets, or this machine's
+layout — only the repo (from git) and the bundle (from the volume).
+
+**The bundle is canonical locally too.** Pre-flight, training and
+evaluation all read it via `--data-root`, so the configuration validated
+on the laptop is byte-for-byte the one that runs on the rented card,
+rather than a second code path first exercised when it costs money.
+
+### 12.2 Sequence
+
+```bash
+# --- local, no GPU ---
+PYTHONPATH=. python3 scripts/preresize_cv4b_dataset.py     # 19 GB -> 1.7 GB
+PYTHONPATH=. python3 scripts/build_gpu_bundle.py --tar     # + cv4b_bundle.tar
+PYTHONPATH=. python3 scripts/preflight_cv4b_finetune.py    # must be 10/10
+
+# --- upload to the network volume (no GPU attached) ---
+aws s3 cp data/processed/cv4b_bundle.tar s3://<bucket>/cv4b_bundle.tar
+# then land it on the volume and untar to /workspace/cv4b_bundle
+
+# --- on the pod, still no GPU / cheapest instance ---
+git clone <origin> /workspace/dermasense && cd /workspace/dermasense
+pip install -r requirements.txt
+python scripts/verify_gpu_bundle.py --data-root /workspace/cv4b_bundle
+#   -> "Bundle verified. Safe to attach a GPU."   (exits non-zero otherwise)
+
+# --- only now attach/rent the GPU ---
+tmux new -s cv4b
+for FOLD in pooled loso_atlas loso_stanford; do
+  PYTHONPATH=. python3 scripts/finetune_cv4b_backbone.py \
+    --fold $FOLD --data-root /workspace/cv4b_bundle \
+    --run-root /workspace/runs --workers 8
+done
+# detach with ctrl-b d; the run survives an SSH drop
+
+# --- after training, test touched once per fold ---
+PYTHONPATH=. python3 scripts/evaluate_cv4b_finetune.py \
+  --fold pooled --data-root /workspace/cv4b_bundle --run-root /workspace/runs
+```
+
+Resume after a dead instance — checkpoints carry model, optimizer and RNG
+state, and pre-flight check 6 proves resume is bit-identical to running
+straight through:
+
+```bash
+PYTHONPATH=. python3 scripts/finetune_cv4b_backbone.py \
+  --fold pooled --data-root /workspace/cv4b_bundle \
+  --run-root /workspace/runs --resume
+```
+
+### 12.3 Things that will bite, in rough order of likelihood
+
+- **Network volumes are region-locked.** The volume lives in one
+  datacenter and only GPUs in that datacenter can mount it. **Confirm the
+  GPU type you want is actually available in that region *before*
+  uploading 1.7 GB there** — otherwise the data is stranded and has to be
+  re-uploaded elsewhere. This is the single most expensive ordering
+  mistake available here, and it is invisible until the last step.
+- **`--run-root` must point at the network volume** (`/workspace/runs`),
+  not container-local disk, or checkpoints die with the pod and the
+  resume path is worthless.
+- **Upload the tar, not 26,739 loose files.** Per-object overhead
+  dominates at that count; one 1.75 GB object transfers far faster.
+- **`--workers 8`** on the pod (the local default of 4 was sized for this
+  laptop). Decode is the bottleneck (§2), so match it to the pod's vCPUs.
+- **Verify before renting, not after.** `verify_gpu_bundle.py` exits
+  non-zero, so chain it: `python scripts/verify_gpu_bundle.py ... && <rent>`.
+- A truncated S3 object still decodes as a valid JPEG — it just decodes
+  to *different pixels*. Only the checksum catches that, which is why
+  the default verifies all 26,739 files rather than a sample.
+
+I have not re-verified RunPod's current API surface or pricing while
+writing this; treat the region and mount-point specifics as "confirm in
+the console", not as fact. The parts this repo controls — bundle layout,
+checksums, resume, `--data-root`/`--run-root` — are tested.
+
+## 13. What this design deliberately refuses to do
 
 - **No hyperparameter search.** One configuration, pre-committed. The
   linear-probe result's own conclusion was that chasing the number with

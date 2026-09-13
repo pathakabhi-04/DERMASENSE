@@ -36,10 +36,13 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from scripts.finetune_cv4b_backbone import (
+    DEFAULT_BUNDLE,
+    FOLDS,
     SPLITS,
     BinaryLesionDataset,
     Row,
     build_model,
+    bundle_rows,
     isic_rows,
     make_sampler,
     non_isic_rows,
@@ -53,7 +56,6 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PRERESIZED_ROOT = REPO_ROOT / "data/processed/cv4b_finetune_256"
 SCRATCH = REPO_ROOT / "analysis/quality/mel_sensitivity/_preflight"
 
-FOLDS = ("pooled", "loso_atlas", "loso_stanford")
 results: list[tuple[str, bool, str]] = []
 
 
@@ -73,9 +75,11 @@ def check(name: str):
 
 
 def fixed_batches(count: int = 4, batch_size: int = 8) -> list[tuple[torch.Tensor, torch.Tensor]]:
-    """Real images, deterministic preprocessing, held in memory -- so
+    """Real images from the BUNDLE -- the same path the GPU host uses --
+    with deterministic preprocessing, held in memory so the
     determinism/resume checks test the optimizer and RNG, not the loader."""
-    rows = non_isic_rows("pooled", "train")[: count * batch_size]
+    rows = [row for row in bundle_rows(DEFAULT_BUNDLE, "pooled", "train")
+            if row.source != "isic2019"][: count * batch_size]
     transform = build_eval_transform()
     images, labels = [], []
     for row in rows:
@@ -384,14 +388,15 @@ def check_throughput() -> str:
     Timing starts AFTER the first batch: DataLoader worker spawn is a
     fixed ~1-2s cost that swamped an earlier 128-image measurement and
     produced a 3x-pessimistic number."""
-    rows = non_isic_rows("pooled", "train")[:512]
+    original_rows = non_isic_rows("pooled", "train")[:512]
+    bundle_clinical = [row for row in bundle_rows(DEFAULT_BUNDLE, "pooled", "train")
+                       if row.source != "isic2019"][:512]
+    rows = original_rows
     measurements = {}
     for label, paths in (
-        ("original", [row.image_path for row in rows]),
-        ("pre-resized", _preresized_paths(rows)),
+        ("original", [row.image_path for row in original_rows]),
+        ("bundle", [row.image_path for row in bundle_clinical]),
     ):
-        if paths is None:
-            continue
         loader = DataLoader(
             BinaryLesionDataset(
                 [Row(path, row.label, row.source, row.is_melanoma)
@@ -407,8 +412,8 @@ def check_throughput() -> str:
             seen += len(batch["label"])
         measurements[label] = (seen - 32) / (time.perf_counter() - start)
 
-    train_size = len(isic_rows("train")) + len(non_isic_rows("pooled", "train"))
-    rate = measurements.get("pre-resized", measurements["original"])
+    train_size = len(bundle_rows(DEFAULT_BUNDLE, "pooled", "train"))
+    rate = measurements["bundle"]
     if rate < 40:
         raise AssertionError(
             f"only {rate:.0f} img/s decode throughput on this machine; an epoch "
@@ -420,14 +425,43 @@ def check_throughput() -> str:
     )
 
 
-def _preresized_paths(rows: list[Row]) -> list[str] | None:
-    manifest_path = PRERESIZED_ROOT / "manifest.csv"
-    if not manifest_path.exists():
-        return None
-    mapping = pd.read_csv(manifest_path).set_index("image_path")["resized_path"].to_dict()
-    if any(row.image_path not in mapping for row in rows):
-        return None
-    return [mapping[row.image_path] for row in rows]
+@check("10 bundle matches splits")
+def check_bundle() -> str:
+    """The bundle is what ships. Verify it agrees with the split CSV it was
+    built from, so a stale bundle cannot silently train on old assignments."""
+    dataset_csv = DEFAULT_BUNDLE / "dataset.csv"
+    if not dataset_csv.exists():
+        raise AssertionError(
+            f"no bundle at {DEFAULT_BUNDLE}; run scripts/build_gpu_bundle.py"
+        )
+    bundle = pd.read_csv(dataset_csv, keep_default_na=False)
+    splits = pd.read_csv(SPLITS)
+
+    clinical = bundle[bundle["source"] != "isic2019"]
+    if len(clinical) != len(splits):
+        raise AssertionError(
+            f"bundle has {len(clinical)} clinical images, split CSV has {len(splits)} "
+            "-- rebuild the bundle"
+        )
+    for fold in FOLDS:
+        bundle_counts = clinical[fold].value_counts().to_dict()
+        split_counts = splits[fold].value_counts().to_dict()
+        if bundle_counts != split_counts:
+            raise AssertionError(f"fold {fold} differs: bundle {bundle_counts} vs {split_counts}")
+
+    isic = bundle[bundle["source"] == "isic2019"]
+    for split in ("train", "val", "test"):
+        expected = len(isic_rows(split))
+        actual = int((isic["isic_split"] == split).sum())
+        if actual != expected:
+            raise AssertionError(f"ISIC {split}: bundle {actual}, CVDataset {expected}")
+
+    missing = [p for p in bundle["relative_path"].sample(200, random_state=0)
+               if not (DEFAULT_BUNDLE / p).exists()]
+    if missing:
+        raise AssertionError(f"{len(missing)} sampled bundle files absent, e.g. {missing[0]}")
+    return (f"{len(bundle)} rows ({len(isic)} ISIC + {len(clinical)} clinical) "
+            f"agree with {SPLITS.name}")
 
 
 def main() -> None:
@@ -437,7 +471,7 @@ def main() -> None:
 
     for function in (check_splits, check_freeze, check_overfit, check_determinism,
                      check_checkpoint, check_resume, check_preresize, check_metrics,
-                     check_throughput):
+                     check_throughput, check_bundle):
         function()
 
     print("\n" + "=" * 72)

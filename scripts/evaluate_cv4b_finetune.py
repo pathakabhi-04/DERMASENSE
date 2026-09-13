@@ -23,14 +23,13 @@ from torch.utils.data import DataLoader
 
 from scripts.evaluate_domain_shift import wilson_interval
 from scripts.finetune_cv4b_backbone import (
+    DEFAULT_BUNDLE,
     FEATURE_DIM,
     RUN_ROOT,
     BinaryLesionDataset,
     Row,
-    apply_preresized,
     build_model,
-    isic_rows,
-    non_isic_rows,
+    bundle_rows,
 )
 from src.data.transforms import build_eval_transform
 
@@ -89,11 +88,12 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--device", default="auto", choices=("auto", "cuda", "cpu"))
-    parser.add_argument("--no-preresized", action="store_true")
+    parser.add_argument("--data-root", type=Path, default=DEFAULT_BUNDLE)
+    parser.add_argument("--run-root", type=Path, default=RUN_ROOT)
     args = parser.parse_args()
 
     device = torch.device("cuda" if (args.device != "cpu" and torch.cuda.is_available()) else "cpu")
-    best_path = RUN_ROOT / args.fold / "best.pt"
+    best_path = args.run_root / args.fold / "best.pt"
     if not best_path.exists():
         raise SystemExit(f"no selected checkpoint at {best_path}; run the fine-tune first")
 
@@ -105,13 +105,10 @@ def main() -> None:
     print(f"loaded epoch {payload['epoch']} (selected on {payload['selection_metric']}, "
           f"val {payload['metrics']['non_isic_auc']:.4f})")
 
-    val_rows = isic_rows("val") + non_isic_rows(args.fold, "val")
-    isic_test = isic_rows("test")
-    non_isic_test = non_isic_rows(args.fold, "test")
-    if not args.no_preresized:
-        val_rows, isic_test, non_isic_test = (
-            apply_preresized(val_rows), apply_preresized(isic_test), apply_preresized(non_isic_test)
-        )
+    val_rows = bundle_rows(args.data_root, args.fold, "val")
+    test_rows = bundle_rows(args.data_root, args.fold, "test")
+    isic_test = [row for row in test_rows if row.source == "isic2019"]
+    non_isic_test = [row for row in test_rows if row.source != "isic2019"]
 
     # Operating point comes from VAL, never from test.
     val_scores = score_rows(model, head, val_rows, device, args.batch_size, args.workers)

@@ -35,6 +35,12 @@ data/raw/
 # scripts/preresize_cv4b_dataset.py)
 data/processed/cv4b_finetune_256/
 
+# GPU upload bundle (1.7 GB of hardlinks + tar, rebuildable via
+# scripts/build_gpu_bundle.py). dataset.csv/SHA256SUMS/BUNDLE.json live
+# inside it and are regenerated with it, so the whole tree stays out.
+data/processed/cv4b_bundle/
+data/processed/cv4b_bundle.tar
+
 # Model checkpoints / trained weights
 checkpoints/
 artifacts/**/*.pt
