@@ -197,27 +197,43 @@ class CVAssessmentContext:
             for flag in self.quality_flags
         )
 
-    def format_for_prompt(self) -> str:
+    def format_for_prompt(self, *, include_diagnosis: bool = True) -> str:
         """
         Render this assessment as supplied evidence for the LLM.
 
         Every figure here is safe to narrate; anything unsafe to narrate
         is deliberately absent rather than present-but-discouraged.
+
+        `include_diagnosis=False` is **Plan A / narrow-product mode**
+        (docs/plan_a_narrow_product_spec.md §5). It omits the class, the
+        confidence attached to it, and the risk category, because the
+        narrow product makes no diagnostic claim -- a user told "most
+        likely class: NEV" has been reassured whether or not a risk
+        category accompanied it.
+
+        What survives is what the narrow product actually ships: the
+        change-over-time verdict and the capture-quality notes. The
+        default stays True so Phase 1/2 behaviour, and every existing
+        test of it, is unchanged.
         """
 
-        return "\n".join(
-            [
-                "CV ASSESSMENT (computed by the DermaSense image pipeline for this "
-                "patient's own photo — explain it, never recompute or override it):",
-                f"- Lesion identifier: {self.lesion_id}",
+        lines = [
+            "CV ASSESSMENT (computed by the DermaSense image pipeline for this "
+            "patient's own photo — explain it, never recompute or override it):",
+            f"- Lesion identifier: {self.lesion_id}",
+        ]
+        if include_diagnosis:
+            lines += [
                 f"- Most likely class from the image classifier: {self.native_class}",
                 f"- Assessment confidence: {self.confidence:.0%} (calibrated)",
                 f"- Risk category: {self.risk_category}",
-                f"- Flagged for professional review: {'yes' if self.requires_review else 'no'}",
-                f"- Change since the previous photo: {self._describe_change()}",
-                f"- Image quality notes: {self._describe_quality_flags()}",
             ]
-        )
+        lines += [
+            f"- Flagged for professional review: {'yes' if self.requires_review else 'no'}",
+            f"- Change since the previous photo: {self._describe_change()}",
+            f"- Image quality notes: {self._describe_quality_flags()}",
+        ]
+        return "\n".join(lines)
 
     def to_dict(self) -> dict[str, Any]:
         """Round-trippable view, for logging and tests."""
@@ -271,6 +287,8 @@ def order_by_severity(
 
 def render_cv_context(
     cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None",
+    *,
+    include_diagnosis: bool = True,
 ) -> str:
     """
     Render zero, one, or several CV assessments to text.
@@ -300,4 +318,7 @@ def render_cv_context(
     if len(contexts) > 1:
         contexts = order_by_severity(contexts)
 
-    return "\n\n".join(context.format_for_prompt() for context in contexts)
+    return "\n\n".join(
+        context.format_for_prompt(include_diagnosis=include_diagnosis)
+        for context in contexts
+    )

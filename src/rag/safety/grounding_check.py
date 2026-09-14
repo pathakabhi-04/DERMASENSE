@@ -253,6 +253,8 @@ def check_source_presence(
     threshold: float = DEFAULT_SOURCE_PRESENCE_THRESHOLD,
     cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
     cv_threshold: float = CV_SOURCE_PRESENCE_THRESHOLD,
+    *,
+    include_diagnosis: bool = True,
 ) -> bool:
     """
     Return True if the answer shows meaningful lexical overlap with at
@@ -287,7 +289,7 @@ def check_source_presence(
     if not answer_text.strip():
         return False
 
-    cv_block = render_cv_context(cv_context)
+    cv_block = render_cv_context(cv_context, include_diagnosis=include_diagnosis)
 
     if not evidence.chunks and not cv_block:
         return False
@@ -313,6 +315,8 @@ def run_safety_check(
     source_presence_threshold: float = DEFAULT_SOURCE_PRESENCE_THRESHOLD,
     cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
     cv_threshold: float = CV_SOURCE_PRESENCE_THRESHOLD,
+    *,
+    include_diagnosis: bool = True,
 ) -> SafetyCheckResult:
     """
     Run both deterministic checks (spec section 5, points 1-2) and
@@ -330,6 +334,9 @@ def run_safety_check(
         threshold=source_presence_threshold,
         cv_context=cv_context,
         cv_threshold=cv_threshold,
+        # MUST match what the prompt supplied and the fallback displays,
+        # or "grounded" stops meaning anything (render_cv_context docstring).
+        include_diagnosis=include_diagnosis,
     )
 
     source_presence_violation = not is_source_grounded
@@ -360,6 +367,8 @@ def run_safety_check(
 def build_fallback_answer(
     evidence: EvidenceBundle,
     cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
+    *,
+    include_diagnosis: bool = True,
 ) -> str:
     """
     Required fallback behavior (spec section 5, points 3-4): when the
@@ -388,7 +397,7 @@ def build_fallback_answer(
     none is dropped.
     """
 
-    cv_block = render_cv_context(cv_context)
+    cv_block = render_cv_context(cv_context, include_diagnosis=include_diagnosis)
 
     # Evidence that barely matched must NOT be introduced as "the
     # relevant evidence". Retrieval returns its top-k with no minimum

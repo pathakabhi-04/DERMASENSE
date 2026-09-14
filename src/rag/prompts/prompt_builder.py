@@ -54,6 +54,8 @@ class PromptBuilder:
         query: str,
         evidence: EvidenceBundle,
         cv_context: "CVAssessmentContext | list[CVAssessmentContext] | None" = None,
+        *,
+        include_diagnosis: bool = True,
     ) -> AssembledPrompt:
         """
         Assemble the prompt. `cv_context` is optional, so every Phase 1
@@ -72,7 +74,7 @@ class PromptBuilder:
                 "Query cannot be empty."
             )
 
-        cv_block = render_cv_context(cv_context)
+        cv_block = render_cv_context(cv_context, include_diagnosis=include_diagnosis)
 
         sections = [f"USER QUESTION:\n{query.strip()}"]
 
