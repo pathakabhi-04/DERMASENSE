@@ -1,0 +1,793 @@
+image_path,label,raw_label,source
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000264.png,ACK,actinic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000005.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000289.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000292.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000290.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000293.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000291.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000037.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000406.png,BCC,basal-cell-carcinoma-nodular,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000073.png,BCC,basal-cell-carcinoma-nodular,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000440.png,BCC,basal-cell-carcinoma-nodular,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000407.png,BCC,basal-cell-carcinoma-nodular,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000071.png,BCC,basal-cell-carcinoma-nodular,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000405.png,BCC,basal-cell-carcinoma-nodular,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000072.png,BCC,basal-cell-carcinoma-superficial,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000404.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000265.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000277.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000051.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000328.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000439.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000310.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000273.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000305.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000323.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000275.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000046.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000278.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000280.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000042.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000281.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000288.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000322.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000047.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000283.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000438.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000279.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000318.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000271.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000307.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000285.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000048.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000320.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000309.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000049.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000317.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000306.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000286.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000269.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000272.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000274.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000267.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000316.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000276.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000311.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000324.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000321.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000268.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000282.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000270.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000287.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000284.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000308.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000266.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000263.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000261.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000045.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000041.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000043.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000050.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000262.png,MEL,nodular-melanoma-(nm),ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000400.png,NEV,pigmented-spindle-cell-nevus-of-reed,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000427.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000432.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000417.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000357.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000355.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000332.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000426.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000434.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000418.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000329.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000429.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000396.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000331.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000425.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000415.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000330.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000433.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000435.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000419.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000416.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000358.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000437.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000304.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000370.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000260.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000259.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000424.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000371.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000436.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000421.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000052.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000244.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000039.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000038.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000044.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000359.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000502.png,ACK,actinic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000538.png,ACK,actinic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000556.png,ACK,actinic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000501.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000557.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000566.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000552.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000583.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000582.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000478.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000512.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000551.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000537.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000488.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000543.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000579.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000481.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000519.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000558.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000656.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000588.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000511.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000554.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000637.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000565.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000648.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000589.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000555.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000560.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000484.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000633.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000644.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000630.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000598.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000541.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000590.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000616.png,BCC,basal-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000010.png,BCC,basal-cell-carcinoma-superficial,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000473.png,NEV,blue-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000651.png,NEV,blue-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000497.png,NEV,blue-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000650.png,NEV,blue-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000243.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000505.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000448.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000480.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000576.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000625.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000461.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000528.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000586.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000446.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000513.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000611.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000442.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000527.png,NEV,dysplastic-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000457.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000526.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000189.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000462.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000099.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000452.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000636.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000624.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000638.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000458.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000098.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000626.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000454.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000504.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000036.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000641.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000631.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000628.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000465.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000646.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000580.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000459.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000100.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000615.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000110.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000064.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000571.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000645.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000447.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000194.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000516.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000620.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000548.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000184.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000460.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000643.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000642.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000466.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000499.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000629.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000529.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000222.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000653.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000563.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000475.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000614.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000498.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000632.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000495.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000570.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000493.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000451.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000443.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000594.png,MEL,melanoma-in-situ,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000635.png,MEL,melanoma-in-situ,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000522.png,MEL,melanoma-in-situ,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000362.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000595.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000363.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000534.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000503.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000608.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000623.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000605.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000476.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000449.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000542.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000082.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000482.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000601.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000445.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000602.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000224.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000569.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000062.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000485.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000483.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000567.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000587.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000532.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000585.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000596.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000581.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000655.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000477.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000562.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000591.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000600.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000173.png,NEV,atypical-spindle-cell-nevus-of-reed,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000058.png,NEV,blue-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000181.png,NEV,blue-nevus,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000152.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000080.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000207.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000206.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000109.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000195.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000120.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000116.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000197.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000145.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000183.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000121.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000088.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000238.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000227.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000191.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000079.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000159.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000101.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000155.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000205.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000092.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000182.png,NEV,melanocytic-nevi,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000162.png,MEL,melanoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000007.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000013.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000009.png,MEL,melanoma-acral-lentiginous,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000008.png,MEL,melanoma-in-situ,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000002.png,MEL,melanoma-in-situ,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000001.png,MEL,melanoma-in-situ,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000168.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000104.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000192.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000153.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000172.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000174.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000160.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000201.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000091.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000203.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000111.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000105.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000129.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000247.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000226.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000180.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000237.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000178.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000114.png,SEK,seborrheic-keratosis,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000142.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000053.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000187.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000161.png,SEK,seborrheic-keratosis-irritated,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000169.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000011.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000015.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000006.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000014.png,SCC,squamous-cell-carcinoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi/images/000012.png,SCC,squamous-cell-carcinoma-keratoacanthoma,ddi
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/368748426.jpg,NEV,Acral junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/408528605_cropped.jpg,NEV,Acral junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/36017959.jpg,NEV,Acral junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4036263.jpg,NEV,Acral junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/173751948.jpg,NEV,Acral junctional melanocytic nevus  with special site atypia,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/208286973.jpg,NEV,Acral junctional melanocytic nevus with atypia,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/272144283.jpg,NEV,Acral junctional melanocytic nevus with special site atypia,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/544149906.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/376452782.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1475311_cropped.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/467987668.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/609300330.jpg,NEV,Atypical compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/488599319_cropped.jpg,NEV,"Atypical junctional melanocytic proliferation, favor inflamed junctional melanocytic nevus with severe atypia",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/474040772_cropped.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/59597411.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/591287793_cropped.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/68887205.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/140138611.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/310451016_cropped.jpg,BCC,"Basal cell carcinoma, nodular type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/449817191.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3706164.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/401209637.JPG,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/180565507.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/21800398.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4583385.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/157362.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/215873524.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/16845126.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/508489103.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/156936.jpg,NEV,Combined nevus (junctional and blue nevus),ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/512128075.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/383080411.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/90164773.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/110071340.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/69748450_cropped.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/210300111.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4962743.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/502317806_cropped.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/564855241_cropped.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/145405_cropped.jpg,NEV,Compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/49466752.jpg,NEV,Compound melanocytic nevus with congenital features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/525653280.jpg,NEV,Compound melanocytic nevus with congenital features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/219101873_cropped.jpg,NEV,Compound melanocytic nevus with congenital features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/382303398.jpg,NEV,Compound melanocytic nevus with congenital features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4545745_cropped.jpg,ACK,Hyperplastic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/230772823.jpg,ACK,Hyperplastic actinic keratosis with adnexal extension,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/66910751.jpg,ACK,Hypertrophic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/114424496.jpg,NEV,Inflamed compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/70097714.jpg,ACK,Inflamed hyperplastic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/522388875_cropped.jpg,SEK,Inflamed macular seborrheic keratosis with prominent pigment dropout,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/601663287.jpg,NEV,Inflamed mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/134770449.jpg,NEV,Inflamed mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/581769038_cropped.jpg,NEV,Inflamed moderately dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/454371472_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/421613260_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/481732681.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/67681366_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2079088_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/404503794_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/452753626.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/619438627.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/570220594.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1699954.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/509552145_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/405167756_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/381010011_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/80491223.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/543594788.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/543594810.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3927108_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/159304236.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2294454.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4281632_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2634218_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/233902321.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3029590.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3320737.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/537208373_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/578118300_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/242982907.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1836399_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/454833518.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/33199773.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/16660247.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/454540140.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3450274.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/590770704_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/443693741_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/47515800.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1476636.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/605688980.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/502948221_cropped.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/397293240.jpg,NEV,Intradermal melanocytic nevus and ruptured follicule/epidermal cyst,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/531442994.jpg,NEV,Intradermal melanocytic nevus with broad dermal scar,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/430654581_cropped.jpg,NEV,Intradermal melanocytic nevus with congenital features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/398575399_cropped.jpg,NEV,Intradermal melanocytic nevus with congenital features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/258212290.jpg,NEV,Intradermal melanocytic nevus with congenital-type features,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/277662611_cropped.jpg,SCC,Invasive squamous cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/140386.jpg,NEV,Irritated intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/302870490.jpg,SEK,Irritated seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/590843988.jpg,NEV,Junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/318363411.jpg,NEV,Junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/302869512.jpg,NEV,Junctional melanocytic nevus with special site atypia,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/154551324.jpg,NEV,Junctional melanocytic nevus with special site atypia,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/233757249_cropped.jpg,NEV,Lentiginous junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/523451750.jpg,NEV,Lentiginous junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1881642.jpg,NEV,Lentiginous junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4051943.jpg,SEK,Macular seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/62167721.jpg,MEL,Malignant melanoma in situ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/54823673.jpg,MEL,Malignant melanoma in situ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/492480409_cropped.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/589370303_cropped.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/453523300.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/429437614.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/121538416.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1706983.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1883546.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/70268265.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/184172246.jpg,NEV,Melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/47362915.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/94637714.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2794736.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/150080038.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/512683910.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/148054994.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/276917796_cropped.jpg,NEV,Mildly dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/94200406.jpg,NEV,Mildly dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/79973107.jpg,NEV,Mildly dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/119378654_cropped.jpg,NEV,Mildly dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/472310674.jpg,NEV,Mildly dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/253037018.jpg,NEV,Moderately dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/159088207.jpg,NEV,Moderately dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/236046253.jpg,NEV,Moderately dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/302869499.jpg,NEV,Moderately dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/512683898.jpg,NEV,Moderately dysplastic junctional melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/180473299.jpg,NEV,Nevus of ito,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/48447649_cropped.jpg,NEV,Nevus sebaceous,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/422452351_cropped.jpg,BCC,Pigmented basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/173719681_cropped.jpg,BCC,"Pigmented basal cell carcinoma, nodular type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/20062430_cropped.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3320724_cropped.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/311621033.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/535497772.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/370142191_cropped.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/419328311.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/342226398.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/590005227.jpg,SEK,Pigmented seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/501946366.jpg,NEV,Pigmented spindle cell nevus (reed nevus),ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/85333706_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/45540491.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/398935806.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/349214594.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4557510_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3706035_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3578914_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/63733030.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/390580622.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/35617148_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/375157869.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/553077840.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/73275809.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/392132683.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2530724.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/23572950_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/492480897_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/610327379.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/379672635.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/69701164.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2113796_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/605663060.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3679432.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/597674276.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1939850.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/48906517.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4763900.jpg,NEV,Severely dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/574940021.jpg,NEV,Severely dysplastic junctional melanocytic nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/70033091.jpg,SCC,Squamous cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/2623694.jpg,SCC,Squamous cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/594223998_cropped.jpg,SCC,Squamous cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/36023981_cropped.jpg,SCC,Squamous cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/628951123.jpg,SCC,Squamous cell carcinoma ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/370156636.jpg,SCC,"Squamous cell carcinoma, at least in-situ",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/49581683.jpg,SCC,"Squamous cell carcinoma, keratoacanthoma type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/271764793.jpg,NEV,Traumatized intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/169511646.jpg,NEV,Traumatized intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3265781_cropped.jpg,SEK,Traumatized seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/270607233_cropped.jpg,NEV,Verruca vulgaris arising in nevus sebaceous,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/431553013_cropped.jpg,SCC,"Well-differentiated squamous cell carcinoma, keratoacanthoma type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/4725324.jpg,NEV,Acral compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3784561_cropped.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/66258170_cropped.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3117646.jpg,ACK,Actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1340434_cropped.jpg,ACK,"Actinic keratosis, dermal scar",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/16354216_cropped.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/131816735.jpg,BCC,Basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/504679151.jpg,BCC,"Basal cell carcinoma, nodular type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1628559.jpg,BCC,"Basal cell carcinoma, nodular type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/119911_cropped.jpg,NEV,Blue nevus ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/128669990.jpg,NEV,Combined nevus (conventional and blue nevus),ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/633413753_cropped.jpg,ACK,Hyperplastic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/97303817.jpg,ACK,Hyperplastic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/438012301_cropped.jpg,ACK,Hyperplastic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/22840145.jpg,ACK,Hypertrophic actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/487007365_cropped.jpg,ACK,Inflamed actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/380988697.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1458624_cropped.jpg,SEK,Inflamed seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/207894512_cropped.jpg,SEK,Inflamed seborrheic keratosis ,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3903285.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3401039.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/222795432.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/514466749.jpg,NEV,Intradermal melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1501744.jpg,NEV,Intradermal melanocytic nevus overlying a ruptured cyst,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1747456.jpg,NEV,"Intradermal melanocytic nevus, congenital pattern",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/20887580.jpg,SEK,Irritated seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/233072363.jpg,MEL,"Malignant melanoma in-situ, acral lentiginous type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1438198.jpg,NEV,Mildly dysplastic compound melanocytic nevus,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/277027867.jpg,ACK,Pigmented actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/188275025_cropped.jpg,BCC,Pigmented basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/147804.jpg,BCC,Pigmented basal cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/326557755.jpg,BCC,"Pigmented basal cell carcinoma, nodular type",ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/557497476.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/31062577_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/632875508.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/536614215.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/229064773_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/15084136_cropped.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1589355.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3068586.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/402679764.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/47900974.jpg,SEK,Seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/228242406.jpg,SCC,Squamous cell carcinoma,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/3781260.jpg,SEK,Traumatized seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/1487402.jpg,SEK,Traumatized seborrheic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/ddi2/images/122877637.jpg,ACK,Ulcerated actinic keratosis,ddi2
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/339d21e178104dd6280e1ac6d354a695.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/70758a12b61186edea167fbcf51c7598.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8b1aac66f2434dc37c84ba01f2c08605.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/68528c33db3fc238d183b5d2c14d6f75.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/30559e9ff81800fcc4e2819d89988b88.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/74c640f21d94d59eec3ac37cebaedd2d.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4ff1ea06e98ef27ae93b27fbfa384a75.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e894e98ec3b149d53b202e1cef0fa9ad.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6af0a95515b388eac5fa547ca8f8e931.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/de2fe2ef59eae8ce0633efc84d0baef3.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ff5fbdbf0d3221c3ba5628b50fc0aa41.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/084d223d5918ec2ddae37f2f8061e23c.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/37de8e0406609884c1140bf660798d40.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/06aa37c1fb2ae9dadf126143b98a1640.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b02895e0d729c9bcecaed2ee070cada9.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/938528c2ba772fc83832aeca85171cf2.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ecdcd89dda8fa5b30706532fb49f315c.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c0a31afecc839c5fccf8c15ca9cee431.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0393b043e435e566657cf7d61879026c.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/96e320998184af49bfc791c8f1b0e174.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b3d94ddf1388ed3894ad18ea3fefc880.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e28cbb701b1b2ff727c3c7aba01fe6ff.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9aced25f0da2ff491cf0da3fee0a8f3c.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e668f37499adaead040d7d893e778cc7.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/2e9a44d7373e97c682c937249b38d622.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/051e5c8ce730d6a81961ca551c9fdb2a.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/943a5ffcd4da3122732edad290533470.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/442efb92b5f59923668f0d2e6316b9cb.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/26ad865bcdc627dfa0dc2e419252a0ed.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/fb89d4fa5b5c3696f327d14ee041942c.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8972c76e23d9f6d7c301532573961b99.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b30468853e0ad984dfbf53fceee5942f.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8761091f0e6c7609bfc61713a34dd872.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/72bcd875e7a573b4139883059e69328d.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/7c015dcdbe6e3f3c2911a64342c135c6.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ddb15beb69fc4276b74a948a00eed2c8.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c1b162ecbd537349c8df036a7f7627dc.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/1d8fcc49e4dda6868fcf76916fc14405.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a646b94f0637b904e4becca57a2dc26f.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a37ed02cd54e4b530341f7587d4e444a.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9ee17127331be5b1c1f2bdea846ee60f.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4ab4fa98f5acf7ec42886917128df401.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b4df499e2397da0425aecca6849c55f0.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0e9e79e3884112fdccf813ffebd698ea.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/aea33f41d93dbd5aa59131a57c001714.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9aaef41b9332298c3e98b4ee33e39fb5.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c6a917a5d74ab6def73579084f791251.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/65f7b7df48effe3ad7238404ca5318ce.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f31a5c7d32b7b4479739bff76a23e8e4.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b9ddf5dbd6257c786e13658934c56ac6.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/1d56b7d688b6b276893107a6bdb93bba.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/3b24865e842419e4efc3fb909c633077.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8a891f4bfb77344d6ae4d236cb9ac4e5.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6c83bef6f525b8734ecdbd9dd5f0e822.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4695bfda5557fa0aaae6e81d4492e0a5.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5492bcfe87eb32401225a4ababbdad52.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ecd97fd36f39e9fd52f09f50c3dc59b5.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/1d78d91cb196cb45b40c615cbf7a94ff.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f7c6e5f7929dd5ca2b066698fd2e83ba.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/70766ed2b71ab0e8c5b387e172213eee.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/889a8ed4164c01992b4981e78597a29a.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/29a86d89608e63ccfc57b1e40c827ead.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/13aa2de8804ae601cd45c1c4cac9bc6f.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/fbd64d85fa7bfed3ba061ca05ff90f69.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ae40c3cfca9899067d0e75465586cf97.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e315766377e07b3a78c789f1ef6cf529.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/2311fe11163e4e84336c53eefb5e24d7.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/db6590971625b0e98971f449b4ed6ee7.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/74bc180ce4619e21a8a8d425c4e86765.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6f7e7323fc3b1d98c4e3bfe5273f6b92.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/60f79f88cbb999246aea835979d1c1db.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d10dfbefc8303b80b1d7e8b661506da0.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/3f014488acf61087ab152f8dc5fac8b3.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/eab91c11e20398a89c454717dc5eaa94.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/30b3bb79b3d16b45ec095a91cd9c32ee.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8e4316c8cc5208eac7a1405d66cb401e.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/fd1fa18a3033459631670d50b9b5bfc9.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/80af44814ea5730ac2e9ba49971ed054.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/80602e43414e592443aee9e67fcca5c7.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b3bc16cf6e0ce8cc7ee9a78ad45d0617.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/23733ccaf3cc5d720585930f3ac1b7e1.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/bd70e00d188e7ef98bf9e7edaaff752e.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b5fa137ead5d2d13313ff126e3e255c2.jpg,MEL,melanoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6983939c38cb0d103d2ee332858ee485.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/47636cb8d1cea91cc2363e837a0a5954.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ee9728f1e771a1922abe13af66282b41.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4213b1f75d491c3b253975caed41d6de.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4442aec61aba4663d4810c0786ed86c8.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c501b9ec2440eaabab9f1e8631af31fd.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/bc17b2b80667945dbbc470f72b152900.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a9774d79170b2b5fef7627127f7ac524.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/10cbd07a7f2e658a27f31eac2ae17269.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/72430e826363a44a2f9d5dd7e88aed64.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d07c72725b477a834d439eef3450d830.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0e539304dcb700d132400c34f44d21b7.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d04699fc9e876ddd627d102570694a0c.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/fcc9ed3892215e076e9dc5b7a8bf81e7.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/45119bcf9dab198dfdfa04b14736c240.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0cbdf45e52b3137a785cc575e8b4bb53.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4ccb6a341928c32e6bdba870cdf57e25.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a15b63b8b1cbecfb8f88fc766b204b9f.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/344cf83a64c8312aa83a952f87ede69e.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/46d0b60ab14b134341ad87bae08e4755.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5f1a4d80fdc87563f3cc7174241c3477.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9beeeb0b8f6d8468c3e88cc31006deae.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9d83cf9b9cc4a03580de63b62ea2a8f0.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/053a5ee87f2fc71f07e99a25fd379210.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c40432238e3ce04f39d1d23f13527c67.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/543017d891174b7fe9443a4dfa537410.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/70febe1909055262ca282551a222a10f.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/190822f2e75490299428db99d2f34486.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/250e8552aca769e9e33e753f50423bda.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f7e7fb15ba1bfabcf68bcd62528f76a8.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9d6fc0774c68a7caec5d86148bcba524.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/613bb35e2fb482c4bb7a4925ec0743b3.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/597405f862fa1572fc379136159aba3a.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/47cb1bb512da0f22002f75e9f158c6e8.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/14123577f30e3a495ac84e2cf1244a99.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f5b5fc7b1af76ca2db94a3118cffc572.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8bdf085e79f86fbfd2f5141b5b3df776.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/414d1baaee908089a3c09143507d5fd8.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/07c3f44536b46156450cf81a451ccedb.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f420eb73f0b50a89b5fddccc85796062.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/3051fedba7a0300d60d48d91766831c4.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/85eecdee71e8ac56831eb6bf276c28bb.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/019fde7f8b6aa85f6f0a653707d9aa06.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/2bceb0364ef64fe3ef5236db2cfbe02a.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f44f3454329e674663e68da31c24e674.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b12942fe22a3ec7bf64c0a4d58776551.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c5ebb84482a21015073cebc37b31f515.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6f197431cd2d540ed3c5c8c6a5296d54.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/801a5e586bc2c8cd9fc5825e1cbb8570.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/39d7ad8e2b3eca2f8356b2df57c59767.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/26628fb7dc4341b5ac2ef37525925fe0.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/aff8f8833189c8c6fff40c65f441f37f.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/730e946083fd36c5e8722f88c178a1a6.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/bdea9a2f7ab80e98881388dcf36424e9.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/28b6d5c8f25acf6ddf93bf72fe7844d0.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/513d69c21897a5244aa85b6fa7a913aa.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0a152642bc8270880808ab9477846866.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/52514f7abd18bb524279c10943916512.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/73ac23918c9537a8c792938b64f779e0.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/44db8ec026393a9fe950d286824bea30.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4914fa9dae16b9762acae30d0349ad85.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/efc3f78778508079ddf1b39b9f09483d.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d7d7980b1fd4fbaf3e14ecfd48c98bdf.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/87089a4409606968748d64f20865a2dc.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/76a5da87f72f5712243ff4bcf52337b6.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9255b18c770f58de26221d16839fadb2.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/17313d3de1e4c2952908201cb825e340.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6c11f4d55463565511ddc7596bf004ca.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/54aa2f1bf36b27de991db5cd358bde06.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8befc3a0c8600e273977e3a8888a802f.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6c44eaf42cb3c29b2aa888048e980dcf.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/399d923af5d3a27f638f0292ca0c3d7f.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/016abe4884715af85cd3f309f93b9641.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/296ec4776e89a65ce8e262ed545ed4bb.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c118e1b0b179f299b4a814d78059c137.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/585de3087248fafc0600dbeae5cb2692.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/98280785c17860f879d21525a92af31f.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/22bcca7d579abf5c2c121c98aa01a4c7.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/37566d4150bbc6080c2dd4ecc7ff9431.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/19e7cad902144cb742b342bb82b395eb.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/4fa9a2f6266c5e685bbce85809b99bee.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/15ab45bcef4ca5f5ddf2d4305a14f885.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8d0d9724e46caa4b82829e70e672fd1f.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5802610b87c8098cf71de102f2e9652d.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c1fcf5b167a0bdcb3c1eba9ecab76ae7.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/1899a650833c9dce36fe8d7da87b2755.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b0acf3a63fa757598b06c51a431eea6d.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/cd5e1db7f0aac364ba2a0fd6407dd4cf.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6abd190e1ce339a018ef0776f530678f.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/7270099b2bb8e4b2454a5e23c5c8960b.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/de608b752927ceeabb7bac264a52942d.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c22dfb448848253cc53435cdb23c1271.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/09a75e2a4e9bbc303e6e0cb3e16a32d8.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b76381e00a47d51418c19231ec321e20.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e927c81f6b508269c83350184f124a2d.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d2506151428601cd8566330c781f82e0.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c6e41ac2c8552505d795c4efda0869d6.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ab7f5d4d82844334fd046cfa3d0c52b7.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/1dcc2fb45c366dafbb1f45c0e8afd3bd.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/7912ab0cf1c1a04708f78e68ebee8d34.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f4048596275ae97f09ab436b6f568cca.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/04437cd3092a8922dc9af8100d350431.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9371b89247ec4e39c05760c2ccaef840.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/3d921ce5a4bb73bebf7f3200257a74c4.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/274fcc8858e2524666aac80c117c1eae.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b7ff367d07ee32101f5188a34cc142ab.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d11416a368eb814bae7eeb54d357f46b.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/d01ee1734e42fb0e876e2b872d0e1145.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/2aa5dac8b5f87535800796c039a818c8.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/dc8b1d07cb9d4b4f4097807e29d045c3.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5532bbc902f5d50f6f8a972016bcf04f.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/13e11954a6ece398b2efe0e1da5b1aa5.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a57cce5e02560bc8ec878ef7a2f783d2.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ee71a2faae114b91878f7460a0ce9d6f.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/63f2efe8aab42d66f08a223d21b79f9d.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c819e82dc15ddf2d0ceb08515f303123.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/093fcc49c98d314303ba07aa0d6c1348.jpg,ACK,actinic keratosis,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/94646305d86635230c4eb1763bb043bc.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/78219f1a6402b8f83a9eecfed6a35c0c.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/40b9006b90679ab5560ebe3ce1a589a1.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5199cceebe2d23bbae855ea7dda2418b.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/cee7765b5c79a3c4a5354fe3a755c388.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/673e2daccb06374f11b9bf5110fb9550.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5e7d0cf1d8901eea8361b2be45a6fec2.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/c50113547f82a9ad4d3ce4dc0972a698.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/dfc849919c7f749a42f6059f927eb82f.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b8187ac1e3d5c7a7238056c87a3072a9.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/170c87c679d5e29b4040d544d8887fa3.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/b7ccee8c91bd6ecd6d7ce5b66e4513c2.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6fb6afb84ad3fadb641d9d5673156e93.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/17beac6823fd7ec2303d5b030a536fca.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e83a91547ae74f206135f5b5fff97b0e.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a036718d77f4a4339b2aaf15e2087fe0.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/9220d313606d63dfbcfdf77eed378706.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5832419baf0cbfefcac35578a40fa5a5.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/170ed3a3d229937e355c091bf5c75d40.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0e802991cd0257f69f62adedb41152f8.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/70a8a40f55e900e60a42054326f62e28.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/850f18a45b3fcbcd8b5020cc07273d91.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/429baf43d2dfce514c2bbf837a537623.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/59fed3f27ebb81c0be581f47a33d4e65.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/8d4f1262a0534e1d906a21a1bcb8707d.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e54daa4b483474920f81739c264c1efc.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/08a183312614facc181ff92c032dc8b0.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ae0f57af6ace4b075703d55ff00f2574.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/12cbe66e3a99633092732daf3351b3c2.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/5f6bf606eaef0ac72ec1132558e8160a.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/ac684a3d2464ae0fba4d90e4f898875d.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/e82cda3eeecc9ba74ba226cc1f8efc38.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/62e2bb9f7a023511b7a064faca724db7.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/064f39810e82e6097f9c187f003ede0a.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/3354d6e561d84457af0adddab4686b31.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/04ec9f7ab6dd2bde77c7f5178d705108.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/6ed58ed2e4c8b378493cd5766f7bad56.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/f2404024ad9adf7355a5363efe418567.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/658a7441448655ad189b84645fdef0ac.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/14c1d65a2ad46d5efc6ad714224483ee.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0b283a47352d88ab55257c9fce2d3603.jpg,BCC,basal cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/a1a72809c749cbfb7f886309882b8a13.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/23b55a045c5f88159ce54f69df645c5f.jpg,SCC,squamous cell carcinoma,fitzpatrick17k
+/home/abhinav-pathak/dermasense/data/raw/fitzpatrick17k/images/0a1ca67fbbf7047acbf7c684694cf688.jpg,NEV,congenital nevus,fitzpatrick17k

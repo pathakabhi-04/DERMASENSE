@@ -34,10 +34,12 @@ import torch
 
 from src.inference.orchestrator import DermaSensePipeline, PipelineOutcome
 from src.risk.action_mapping import diagnosis_to_action
+from src.training.metrics import wilson_interval
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 PAD_UFES_TEST = REPO_ROOT / "data/splits/pad_ufes/test.csv"
+EXTERNAL_TEST = REPO_ROOT / "analysis/quality/mel_sensitivity/external_6class_eval_set.csv"
 ITOBOS_TEST = REPO_ROOT / "data/splits/itobos_detection/test.csv"
 
 ROUTER_CHECKPOINT = REPO_ROOT / "checkpoints/cv1_5_router/best.pt"
@@ -86,7 +88,7 @@ def parse_args() -> argparse.Namespace:
         description="Evaluate the assembled CV-1 -> CV-4 pipeline."
     )
     p.add_argument(
-        "--split", choices=["pad_ufes", "itobos"], default="pad_ufes"
+        "--split", choices=["pad_ufes", "itobos", "external"], default="pad_ufes"
     )
     p.add_argument(
         "--device", choices=["auto", "cpu", "cuda"], default="auto"
@@ -311,6 +313,89 @@ def summarize_pre_framed(results: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
+
+# SEES_CLINICIAN: the product-level success criterion from
+# cv_metrics_improvement_plan.md Step 4 -- "sends the user to a doctor",
+# NOT "classified as MEL". A melanoma called BCC still yields
+# URGENT_EVALUATION and is a good outcome; called NEV it yields MONITOR,
+# which is the failure that matters. Same definition already used by
+# evaluate_domain_shift.py and evaluate_pad_checkpoint_on_isic_mel.py.
+BENIGN_PREDICTIONS = {"NEV", "SEK"}
+
+
+def summarize_external(results: pd.DataFrame) -> str:
+    """External 6-class evaluation: DDI + DDI-2 + Fitzpatrick17k.
+
+    Answers two questions the PAD-UFES test split cannot, because it has
+    9 melanomas and a ~30-93% confidence interval:
+      1. what IS CV-4's melanoma recall (n=107 here)?
+      2. end-to-end, what fraction of melanomas reach a clinician?
+    """
+    assessed = results[
+        results["outcome"] == PipelineOutcome.ASSESSED.value
+    ].dropna(subset=["predicted_class"])
+    scored = assessed.drop_duplicates("image_id")
+    per_image = results.drop_duplicates("image_id")
+    not_assessed = len(per_image) - len(scored)
+
+    lines = [
+        "CV-1 -> CV-4 Assembly -- EXTERNAL 6-class set (DDI + DDI-2 + Fitzpatrick17k)",
+        "=" * 74,
+        "",
+        f"Images: {len(per_image)}   Assessed: {len(scored)}   "
+        f"Not assessed: {not_assessed}",
+        "",
+        "NOTE: these are clinical photographs from three sources the model never",
+        "trained on. A low number here confounds CV-4 weakness with the domain",
+        "shift already measured in domain_shift_second_source.md. It is still a",
+        "far better melanoma measurement than PAD-UFES test's 9 images.",
+        "",
+        "Per-class recall (Wilson 95% CI):",
+    ]
+
+    for true_class in sorted(scored["true_class"].unique()):
+        subset = scored[scored["true_class"] == true_class]
+        hits = int((subset["predicted_class"] == true_class).sum())
+        low, high = wilson_interval(hits, len(subset))
+        flag = "   <- THIN" if len(subset) < 30 else ""
+        lines.append(
+            f"  {true_class:4} n={len(subset):4}  recall={hits / len(subset):.4f} "
+            f"({hits}/{len(subset)})  [{low:.2f}, {high:.2f}]{flag}"
+        )
+
+    lines += ["", "End-to-end: does the output send the user to a clinician?", ""]
+    for true_class in sorted(scored["true_class"].unique()):
+        subset = scored[scored["true_class"] == true_class]
+        routed = int((~subset["predicted_class"].isin(BENIGN_PREDICTIONS)).sum())
+        low, high = wilson_interval(routed, len(subset))
+        lines.append(
+            f"  {true_class:4} n={len(subset):4}  routed={routed / len(subset):.4f} "
+            f"({routed}/{len(subset)})  [{low:.2f}, {high:.2f}]"
+        )
+
+    melanoma = scored[scored["true_class"] == "MEL"]
+    if len(melanoma):
+        hits = int((melanoma["predicted_class"] == "MEL").sum())
+        routed = int((~melanoma["predicted_class"].isin(BENIGN_PREDICTIONS)).sum())
+        r_low, r_high = wilson_interval(routed, len(melanoma))
+        lines += [
+            "",
+            "MELANOMA HEADLINE",
+            "-" * 74,
+            f"  classified as MEL : {hits}/{len(melanoma)} = {hits / len(melanoma):.4f}",
+            f"  reaches clinician : {routed}/{len(melanoma)} = {routed / len(melanoma):.4f}  "
+            f"[{r_low:.2f}, {r_high:.2f}]",
+            f"  missed entirely   : {len(melanoma) - routed}/{len(melanoma)} "
+            "(predicted NEV or SEK -> MONITOR)",
+            "",
+            "  for reference, PAD-UFES test: 6/9 = 0.6667, CI roughly [0.30, 0.93]",
+        ]
+        confusion = melanoma["predicted_class"].value_counts().to_dict()
+        lines.append(f"  melanomas were predicted as: {confusion}")
+
+    return "\n".join(lines)
+
+
 def summarize_wide_field(results: pd.DataFrame) -> str:
     per_image = results.drop_duplicates("image_id")
     total = len(per_image)
@@ -372,17 +457,28 @@ def main() -> None:
     device = resolve_device(args.device)
     args.output.mkdir(parents=True, exist_ok=True)
 
+    is_external = args.split == "external"
     is_pad_ufes = args.split == "pad_ufes"
-    table = pd.read_csv(PAD_UFES_TEST if is_pad_ufes else ITOBOS_TEST)
-    if not is_pad_ufes:
-        table = table.drop_duplicates("image_id")
+    has_labels = is_pad_ufes or is_external
+
+    if is_external:
+        # DDI + DDI-2 + Fitzpatrick17k mapped onto the PAD label space
+        # (scripts/build_external_6class_eval.py). 107 melanomas against
+        # PAD-UFES test's 9 -- this is the set that makes MEL recall
+        # measurable at all.
+        table = pd.read_csv(EXTERNAL_TEST).rename(columns={"label": "native_diagnosis"})
+        table["image_id"] = table["image_path"].map(lambda p: Path(p).stem)
+    else:
+        table = pd.read_csv(PAD_UFES_TEST if is_pad_ufes else ITOBOS_TEST)
+        if not is_pad_ufes:
+            table = table.drop_duplicates("image_id")
     if args.limit and args.limit < len(table):
         # Random, seeded -- a head() slice could track acquisition order
         # (site, batch, body region) and bias the structural rates.
         table = table.sample(n=args.limit, random_state=args.seed)
 
     # The detector is only needed for the wide-field branch.
-    detector_weights = None if is_pad_ufes else DETECTOR_WEIGHTS
+    detector_weights = None if has_labels else DETECTOR_WEIGHTS
     if detector_weights is not None and not Path(detector_weights).exists():
         raise FileNotFoundError(
             f"CV-2 weights not found: {detector_weights}"
@@ -401,19 +497,20 @@ def main() -> None:
         device=device,
     )
 
-    results = run_split(pipeline, table, has_labels=is_pad_ufes)
+    results = run_split(pipeline, table, has_labels=has_labels)
 
-    prefix = "pad_ufes" if is_pad_ufes else "itobos"
+    prefix = args.split
     predictions_path = args.output / f"{prefix}_predictions.csv"
     summary_path = args.output / f"{prefix}_summary.txt"
 
     results.to_csv(predictions_path, index=False)
 
-    summary = (
-        summarize_pre_framed(results)
-        if is_pad_ufes
-        else summarize_wide_field(results)
-    )
+    if is_external:
+        summary = summarize_external(results)
+    elif is_pad_ufes:
+        summary = summarize_pre_framed(results)
+    else:
+        summary = summarize_wide_field(results)
     summary_path.write_text(summary + "\n")
 
     print()

@@ -605,8 +605,12 @@ oversight:**
   taxonomy (PAD-UFES 6-class vs. the contract's ISIC 8-class example)
   and CV-2's known tiling limitation — both pre-existing, deliberately
   out of this scope, documented where they were found.
-- Any Stage 2 (learned) model for CV-1.5 or CV-7 — both stayed
-  Stage-1-only after their own evaluations found no need to escalate.
+- A Stage 2 (learned) model for CV-7 — it stayed Stage-1-only after its
+  own evaluation found no need to escalate. (**Corrected 2026-09-14:**
+  this bullet previously said CV-1.5 stayed Stage-1-only too. It did not
+  — CV-1.5's Stage 1 heuristic failed its gate at 80%/62% and Stage 2
+  (ResNet18) was trained and passed at 1.000/1.000. See "Completed:
+  CV-1.5 Domain Router" below.)
 - CV-6/CV-5 are opt-in (cost tradeoffs — extra forward passes / a
   backward pass), off by default; a caller wanting them passes
   `additional_ensemble_checkpoints=...` / `compute_gradcam=True`.
