@@ -438,7 +438,11 @@ aws s3 cp data/processed/cv4b_bundle.tar s3://<bucket>/cv4b_bundle.tar
 
 # --- on the pod, still no GPU / cheapest instance ---
 git clone <origin> /workspace/dermasense && cd /workspace/dermasense
-pip install -r requirements.txt
+
+# Check the image's torch FIRST -- do not reinstall it (see below).
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+pip install -r requirements-pod.txt        # NOT requirements.txt
+
 python scripts/verify_gpu_bundle.py --data-root /workspace/cv4b_bundle
 #   -> "Bundle verified. Safe to attach a GPU."   (exits non-zero otherwise)
 
@@ -517,6 +521,22 @@ accumulates on an idle account.
   bring the 90 MB checkpoint the fine-tune starts from. It now ships
   inside the bundle and `verify_gpu_bundle.py` checks for it — without
   that, the failure surfaces only after the GPU is attached and billing.
+- **Do not `pip install -r requirements.txt` on the pod.** That file pins
+  `torch==2.13.0`, which would *replace* the image's CUDA-matched torch
+  with a wheel whose bundled CUDA may not match the host driver — the
+  classic route to `torch.cuda.is_available() == False` on a GPU you are
+  paying for. It also drags in streamlit, fastapi, sentence-transformers,
+  faiss and umap for a job that touches none of them. Use
+  `requirements-pod.txt` (5 packages, torch deliberately unpinned) and
+  check the image's torch before installing anything.
+- **opencv is no longer on the pod path.** `evaluate_cv4b_finetune.py`
+  previously imported `scripts/evaluate_domain_shift.py` — and therefore
+  `cv2` plus the whole native-inference stack — purely to reach an
+  eight-line `wilson_interval`. On a slim container `import cv2` commonly
+  dies on a missing `libGL.so.1`, which would have failed the *final
+  evaluation*, after all three training runs had completed and been paid
+  for. The helper now lives in `src/training/metrics.py`; verified by
+  importing all three pod-side scripts with `cv2` forcibly unavailable.
 - A truncated S3 object still decodes as a valid JPEG — it just decodes
   to *different pixels*. Only the checksum catches that, which is why
   the default verifies all 26,739 files rather than a sample.

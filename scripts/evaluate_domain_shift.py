@@ -20,7 +20,6 @@ Add one for a new dataset rather than writing a new evaluation script.
 
 from __future__ import annotations
 
-import math
 from pathlib import Path
 
 import cv2
@@ -38,6 +37,7 @@ from src.models.native_classifier import (
 )
 from src.risk.action_mapping import HIGH_RISK_DIAGNOSES
 from src.risk.referral_head import ReferralHead
+from src.training.metrics import wilson_interval
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CLASSIFIER_CHECKPOINT = (
@@ -52,16 +52,6 @@ _TRANSFORM = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
-
-
-def wilson_interval(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
-    if n == 0:
-        return (0.0, 0.0)
-    p = successes / n
-    denom = 1 + z ** 2 / n
-    centre = p + z ** 2 / (2 * n)
-    spread = z * math.sqrt(p * (1 - p) / n + z ** 2 / (4 * n ** 2))
-    return ((centre - spread) / denom, (centre + spread) / denom)
 
 
 def load_backbone_for_features(device: str = "cpu") -> torch.nn.Module:

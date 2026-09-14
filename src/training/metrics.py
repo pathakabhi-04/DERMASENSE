@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Iterable, Sequence
 
@@ -8,6 +9,25 @@ import torch
 
 class MetricsError(ValueError):
     """Raised when invalid metric inputs are supplied."""
+
+
+def wilson_interval(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """Wilson score interval, for the small-n rates this project reports
+    (melanoma routing on a handful of positives).
+
+    Lives here rather than in `scripts/evaluate_domain_shift.py` because
+    importing it from there pulls in OpenCV and the whole native-inference
+    stack for eight lines of arithmetic -- which is a gratuitous failure
+    mode on a slim GPU container, where `import cv2` commonly dies on a
+    missing libGL.
+    """
+    if n == 0:
+        return (0.0, 0.0)
+    p = successes / n
+    denominator = 1 + z ** 2 / n
+    centre = p + z ** 2 / (2 * n)
+    spread = z * math.sqrt(p * (1 - p) / n + z ** 2 / (4 * n ** 2))
+    return ((centre - spread) / denominator, (centre + spread) / denominator)
 
 
 @dataclass(frozen=True)

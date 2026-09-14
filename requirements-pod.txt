@@ -1,0 +1,38 @@
+# Minimal dependencies for the CV-4b fine-tune on a rented GPU pod.
+#
+# Use this, NOT requirements.txt, on the pod.
+#
+# requirements.txt is a full-environment freeze: streamlit, fastapi,
+# sentence-transformers, faiss, umap-learn, numba, matplotlib,
+# beautifulsoup4 -- the RAG layer and the demo app. None of that is
+# reachable from the three scripts the pod runs, and it adds gigabytes
+# and minutes to an install that can fail on a slim container.
+#
+# ## torch and torchvision are deliberately NOT pinned here
+#
+# RunPod's PyTorch templates ship a CUDA build of torch already matched
+# to the host driver. `pip install torch==2.13.0` from requirements.txt
+# would REPLACE that with a wheel whose bundled CUDA may not match the
+# driver -- the classic way to end up with torch.cuda.is_available()
+# returning False on a GPU you are paying for, or a container that
+# imports torch and immediately segfaults.
+#
+# So: verify the image's torch first, and only install one if absent.
+#
+#     python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+#
+# If that prints a version and True, install this file and leave torch
+# alone. If torch is missing entirely, install the build matching the
+# pod's CUDA from pytorch.org, then this file.
+#
+#     pip install -r requirements-pod.txt
+#
+# opencv is intentionally absent: nothing on the pod path imports cv2
+# any more (wilson_interval moved to src/training/metrics.py), and
+# opencv-python routinely fails on slim images with a missing libGL.
+
+numpy==2.5.2
+pandas==3.0.5
+pillow==12.3.0
+scikit-learn==1.9.0
+scipy==1.18.1

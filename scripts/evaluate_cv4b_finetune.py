@@ -21,7 +21,6 @@ from sklearn.metrics import roc_auc_score
 from torch import nn
 from torch.utils.data import DataLoader
 
-from scripts.evaluate_domain_shift import wilson_interval
 from scripts.finetune_cv4b_backbone import (
     DEFAULT_BUNDLE,
     FEATURE_DIM,
@@ -32,6 +31,7 @@ from scripts.finetune_cv4b_backbone import (
     bundle_rows,
 )
 from src.data.transforms import build_eval_transform
+from src.training.metrics import wilson_interval
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULT_DIR = REPO_ROOT / "analysis/quality/mel_sensitivity"
