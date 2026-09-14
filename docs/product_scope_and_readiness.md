@@ -194,10 +194,20 @@ Four gates, in order. None is optional.
    training distribution recovered real ground (non-ISIC AUC 0.60→0.73)
    but did not clear its own pre-committed bar (0.80) and increased the
    non-ISIC benign-referral cost to 54%, so it was **not** shipped — the
-   ISIC-only head stays in production. This points at the frozen
-   backbone's representation, not the head-fitting data, as the next
-   lever, which needs GPU budget not currently allocated. See
+   ISIC-only head stays in production. See
    `analysis/quality/mel_sensitivity/cv4b_retrain_result.md`.
+   **Backbone fine-tuning was then tried and also did not ship**
+   (`cv4b_backbone_finetune_result.md`). With leave-one-source-out folds,
+   adaptation reached held-out images from *seen* sources (0.85) but not
+   an *unseen* source (0.63–0.67) — and melanoma routing on unseen
+   sources fell *below* the un-fine-tuned baseline (0.80→0.70 on
+   Fitzpatrick; ~0.76→0.52 on DDI/DDI-2, where melanomas were routed at a
+   lower rate than benign lesions). ISIC held at 0.916, so this is not
+   forgetting; it is that **zero-shot transfer to a capture source absent
+   from training does not happen**, which is precisely what a user's phone
+   is. The gate-2 conclusion is therefore stronger than "unvalidated":
+   per-deployment-source labelled calibration data is required, and that
+   is a data-collection commitment, not a modelling fix.
 3. **No reassurance, ever** (§2.4), until sensitivity supports it.
 4. **Regulatory.** Anything returning a risk category on a skin lesion
    is Software as a Medical Device. FDA/CE has a defined pathway; it

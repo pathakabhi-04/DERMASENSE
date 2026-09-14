@@ -1,0 +1,49 @@
+{
+  "fold": "loso_atlas",
+  "epoch": 3,
+  "threshold": 0.0632350742816925,
+  "isic_test": {
+    "split": "ISIC (in-domain)",
+    "n": 3473,
+    "auc": 0.9162269305700419,
+    "benign_referred": 0.4076060458313018,
+    "melanoma_routed": 0.8978978978978979,
+    "melanoma_ci": [
+      0.8725728172337476,
+      0.918659020263356
+    ],
+    "n_melanoma": 666
+  },
+  "non_isic_test": {
+    "split": "non-ISIC (combined)",
+    "n": 583,
+    "auc": 0.6682096584216726,
+    "benign_referred": 0.6566666666666666,
+    "melanoma_routed": 0.6987951807228916,
+    "melanoma_ci": [
+      0.5931077009464831,
+      0.7868945099754715
+    ],
+    "n_melanoma": 83
+  },
+  "per_source": [
+    {
+      "split": "fitzpatrick17k",
+      "n": 583,
+      "auc": 0.6682096584216726,
+      "benign_referred": 0.6566666666666666,
+      "melanoma_routed": 0.6987951807228916,
+      "melanoma_ci": [
+        0.5931077009464831,
+        0.7868945099754715
+      ],
+      "n_melanoma": 83
+    }
+  ],
+  "criteria": {
+    "non-ISIC test AUC >= 0.8": false,
+    "ISIC test AUC >= 0.85": true,
+    "non-ISIC benign referral <= 0.45": false
+  },
+  "success": false
+}

@@ -1,0 +1,73 @@
+{
+  "fold": "pooled",
+  "epoch": 12,
+  "threshold": 0.021398423239588737,
+  "isic_test": {
+    "split": "ISIC (in-domain)",
+    "n": 3473,
+    "auc": 0.917958787898737,
+    "benign_referred": 0.41248171623598245,
+    "melanoma_routed": 0.9069069069069069,
+    "melanoma_ci": [
+      0.8824454318741313,
+      0.9267010887361143
+    ],
+    "n_melanoma": 666
+  },
+  "non_isic_test": {
+    "split": "non-ISIC (combined)",
+    "n": 379,
+    "auc": 0.8497202797202797,
+    "benign_referred": 0.32727272727272727,
+    "melanoma_routed": 0.9545454545454546,
+    "melanoma_ci": [
+      0.7820151050048196,
+      0.9919307806988523
+    ],
+    "n_melanoma": 22
+  },
+  "per_source": [
+    {
+      "split": "ddi",
+      "n": 131,
+      "auc": 0.7122498483929655,
+      "benign_referred": 0.4536082474226804,
+      "melanoma_routed": 0.6666666666666666,
+      "melanoma_ci": [
+        0.20765495512648788,
+        0.9385096847238393
+      ],
+      "n_melanoma": 3
+    },
+    {
+      "split": "ddi2",
+      "n": 132,
+      "auc": 0.7088377723970944,
+      "benign_referred": 0.19491525423728814,
+      "melanoma_routed": NaN,
+      "melanoma_ci": [
+        0.0,
+        0.0
+      ],
+      "n_melanoma": 0
+    },
+    {
+      "split": "fitzpatrick17k",
+      "n": 116,
+      "auc": 0.9264880952380952,
+      "benign_referred": 0.38333333333333336,
+      "melanoma_routed": 1.0,
+      "melanoma_ci": [
+        0.8318156346315495,
+        1.0000000000000002
+      ],
+      "n_melanoma": 19
+    }
+  ],
+  "criteria": {
+    "non-ISIC test AUC >= 0.8": true,
+    "ISIC test AUC >= 0.85": true,
+    "non-ISIC benign referral <= 0.45": true
+  },
+  "success": true
+}
