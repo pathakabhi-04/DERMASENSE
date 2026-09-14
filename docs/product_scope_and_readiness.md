@@ -106,6 +106,46 @@ produced without a human first looking.
 
 ---
 
+## 1b. The decision this now forces (2026-09-15)
+
+The classification gap has been isolated to a **data** constraint, not a
+technical one — four pre-registered investigations, summarised in
+`docs/data_constraint_spec.md`. That closes the "keep improving the
+model" path and forces a product choice. There are exactly three honest
+options.
+
+| option | what it needs | what it gives up |
+|---|---|---|
+| **A — Narrow the product** (§2) | nothing; it is already built | any diagnosis claim |
+| **B — Restrict the domain** | dermoscopy input; a clinician customer | the consumer market |
+| **C — Collect deployment data** | clinical partner, ethics, months | time, and it may still fail |
+
+**A — Narrow the product.** Capture assistance, longitudinal tracking,
+and the clinician summary do not depend on the classifier at all. Every
+piece exists and works today. §2 below is that product. **Cheapest, and
+the only one that is honest right now.**
+
+**B — Restrict the domain.** The system is not broken; it works where it
+was trained — **0.9024 melanoma routing on ISIC dermoscopy**. A product
+that requires a dermoscope attachment, or that targets a GP practice
+rather than a consumer, is operating in-distribution. That is a real
+option and a genuinely different product, with a different customer and
+a different regulatory story.
+
+**C — Collect deployment-source data.** The technically correct answer
+and the one the evidence points at. It needs a clinical partner with a
+biopsy pathway, ethics approval, and months of lead time, because the
+labels come from pathology and the melanomas come from people who have
+melanoma. `data_constraint_spec.md` specifies exactly what would be
+sufficient. **Only viable if the project has that runway** — and if it
+does not, approximating it with more public clinical datasets is already
+shown not to work.
+
+These are not exclusive: A ships now and funds the wait for C. What is
+*not* available is a fourth option where more modelling closes the gap.
+
+---
+
 ## 2. What to ship now: the narrow product
 
 There is a genuinely useful product here that does **not** depend on the
@@ -120,6 +160,25 @@ user take a good one is valuable on its own.
 
 *Ships as:* live capture feedback — "too blurry", "move closer", "the
 lesion is cut off at the edge".
+
+**Newly load-bearing (2026-09-15).** This is no longer just a
+convenience. `abstention_result.md` found that the pipeline's *dangerous*
+failures — melanomas assessed and sent to `MONITOR` — concentrate on
+images where CV-3 measures a **small lesion relative to the frame**, i.e.
+under-zoomed photographs. The signal is detectable **at capture time,
+before any classification runs**, and carries a 1.62× lift over chance
+(consistent across 98% of 40 random splits).
+
+It was deliberately *not* made into a post-hoc abstention gate: as a gate
+it caught only ~37% of dangerous misses while abstaining on 23% of
+everything, which failed its pre-committed bar. As a **capture prompt**
+it costs the user one retake, has no false-abstention cost, and gives
+them something to act on. "Move closer" is the intervention.
+
+Also settled there, and worth knowing: the classifier's own
+`calibrated_confidence` is **0.7031 on melanomas it routes correctly and
+0.7028 on the ones it misses** — it carries no information about its own
+errors, so no confidence-keyed abstention is possible.
 
 ### 2.2 Longitudinal tracking with change flags — CV-3 + CV-7
 
@@ -152,9 +211,11 @@ says plainly when the corpus doesn't cover a question.
 > "we can't tell — see a clinician". It never says low risk, benign,
 > or probably fine.
 
-A system with 55% sensitivity can be honest about uncertainty. It cannot
-be reassuring. Drop the `LOW` risk label from anything user-facing until
-the sensitivity supports it.
+A system that routes **57.9%** of melanomas to a clinician on external
+clinical photographs (`external_6class_result.md` — measured, not
+inferred) can be honest about uncertainty. It cannot be reassuring. Drop
+the `LOW` risk label from anything user-facing until the sensitivity
+supports it.
 
 **Restated precisely, given §1's correction.** The shipped gate already
 prevents `MONITOR` from being auto-released, so the rule is not asking
@@ -195,6 +256,48 @@ The narrow scope is *better* academically, not a retreat:
 That last point is the strongest thing in the project. Most student
 work overclaims; measuring your own system and reporting that it misses
 half of melanomas is a better result than a number nobody checked.
+
+### 3.1 The central contribution (2026-09-15)
+
+The classification work is now a **pre-registered negative result**, and
+it is a stronger contribution than a tuned number would have been:
+
+> Across four independent experiments, the melanoma-routing gap on
+> unseen capture sources was isolated to a **data** constraint. It is not
+> model capacity, training objective, detection recall, routing, or the
+> number of training domains.
+
+| experiment | held-out clinical AUC | what it eliminated |
+|---|---:|---|
+| linear probe on broader data | 0.73 | head-fitting data |
+| backbone fine-tune | 0.63–0.67 | frozen representation |
+| routing / detection attribution | — | CV-1.5 and CV-2 |
+| multi-domain + per-domain heads | 0.63–0.64 | domain count |
+
+What makes it defensible rather than merely disappointing is the method:
+
+- **decision rules fixed before each run**, so no bar moved after seeing
+  a number;
+- **leave-one-source-out**, because held-out *images* from a seen source
+  overstate deployment — a distinction the results confirm (seen 0.85 vs
+  unseen 0.63);
+- **patient-grouped splits**, after finding 25 of 132 DDI-2 test images
+  shared a patient with training;
+- **confounds reported against our own interest** — `dg_pad` "passed" at
+  0.8522 and was discarded because the starting checkpoint had already
+  been fine-tuned on PAD-UFES;
+- **corrections recorded, not overwritten** — the CV-2 compounding claim,
+  the "router is misrouting" reading, the 0.7250 figure that came from
+  silently dropping 45% of inputs.
+
+Several of those are cases where the honest reading was *worse* than the
+convenient one. That is the part worth writing up.
+
+Two further negative results stand on their own: the classifier's
+calibrated confidence carries **no** information about its own errors
+(0.7031 vs 0.7028), and CV-2's 30.8% no-candidate rate on clinical
+photographs costs almost no melanoma sensitivity because **75% of what it
+drops is benign**.
 
 ---
 
