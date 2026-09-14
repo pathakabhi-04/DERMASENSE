@@ -84,6 +84,20 @@ def collect_tasks() -> list[tuple[str, str, str]]:
             stem = Path(row.image_path).stem
             tasks.append((row.image_path, str(OUT_ROOT / "isic2019" / f"{stem}.jpg"), "isic2019"))
 
+    # PAD-UFES: a fourth domain group, added for the domain-generalization
+    # run (docs/cv4b_domain_generalization_design.md). It was omitted from
+    # the first fine-tune's bundle entirely -- that was a defect, not a
+    # choice.
+    for split in ("train", "val", "test"):
+        pad = pd.read_csv(REPO_ROOT / f"data/splits/pad_ufes/{split}.csv")
+        for row in pad.itertuples():
+            stem = Path(row.image_path).stem
+            tasks.append((
+                str(REPO_ROOT / row.image_path),
+                str(OUT_ROOT / "pad_ufes" / f"{stem}.jpg"),
+                "pad_ufes",
+            ))
+
     clinical = pd.read_csv(SPLITS)
     for row in clinical.itertuples():
         stem = Path(row.image_path).stem

@@ -18,12 +18,11 @@ from pathlib import Path
 import numpy as np
 import torch
 from sklearn.metrics import roc_auc_score
-from torch import nn
 from torch.utils.data import DataLoader
 
 from scripts.finetune_cv4b_backbone import (
     DEFAULT_BUNDLE,
-    FEATURE_DIM,
+    FOLDS,
     RUN_ROOT,
     BinaryLesionDataset,
     Row,
@@ -39,6 +38,13 @@ RESULT_DIR = REPO_ROOT / "analysis/quality/mel_sensitivity"
 # design §8 -- all three must hold. Copied here as constants so the
 # evaluation cannot quietly drift from what was pre-committed.
 LOSO_AUC_TARGET = 0.80
+# The multi-domain run pre-committed a different bar
+# (docs/cv4b_domain_generalization_design.md §6): 0.75, because its claim
+# is "domain count is a mechanism", not "this ships". dg_pad is reported
+# but NOT gated -- 9 melanomas is the measurement problem that started
+# this whole line of work.
+DG_AUC_TARGET = 0.75
+DG_UNGATED_FOLDS = ("dg_pad",)
 ISIC_AUC_FLOOR = 0.85
 BENIGN_REFERRAL_CEILING = 0.45
 TARGET_BENIGN_REFERRAL = 0.40  # operating-point budget, chosen on val
@@ -55,7 +61,7 @@ def score_rows(model, head, rows: list[Row], device, batch_size: int, workers: i
     scores = []
     for batch in loader:
         features = model.extract_features(batch["image"].to(device, non_blocking=True))
-        scores.append(torch.sigmoid(head(features).squeeze(1)).cpu().numpy())
+        scores.append(torch.sigmoid(head["pooled"](features).squeeze(1)).cpu().numpy())
     return np.concatenate(scores)
 
 
@@ -83,8 +89,7 @@ def summarise(rows: list[Row], scores: np.ndarray, threshold: float, label: str)
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fold", default="pooled",
-                        choices=("pooled", "loso_atlas", "loso_stanford"))
+    parser.add_argument("--fold", default="pooled", choices=FOLDS)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--device", default="auto", choices=("auto", "cuda", "cpu"))
@@ -103,7 +108,9 @@ def main() -> None:
     payload = torch.load(best_path, map_location=device, weights_only=False)
     model, head, _ = build_model(device, args.data_root)
     model.load_state_dict(payload["model"])
-    head = nn.Linear(FEATURE_DIM, 1).to(device)
+    # `head` is a ModuleDict (pooled + per-domain auxiliaries); only the
+    # pooled head is scored. build_model already constructed the right
+    # shape, so load into it rather than rebuilding one by hand.
     head.load_state_dict(payload["head"])
     print(f"loaded epoch {payload['epoch']} (selected on {payload['selection_metric']}, "
           f"val {payload['metrics']['non_isic_auc']:.4f})")
@@ -136,14 +143,18 @@ def main() -> None:
             non_isic_scores[mask], threshold, source,
         ))
 
+    is_dg = args.fold.startswith("dg_")
+    target = DG_AUC_TARGET if is_dg else LOSO_AUC_TARGET
     criteria = {
-        f"non-ISIC test AUC >= {LOSO_AUC_TARGET}":
-            non_isic_result["auc"] >= LOSO_AUC_TARGET,
+        f"held-out-domain AUC >= {target}": non_isic_result["auc"] >= target,
         f"ISIC test AUC >= {ISIC_AUC_FLOOR}":
             isic_result["auc"] >= ISIC_AUC_FLOOR,
-        f"non-ISIC benign referral <= {BENIGN_REFERRAL_CEILING}":
+        f"held-out benign referral <= {BENIGN_REFERRAL_CEILING}":
             non_isic_result["benign_referred"] <= BENIGN_REFERRAL_CEILING,
     }
+    if args.fold in DG_UNGATED_FOLDS:
+        print(f"\nNOTE: {args.fold} is REPORTED, NOT GATED (design §5) -- "
+              f"{non_isic_result['n_melanoma']} melanomas is too few to gate on.")
     print("\n" + "=" * 72)
     for name, met in criteria.items():
         print(f"  {'MET    ' if met else 'NOT MET'}  {name}")

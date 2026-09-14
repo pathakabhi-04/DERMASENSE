@@ -51,9 +51,13 @@ import pandas as pd
 from scripts.finetune_cv4b_backbone import SOURCE_CHECKPOINT, SPLITS, isic_rows
 from scripts.preresize_cv4b_dataset import MANIFEST as PRERESIZE_MANIFEST
 
+DG_SPLITS = Path(__file__).resolve().parents[1] / "analysis/quality/mel_sensitivity/cv4b_dg_splits.csv"
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_ROOT = REPO_ROOT / "data/processed/cv4b_bundle"
-FOLDS = ("pooled", "loso_atlas", "loso_stanford")
+OLD_FOLDS = ("pooled", "loso_atlas", "loso_stanford")
+DG_FOLDS = ("dg_atlas", "dg_stanford", "dg_pad")
+FOLDS = OLD_FOLDS + DG_FOLDS
 
 
 def git_commit() -> str:
@@ -66,6 +70,17 @@ def git_commit() -> str:
 
 
 def build_rows(resized_by_original: dict[str, str]) -> pd.DataFrame:
+    """One row per image, carrying EVERY fold assignment.
+
+    Two generations of folds coexist deliberately:
+      pooled / loso_*  the first fine-tune (cv4b_finetune_splits.csv),
+                       kept so that experiment stays reproducible
+      dg_*             the multi-domain run (cv4b_dg_splits.csv), which
+                       is authoritative for every source including ISIC
+                       and PAD-UFES
+    """
+    dg = pd.read_csv(DG_SPLITS).set_index("image_path")
+    clinical_folds = pd.read_csv(SPLITS).set_index("image_path")
     records = []
 
     for split in ("train", "val", "test"):
@@ -77,25 +92,30 @@ def build_rows(resized_by_original: dict[str, str]) -> pd.DataFrame:
                 "relative_path": f"images/isic2019/{Path(resized).name}",
                 "source_file": resized,
                 "source": "isic2019",
+                "domain_group": "isic",
                 "label": row.label,
                 "is_melanoma": row.is_melanoma,
                 "isic_split": split,
-                **{fold: "" for fold in FOLDS},
+                **{fold: "" for fold in OLD_FOLDS},
+                # ISIC keeps its frozen split in every dg fold.
+                **{fold: split for fold in DG_FOLDS},
             })
 
-    clinical = pd.read_csv(SPLITS)
-    for row in clinical.itertuples():
-        resized = resized_by_original.get(row.image_path)
+    for image_path, row in dg.iterrows():
+        resized = resized_by_original.get(image_path)
         if resized is None:
-            raise SystemExit(f"no pre-resized copy for {row.image_path}")
+            raise SystemExit(f"no pre-resized copy for {image_path}")
+        old = clinical_folds.loc[image_path] if image_path in clinical_folds.index else None
         records.append({
-            "relative_path": f"images/{row.source}/{Path(resized).name}",
+            "relative_path": f"images/{row['source']}/{Path(resized).name}",
             "source_file": resized,
-            "source": row.source,
-            "label": int(row.is_malignant),
-            "is_melanoma": bool(row.is_melanoma),
+            "source": row["source"],
+            "domain_group": row["domain_group"],
+            "label": int(bool(row["is_malignant"])),
+            "is_melanoma": bool(row["is_melanoma"]),
             "isic_split": "",
-            **{fold: getattr(row, fold) for fold in FOLDS},
+            **{fold: (old[fold] if old is not None else "") for fold in OLD_FOLDS},
+            **{fold: row[fold] for fold in DG_FOLDS},
         })
 
     frame = pd.DataFrame(records)

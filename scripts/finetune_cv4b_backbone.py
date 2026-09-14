@@ -53,7 +53,13 @@ BENIGN = ("NV", "BKL")
 
 FEATURE_DIM = 2048
 NON_ISIC_BATCH_FRACTION = 0.5  # design §6
-FOLDS = ("pooled", "loso_atlas", "loso_stanford")
+FOLDS = ("pooled", "loso_atlas", "loso_stanford", "dg_atlas", "dg_stanford", "dg_pad")
+DG_FOLDS = ("dg_atlas", "dg_stanford", "dg_pad")
+# Auxiliary per-domain heads shape the backbone; the POOLED head is
+# what ships, because a user's phone is an unseen domain with no head
+# of its own (docs/cv4b_domain_generalization_design.md §3).
+DOMAIN_GROUPS = ("isic", "pad", "stanford", "atlas")
+AUX_LOSS_WEIGHT = 0.5
 
 # design §7 -- targeted at the colour/white-balance hypothesis the
 # composition audit left open, not a uniform turn-up.
@@ -74,8 +80,9 @@ TRAIN_TRANSFORM_CONFIG = ImageTransformConfig(
 class Row:
     image_path: str
     label: int  # 1 = refer/malignant
-    source: str  # "isic2019" | "ddi" | "ddi2" | "fitzpatrick17k"
+    source: str  # "isic2019" | "pad_ufes" | "ddi" | "ddi2" | "fitzpatrick17k"
     is_melanoma: bool
+    domain_group: str = "isic"  # isic | pad | stanford | atlas
 
 
 class BinaryLesionDataset(Dataset):
@@ -95,6 +102,7 @@ class BinaryLesionDataset(Dataset):
         return {
             "image": tensor,
             "label": torch.tensor(float(row.label)),
+            "domain": torch.tensor(DOMAIN_GROUPS.index(row.domain_group)),
             "source_index": index,
         }
 
@@ -162,14 +170,22 @@ def bundle_rows(data_root: Path, fold: str, split: str) -> list[Row]:
     if fold not in table.columns:
         raise SystemExit(f"unknown fold {fold!r}; available: {', '.join(FOLDS)}")
 
-    is_isic = table["source"] == "isic2019"
-    selected = table[(is_isic & (table["isic_split"] == split))
-                     | (~is_isic & (table[fold] == split))]
+    if fold in DG_FOLDS:
+        # dg folds are authoritative for EVERY source, ISIC and PAD
+        # included -- no per-source special-casing, and "unused" rows are
+        # excluded by simply not matching the requested split.
+        selected = table[table[fold] == split]
+    else:
+        is_isic = table["source"] == "isic2019"
+        selected = table[(is_isic & (table["isic_split"] == split))
+                         | (~is_isic & (table[fold] == split))]
 
     rows = []
     for record in selected.itertuples():
         path = Path(data_root) / record.relative_path
-        rows.append(Row(str(path), int(record.label), record.source, bool(record.is_melanoma)))
+        domain = getattr(record, "domain_group", "isic") or "isic"
+        rows.append(Row(str(path), int(record.label), record.source,
+                        bool(record.is_melanoma), domain))
     if not rows:
         raise SystemExit(f"bundle produced no rows for fold={fold} split={split}")
     return rows
@@ -214,7 +230,13 @@ def build_model(device: torch.device, data_root: Path | None = None):
     for parameter in layer4.parameters():
         parameter.requires_grad = True
 
-    head = nn.Linear(FEATURE_DIM, 1)
+    # Pooled head (ships) + per-domain auxiliary heads (shape the
+    # backbone only). A ModuleDict keeps them in one state_dict so the
+    # checkpoint round-trip and resume paths need no special handling.
+    head = nn.ModuleDict({
+        "pooled": nn.Linear(FEATURE_DIM, 1),
+        **{f"aux_{group}": nn.Linear(FEATURE_DIM, 1) for group in DOMAIN_GROUPS},
+    })
 
     trainable_backbone = sum(p.numel() for p in model.backbone.parameters() if p.requires_grad)
     layer4_params = sum(p.numel() for p in layer4.parameters())
@@ -265,7 +287,7 @@ def evaluate(model, head, rows: list[Row], device, batch_size: int, workers: int
     scores = []
     for batch in loader:
         features = model.extract_features(batch["image"].to(device, non_blocking=True))
-        scores.append(torch.sigmoid(head(features).squeeze(1)).cpu().numpy())
+        scores.append(torch.sigmoid(head["pooled"](features).squeeze(1)).cpu().numpy())
     scores = np.concatenate(scores)
 
     labels = np.array([row.label for row in rows])
@@ -314,8 +336,7 @@ def save_run_checkpoint(path: Path, **payload) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fold", default="pooled",
-                        choices=("pooled", "loso_atlas", "loso_stanford"))
+    parser.add_argument("--fold", default="pooled", choices=FOLDS)
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--backbone-lr", type=float, default=1e-5)
@@ -406,9 +427,23 @@ def main() -> None:
             images = batch["image"].to(device, non_blocking=True)
             labels = batch["label"].to(device, non_blocking=True)
 
+            domains = batch["domain"].to(device, non_blocking=True)
+
             optimizer.zero_grad(set_to_none=True)
-            logits = head(model.extract_features(images)).squeeze(1)
-            loss = criterion(logits, labels)
+            features = model.extract_features(images)
+            loss = criterion(head["pooled"](features).squeeze(1), labels)
+
+            # Auxiliary per-domain heads. Each sees only its own domain's
+            # samples, so it absorbs that domain's prevalence and
+            # calibration and the shared backbone is pushed to carry what
+            # generalises. They are never used at inference.
+            for index, group in enumerate(DOMAIN_GROUPS):
+                mask = domains == index
+                if not bool(mask.any()):
+                    continue
+                aux_logits = head[f"aux_{group}"](features[mask]).squeeze(1)
+                loss = loss + AUX_LOSS_WEIGHT * criterion(aux_logits, labels[mask])
+
             if not torch.isfinite(loss):
                 raise RuntimeError("loss became non-finite")
             loss.backward()

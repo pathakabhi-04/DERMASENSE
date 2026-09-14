@@ -37,6 +37,8 @@ from torch.utils.data import DataLoader
 
 from scripts.finetune_cv4b_backbone import (
     DEFAULT_BUNDLE,
+    DG_FOLDS,
+    DOMAIN_GROUPS,
     FOLDS,
     SPLITS,
     BinaryLesionDataset,
@@ -54,6 +56,7 @@ from src.training.reproducibility import seed_everything
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRERESIZED_ROOT = REPO_ROOT / "data/processed/cv4b_finetune_256"
+DG_SPLITS = REPO_ROOT / "analysis/quality/mel_sensitivity/cv4b_dg_splits.csv"
 SCRATCH = REPO_ROOT / "analysis/quality/mel_sensitivity/_preflight"
 
 results: list[tuple[str, bool, str]] = []
@@ -102,7 +105,7 @@ def train_steps(model, head, optimizer, criterion, batches, steps: int) -> list[
     for step in range(steps):
         images, labels = batches[step % len(batches)]
         optimizer.zero_grad(set_to_none=True)
-        loss = criterion(head(model.extract_features(images)).squeeze(1), labels)
+        loss = criterion(head["pooled"](model.extract_features(images)).squeeze(1), labels)
         loss.backward()
         optimizer.step()
         losses.append(float(loss.item()))
@@ -111,31 +114,53 @@ def train_steps(model, head, optimizer, criterion, batches, steps: int) -> list[
 
 @check("1 split integrity")
 def check_splits() -> str:
-    table = pd.read_csv(SPLITS)
+    """Two split generations coexist: the clinical-only folds from the
+    first fine-tune, and the dg_* folds which are authoritative for every
+    source. Each is validated against the file that defines it."""
     details = []
-    for fold in FOLDS:
-        spans = table.groupby("group")[fold].nunique()
+
+    clinical = pd.read_csv(SPLITS)
+    for fold in ("pooled", "loso_atlas", "loso_stanford"):
+        spans = clinical.groupby("group")[fold].nunique()
         if (spans > 1).any():
             raise AssertionError(f"{fold}: {(spans > 1).sum()} groups span splits")
-        if (table.groupby("image_path")[fold].nunique() > 1).any():
+        if (clinical.groupby("image_path")[fold].nunique() > 1).any():
             raise AssertionError(f"{fold}: an image appears in two splits")
-        if set(table[fold]) != {"train", "val", "test"}:
-            raise AssertionError(f"{fold}: unexpected split values {set(table[fold])}")
-        for split in ("train", "val"):
-            subset = table[table[fold] == split]
-            if subset["is_malignant"].nunique() < 2:
-                raise AssertionError(f"{fold}/{split} has only one class")
+        if set(clinical[fold]) != {"train", "val", "test"}:
+            raise AssertionError(f"{fold}: unexpected values {set(clinical[fold])}")
         details.append(f"{fold} ok")
 
-    missing = [path for path in table["image_path"] if not Path(path).exists()]
+    dg = pd.read_csv(DG_SPLITS)
+    for fold in DG_FOLDS:
+        used = dg[dg[fold] != "unused"]
+        spans = used.groupby("group")[fold].nunique()
+        if (spans > 1).any():
+            raise AssertionError(f"{fold}: {(spans > 1).sum()} groups span splits")
+        if (used.groupby("image_path")[fold].nunique() > 1).any():
+            raise AssertionError(f"{fold}: an image appears in two splits")
+        for split in ("train", "val"):
+            subset = used[used[fold] == split]
+            if subset.empty or subset["is_malignant"].nunique() < 2:
+                raise AssertionError(f"{fold}/{split} is empty or single-class")
+        if (used[fold] == "test").sum() == 0:
+            raise AssertionError(f"{fold} has no test rows")
+        domains = used.loc[used[fold] == "train", "domain_group"].nunique()
+        # The whole point of this run: >1 clinical training domain, or
+        # domain-invariant features cannot be learned at all.
+        if domains < 2:
+            raise AssertionError(
+                f"{fold} trains on only {domains} non-ISIC domain -- "
+                "invariance cannot be learned from one"
+            )
+        details.append(f"{fold} ok ({domains} non-ISIC train domains)")
+
+    missing = [p for p in clinical["image_path"] if not Path(p).exists()]
     if missing:
         raise AssertionError(f"{len(missing)} image files missing, e.g. {missing[0]}")
-
-    sample = table["image_path"].sample(min(40, len(table)), random_state=0)
-    for path in sample:
+    for path in clinical["image_path"].sample(min(40, len(clinical)), random_state=0):
         with Image.open(path) as image:
             image.convert("RGB")
-    return f"{len(table)} images, {table['group'].nunique()} groups; " + ", ".join(details)
+    return "; ".join(details)
 
 
 @check("2 freeze mask")
@@ -147,8 +172,11 @@ def check_freeze() -> str:
         raise AssertionError(f"{trainable} trainable model params, expected layer4's {expected}")
     frozen_total = sum(p.numel() for p in model.parameters() if not p.requires_grad)
     head_params = sum(p.numel() for p in head.parameters())
-    if head_params != 2048 + 1:
-        raise AssertionError(f"binary head has {head_params} params, expected 2049")
+    expected_heads = 1 + len(DOMAIN_GROUPS)  # pooled + one auxiliary per domain
+    if head_params != expected_heads * (2048 + 1):
+        raise AssertionError(
+            f"head has {head_params} params, expected {expected_heads} x 2049"
+        )
     return f"trainable layer4 {trainable:,} + head {head_params:,}; frozen {frozen_total:,}"
 
 
@@ -201,7 +229,7 @@ def check_checkpoint() -> str:
 
     model.eval(); head.eval()
     with torch.no_grad():
-        before = head(model.extract_features(batch))
+        before = head["pooled"](model.extract_features(batch))
 
     SCRATCH.mkdir(parents=True, exist_ok=True)
     path = SCRATCH / "roundtrip.pt"
@@ -213,7 +241,7 @@ def check_checkpoint() -> str:
     reloaded_head.load_state_dict(payload["head"])
     reloaded_model.eval(); reloaded_head.eval()
     with torch.no_grad():
-        after = reloaded_head(reloaded_model.extract_features(batch))
+        after = reloaded_head["pooled"](reloaded_model.extract_features(batch))
 
     if not torch.equal(before, after):
         raise AssertionError(f"predictions changed across save/load by "
@@ -427,41 +455,47 @@ def check_throughput() -> str:
 
 @check("10 bundle matches splits")
 def check_bundle() -> str:
-    """The bundle is what ships. Verify it agrees with the split CSV it was
-    built from, so a stale bundle cannot silently train on old assignments."""
+    """The bundle is what ships. Verify it agrees with BOTH split files it
+    was built from, so a stale bundle cannot silently train on old
+    assignments."""
     dataset_csv = DEFAULT_BUNDLE / "dataset.csv"
     if not dataset_csv.exists():
-        raise AssertionError(
-            f"no bundle at {DEFAULT_BUNDLE}; run scripts/build_gpu_bundle.py"
-        )
+        raise AssertionError(f"no bundle at {DEFAULT_BUNDLE}; run scripts/build_gpu_bundle.py")
     bundle = pd.read_csv(dataset_csv, keep_default_na=False)
-    splits = pd.read_csv(SPLITS)
 
-    clinical = bundle[bundle["source"] != "isic2019"]
-    if len(clinical) != len(splits):
+    clinical = pd.read_csv(SPLITS)
+    in_bundle = bundle[bundle["domain_group"].isin(["stanford", "atlas"])]
+    if len(in_bundle) != len(clinical):
         raise AssertionError(
-            f"bundle has {len(clinical)} clinical images, split CSV has {len(splits)} "
-            "-- rebuild the bundle"
+            f"bundle has {len(in_bundle)} stanford/atlas images, "
+            f"split CSV has {len(clinical)} -- rebuild the bundle"
         )
-    for fold in FOLDS:
-        bundle_counts = clinical[fold].value_counts().to_dict()
-        split_counts = splits[fold].value_counts().to_dict()
-        if bundle_counts != split_counts:
-            raise AssertionError(f"fold {fold} differs: bundle {bundle_counts} vs {split_counts}")
+    for fold in ("pooled", "loso_atlas", "loso_stanford"):
+        if in_bundle[fold].value_counts().to_dict() != clinical[fold].value_counts().to_dict():
+            raise AssertionError(f"fold {fold} differs from {SPLITS.name}")
 
-    isic = bundle[bundle["source"] == "isic2019"]
+    dg = pd.read_csv(DG_SPLITS)
+    non_isic = bundle[bundle["domain_group"] != "isic"]
+    if len(non_isic) != len(dg):
+        raise AssertionError(
+            f"bundle has {len(non_isic)} non-ISIC images, dg CSV has {len(dg)}"
+        )
+    for fold in DG_FOLDS:
+        if non_isic[fold].value_counts().to_dict() != dg[fold].value_counts().to_dict():
+            raise AssertionError(f"fold {fold} differs from {DG_SPLITS.name}")
+
+    isic = bundle[bundle["domain_group"] == "isic"]
     for split in ("train", "val", "test"):
         expected = len(isic_rows(split))
-        actual = int((isic["isic_split"] == split).sum())
-        if actual != expected:
-            raise AssertionError(f"ISIC {split}: bundle {actual}, CVDataset {expected}")
+        if int((isic["isic_split"] == split).sum()) != expected:
+            raise AssertionError(f"ISIC {split} count differs from CVDataset")
 
     missing = [p for p in bundle["relative_path"].sample(200, random_state=0)
                if not (DEFAULT_BUNDLE / p).exists()]
     if missing:
         raise AssertionError(f"{len(missing)} sampled bundle files absent, e.g. {missing[0]}")
-    return (f"{len(bundle)} rows ({len(isic)} ISIC + {len(clinical)} clinical) "
-            f"agree with {SPLITS.name}")
+    counts = bundle["domain_group"].value_counts().to_dict()
+    return f"{len(bundle)} rows agree with both split files; domains {counts}"
 
 
 def main() -> None:
