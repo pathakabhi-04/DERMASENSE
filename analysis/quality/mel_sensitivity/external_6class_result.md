@@ -101,6 +101,16 @@ fraction at 0.249 against DDI's 0.360, so some of those images may
 legitimately be wider shots. Either way the consequence for the product
 is the same.
 
+> **Settled 2026-09-14 — it is genuine framing, not router error**
+> (`cv1_5_routing_resolution.md`). Images the router calls `wide_field`
+> have a median whole-frame lesion area fraction of 0.236 against
+> `pre_framed`'s 0.402, separated at every quantile, with PAD-UFES's
+> true-pre-framed 0.312 sitting between them. The router is splitting a
+> real continuum near the right place. Forcing everything pre-framed
+> moves melanoma reach-rate by +1.9 points — inside the noise — so
+> routing is not the lever either. Any reading of this section as
+> "the router is misrouting" is superseded.
+
 This also exercises the **proxy-label caveat the router spec itself
 flagged**: CV-1.5 scored 1.000/1.000 on a held-out set where dataset
 identity (PAD-UFES vs iToBoS) stood in for verified per-image framing.

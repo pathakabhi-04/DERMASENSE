@@ -76,6 +76,23 @@ classified, or risk-assessed — it is invisible to the entire downstream
 pipeline. That cost is already measured (~19% of lesion-containing
 images surface nothing) and requires no end-to-end risk score.
 
+**UPDATE 2026-09-14 — the original gate is now answered with data, and
+it agrees.** The unsatisfiable gate was "IF the end-to-end evaluation
+shows CV-2's miss rate is a dominant contributor to end-to-end failure".
+It is not. On 792 external clinical photographs (DDI + DDI-2 +
+Fitzpatrick17k), CV-1.5 routed 357 to wide-field and CV-2 returned no
+candidate for 110 of them. **82 of those 110 (75%) were benign** — NEV
+66, SEK 16 — and only 8 were melanomas, of which just **2** reached a
+clinician once the detector was bypassed and they were classified
+anyway. Removing CV-2 from the path entirely moves melanoma reach-rate
+by **+1.9 points**, well inside the confidence interval. What CV-2
+drops is overwhelmingly benign. See
+`analysis/quality/mel_sensitivity/cv1_5_routing_resolution.md`.
+
+This is measured on *clinical photographs*, not phone photos, so the
+domain caveat in point 2 below still stands — but the "is it dominant?"
+question is settled, and the answer is no.
+
 *Re-scoped gate:* the real question is whether that miss rate is
 acceptable given the product's deployment model, which is a product
 judgement, not a measurement. Current answer: **tiling stays deferred on
