@@ -478,7 +478,12 @@ def main() -> None:
         table = table.sample(n=args.limit, random_state=args.seed)
 
     # The detector is only needed for the wide-field branch.
-    detector_weights = None if has_labels else DETECTOR_WEIGHTS
+    # PAD-UFES is pre-framed by construction, so its branch never needs
+    # CV-2. The external set is NOT: CV-1.5 routes ~45% of those clinical
+    # photos to wide_field, and without a detector those become silent
+    # NO_CANDIDATES -- which would measure a router-selected easy subset
+    # rather than the pipeline. See external_6class_result.md.
+    detector_weights = None if is_pad_ufes else DETECTOR_WEIGHTS
     if detector_weights is not None and not Path(detector_weights).exists():
         raise FileNotFoundError(
             f"CV-2 weights not found: {detector_weights}"

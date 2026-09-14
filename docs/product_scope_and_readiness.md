@@ -26,27 +26,35 @@ by CV-4's misclassification rate to land end-to-end sensitivity near
 
 CV-1.5 routes each image by framing: pre-framed / lesion-centric photos
 go **straight to CV-3, skipping CV-2 entirely**; only wide-field images
-go through CV-2 (`docs/cv1_5_router_spec.md`; router passes at
-1.000/1.000 on its held-out set). PAD-UFES — the only branch carrying
-diagnosis labels — is pre-framed, so CV-2's 0.8098 recall never gates
-it. For a product where the user photographs one lesion close-up, CV-2
-is not in the path and its recall does not multiply into melanoma
-sensitivity at all.
+go through CV-2 (`docs/cv1_5_router_spec.md`). PAD-UFES — the only
+*training* branch carrying diagnosis labels — is pre-framed by
+construction, so CV-2's 0.8098 recall never gates it.
 
-The honest statement is **branch-dependent**:
+**Second correction, same day:** an earlier version of this paragraph
+went further and said CV-2 "is not in the path" for close-up photos
+generally. That was too strong, and the external evaluation below
+refutes it. On 792 real clinical photographs from three sources,
+**CV-1.5 routes 45% to wide_field** (DDI 42%, DDI-2 76%,
+Fitzpatrick17k 21%), and CV-2 then returns no candidate for 30.8% of
+those. CV-2 *is* on the critical path for roughly half of real-world
+close-ups. The router's 1.000/1.000 was measured where dataset identity
+stood in for framing; a third source is the first real test of it.
 
-- **Pre-framed close-up** (the diagnosis path): sensitivity is the
-  classification/routing number alone — 0.7180 via the shipped 6-class
-  argmax, 0.9024 with the CV-4b referral head, both ISIC in-domain.
-- **Wide-field**: CV-2's 0.81 recall is a genuine multiplicative
-  ceiling, but that branch has no diagnosis ground truth to score
-  against (iToBoS carries only `body_part` / `sun_damage_level`), so no
-  end-to-end melanoma number exists for it.
+**So the end-to-end number is now measured rather than inferred**
+(`analysis/quality/mel_sensitivity/external_6class_result.md`, 107
+melanomas — against PAD-UFES test's 9):
 
-Neither is 50–55%. The real end-to-end number for the pre-framed path
-still has to be *measured*, not inferred from per-stage figures — that
-is the standing evaluation `cv_metrics_improvement_plan.md` Step 4 calls
-for and which has never been built.
+| outcome for a melanoma | share |
+|---|---:|
+| reaches a clinician | **57.9%** |
+| assessed → `MONITOR` | **34.6%** |
+| never assessed | 7.5% |
+
+Conditional on assessment, melanoma routing is 0.6263 [0.53, 0.72], and
+6-class macro recall is 0.3117 against the in-domain 0.5996. The old
+50–55% figure was arithmetic over stages that are not all on the same
+path; 57.9% is the measurement, and it happens to land nearby for
+different reasons.
 
 And that 0.6667 is **6 of 9 test images** — PAD-UFES has 9 melanomas in
 its test split. The 95% confidence interval is roughly 30–93%. We do not

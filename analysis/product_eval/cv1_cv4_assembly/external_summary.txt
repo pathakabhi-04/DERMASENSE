@@ -1,0 +1,35 @@
+CV-1 -> CV-4 Assembly -- EXTERNAL 6-class set (DDI + DDI-2 + Fitzpatrick17k)
+==========================================================================
+
+Images: 792   Assessed: 676   Not assessed: 116
+
+NOTE: these are clinical photographs from three sources the model never
+trained on. A low number here confounds CV-4 weakness with the domain
+shift already measured in domain_shift_second_source.md. It is still a
+far better melanoma measurement than PAD-UFES test's 9 images.
+
+Per-class recall (Wilson 95% CI):
+  ACK  n=  27  recall=0.1852 (5/27)  [0.08, 0.37]   <- THIN
+  BCC  n= 134  recall=0.4179 (56/134)  [0.34, 0.50]
+  MEL  n=  99  recall=0.1818 (18/99)  [0.12, 0.27]
+  NEV  n= 195  recall=0.6256 (122/195)  [0.56, 0.69]
+  SCC  n=  99  recall=0.2626 (26/99)  [0.19, 0.36]
+  SEK  n= 122  recall=0.1967 (24/122)  [0.14, 0.28]
+
+End-to-end: does the output send the user to a clinician?
+
+  ACK  n=  27  routed=0.5556 (15/27)  [0.37, 0.72]
+  BCC  n= 134  routed=0.8134 (109/134)  [0.74, 0.87]
+  MEL  n=  99  routed=0.6263 (62/99)  [0.53, 0.72]
+  NEV  n= 195  routed=0.2667 (52/195)  [0.21, 0.33]
+  SCC  n=  99  routed=0.7980 (79/99)  [0.71, 0.87]
+  SEK  n= 122  routed=0.3279 (40/122)  [0.25, 0.42]
+
+MELANOMA HEADLINE
+--------------------------------------------------------------------------
+  classified as MEL : 18/99 = 0.1818
+  reaches clinician : 62/99 = 0.6263  [0.53, 0.72]
+  missed entirely   : 37/99 (predicted NEV or SEK -> MONITOR)
+
+  for reference, PAD-UFES test: 6/9 = 0.6667, CI roughly [0.30, 0.93]
+  melanomas were predicted as: {'BCC': 31, 'NEV': 30, 'MEL': 18, 'SCC': 12, 'SEK': 7, 'ACK': 1}
