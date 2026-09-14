@@ -90,6 +90,9 @@ def main() -> None:
     parser.add_argument("--device", default="auto", choices=("auto", "cuda", "cpu"))
     parser.add_argument("--data-root", type=Path, default=DEFAULT_BUNDLE)
     parser.add_argument("--run-root", type=Path, default=RUN_ROOT)
+    parser.add_argument("--result-dir", type=Path, default=RESULT_DIR,
+                        help="repo copy of the result JSON; the authoritative copy is always "
+                             "written to <run-root>/<fold>/result.json as well")
     args = parser.parse_args()
 
     device = torch.device("cuda" if (args.device != "cpu" and torch.cuda.is_available()) else "cpu")
@@ -149,15 +152,29 @@ def main() -> None:
           f"({'all three' if success else 'see design §8 for what each outcome means'})")
     print("=" * 72)
 
-    out = RESULT_DIR / f"cv4b_finetune_{args.fold}_result.json"
-    out.write_text(json.dumps({
+    document = json.dumps({
         "fold": args.fold, "epoch": int(payload["epoch"]), "threshold": threshold,
         "isic_test": isic_result, "non_isic_test": non_isic_result,
         "per_source": per_source,
         "criteria": {name: bool(met) for name, met in criteria.items()},
         "success": success,
-    }, indent=2))
-    print(f"\nresult -> {out}")
+    }, indent=2)
+
+    # Written beside the checkpoint FIRST and always. On a rented pod the
+    # repo clone may sit on container-local disk that dies with the pod,
+    # and this JSON is the actual deliverable of the whole exercise --
+    # losing it would mean re-running the GPU job to recover a number that
+    # had already been computed.
+    run_copy = args.run_root / args.fold / "result.json"
+    run_copy.parent.mkdir(parents=True, exist_ok=True)
+    run_copy.write_text(document)
+    print(f"\nresult -> {run_copy}  (beside the checkpoint; survives the pod)")
+
+    repo_copy = args.result_dir / f"cv4b_finetune_{args.fold}_result.json"
+    if repo_copy.resolve() != run_copy.resolve():
+        repo_copy.parent.mkdir(parents=True, exist_ok=True)
+        repo_copy.write_text(document)
+        print(f"result -> {repo_copy}  (repo copy, for committing)")
 
 
 if __name__ == "__main__":
