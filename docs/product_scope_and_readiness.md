@@ -238,9 +238,16 @@ Four gates, in order. None is optional.
    lower rate than benign lesions). ISIC held at 0.916, so this is not
    forgetting; it is that **zero-shot transfer to a capture source absent
    from training does not happen**, which is precisely what a user's phone
-   is. The gate-2 conclusion is therefore stronger than "unvalidated":
-   per-deployment-source labelled calibration data is required, and that
-   is a data-collection commitment, not a modelling fix.
+   is. A further **multi-domain run** — three training domains per fold
+   plus per-domain auxiliary heads, adding PAD-UFES which the first
+   fine-tune had omitted — did not change this
+   (`cv4b_domain_generalization_result.md`): held-out-domain AUC 0.6334
+   and 0.6385 against a pre-committed 0.75 bar, one of them *worse* than
+   its predecessor. ISIC held at 0.91 throughout. The gate-2 conclusion is
+   therefore stronger than "unvalidated": **per-deployment-source labelled
+   calibration data is required**, and that is a data-collection
+   commitment, not a modelling fix. Four independent investigations now
+   converge on it.
 3. **No reassurance, ever** (§2.4), until sensitivity supports it.
 4. **Regulatory.** Anything returning a risk category on a skin lesion
    is Software as a Medical Device. FDA/CE has a defined pathway; it
