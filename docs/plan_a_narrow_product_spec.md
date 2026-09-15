@@ -131,6 +131,49 @@ These are new work, not existing components:
   and it is flagged here rather than assumed.
 - The `LOW` risk label, everywhere, permanently.
 
+## 8b. The first visit is Plan A's weakest point
+
+CV-7 is the headline feature and **it cannot fire on a first visit**.
+A first-time user asking "what is this?" gets a measurement, a stored
+baseline, capture feedback, a clinician handoff, and general cited
+education — and nothing lesion-specific.
+
+The system is at least *honest* about it today: on a first visit the CV
+context reads *"no previous photo was available, so no change assessment
+was performed"*, never "no change detected". Absence of a comparison does
+not masquerade as stability, and there is a test pinning that.
+
+**One attempt was made to close the gap and it failed.**
+`abcd_features_result.md` tested whether mask-derived ABCD features
+(asymmetry, border irregularity, colour variation) carry melanoma signal
+that survives domain shift. They do not — ~0.60 on held-out sources, and
+the geometric features run *backwards* relative to the clinical rule.
+Nothing from that line ships.
+
+So the gap is structural, and it is a **product** risk rather than a
+technical one:
+
+> The product's value is back-loaded to visit 2; the user's worry is
+> front-loaded at visit 1.
+
+What legitimately mitigates it, none of it requiring a new model:
+
+- **The clinician handoff has value on day one** for anyone who is going
+  to see a doctor anyway — a well-framed photo, a measurement and a
+  one-page summary make that appointment better.
+- **Self-check education** — teaching ABCDE as something the *user*
+  checks, with citations, is instruction rather than a claim about their
+  lesion, and needs no validation.
+- **"Don't wait for visit 2."** If they are worried now, the honest
+  answer is to see someone now.
+
+The binding rule, which §5 already implies and which the first visit
+makes sharpest:
+
+> A first visit may say "I can't assess this", "here's what I measured",
+> and "here's what to watch for". It may never say anything a worried
+> person could read as *"you're probably fine."*
+
 ## 9. Success criteria
 
 Plan A is not graded on melanoma sensitivity — it makes no such claim.
