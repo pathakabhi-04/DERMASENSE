@@ -3,9 +3,29 @@
 
 A transport layer over `DermaSensePipeline.predict()` and nothing more:
 no new CV logic, no re-derived thresholds, no reinterpretation of any
-result. Every field it returns comes from `RiskAssessment.to_dict()`
-unchanged, so the JSON a caller receives here is the same JSON
-`docs/cv8_sample_outputs/sample_outputs.json` already documents.
+result.
+
+## Product mode (added 2026-09-16, Plan A)
+
+In `full` mode every field comes from `RiskAssessment.to_dict()`
+unchanged, so the JSON matches
+`docs/cv8_sample_outputs/sample_outputs.json` exactly.
+
+**The default is now `narrow`** (`src/serving/product_mode.py`), which
+withholds `diagnosis`, `risk_category` and `risk_reason` from the
+client. Plan A ships a product that makes no diagnostic claim, and a
+client rendering those fields would break that rule regardless of how
+carefully anything downstream was narrowed. The full assessment is still
+computed and logged server-side for Plan C.
+
+**Narrowing is a presentation boundary at the API edge, not a contract
+change.** The CV-8 contract is untouched, and consumers that need the
+full assessment -- the RAG layer, whose parser requires `diagnosis` and
+`risk_category` as required keys -- must sit INSIDE that boundary and
+receive the assessment object server-side, not the narrowed JSON. The
+RAG does its own narrowing of what it *narrates*
+(`RagPipeline(narrow_product=True)`); the two are separate mechanisms
+protecting the same rule at different layers.
 
 Built to the shape already decided in `docs/build_on_baseline_1.md`
 Section A, once the prerequisite it named was actually answered:
@@ -60,6 +80,7 @@ import json
 
 from src.inference.orchestrator import DermaSensePipeline, PipelineOutcome
 from src.risk.convergence import CONTRACT_VERSION
+from src.serving.product_mode import apply_product_mode, current_mode, is_narrow
 from src.temporal.calibration import RulerCalibration
 from src.temporal.measurement import LesionMeasurement
 
@@ -90,6 +111,9 @@ def load_pipeline() -> DermaSensePipeline:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Validate before loading anything: a bad mode must stop the server,
+    # not surface as a 500 on the first real assessment.
+    logger.info("Product mode: %s", current_mode())
     logger.info("Loading CV checkpoints...")
     _state["pipeline"] = load_pipeline()
     logger.info("CV pipeline ready.")
@@ -293,8 +317,20 @@ async def assess(
         if candidate.risk_assessment is not None
     ]
 
+    # Plan A §4: the diagnosis path keeps running and is LOGGED -- those
+    # predictions beside a future biopsy result are the evaluation Plan C
+    # exists to enable -- but it does not reach the client. Logged before
+    # narrowing, returned after.
+    if is_narrow() and assessments:
+        logger.info(
+            "cv8_internal %s",
+            json.dumps({"assessments": assessments}, default=str),
+        )
+    assessments = apply_product_mode(assessments)
+
     return {
         "outcome": result.outcome.value,
+        "product_mode": current_mode(),
         # Named so an empty list can never be misread as "assessed, no
         # risk" -- see the module docstring.
         "assessed": result.outcome is PipelineOutcome.ASSESSED,

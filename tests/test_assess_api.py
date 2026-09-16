@@ -15,6 +15,7 @@ volume are unavailable.
 from __future__ import annotations
 
 import json
+import os
 import unittest
 import zipfile
 from pathlib import Path
@@ -105,10 +106,18 @@ class FixtureReproductionTests(unittest.TestCase):
     """
     Section A, item 3: the endpoint must reproduce the delivered
     examples. Loads checkpoints once for the whole class.
+
+    These are CONTRACT-fidelity tests, so they run in `full` product
+    mode explicitly. The shipped default is `narrow` (Plan A), which
+    withholds the diagnosis and risk fields from the client -- see
+    `tests/test_product_mode.py` and `NarrowModeApiTests` below. The
+    contract itself is unchanged; only what the API presents to a client
+    is narrowed, and these tests pin the contract.
     """
 
     @classmethod
     def setUpClass(cls) -> None:
+        os.environ["DERMASENSE_PRODUCT_MODE"] = "full"
         from fastapi.testclient import TestClient
         from src.serving import assess_api
         import pandas as pd
@@ -213,6 +222,10 @@ class FixtureReproductionTests(unittest.TestCase):
                 )
                 self.assertEqual(response.status_code, 400)
 
+    @classmethod
+    def tearDownClass(cls) -> None:
+        os.environ.pop("DERMASENSE_PRODUCT_MODE", None)
+
     def test_response_parses_with_the_rag_side_parser(self):
         """The endpoint's output must satisfy the consumer that exists."""
         from src.rag.cv_context.parser import parse_cv_assessment
@@ -246,3 +259,59 @@ class FixtureReproductionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NarrowModeApiTests(unittest.TestCase):
+    """Plan A's shipping guarantee, end to end through the real endpoint.
+
+    `tests/test_product_mode.py` pins the narrowing helper. This pins the
+    thing a client actually receives, in the DEFAULT configuration, because
+    that is what would reach a worried person.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        os.environ.pop("DERMASENSE_PRODUCT_MODE", None)  # default = narrow
+        from fastapi.testclient import TestClient
+        from src.serving import assess_api
+        import pandas as pd
+
+        cls.api = assess_api
+        cls.api._state["pipeline"] = assess_api.load_pipeline()
+        cls.client = TestClient(assess_api.app)
+        cls.pad_row = pd.read_csv(REPO_ROOT / "data/splits/pad_ufes/test.csv").iloc[0]
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.api._state.clear()
+
+    def test_default_response_carries_no_diagnosis_or_risk(self):
+        image = cv2.imread(str(REPO_ROOT / self.pad_row["image_path"]))
+        response = self.client.post(
+            "/assess",
+            files={"image": ("current.png", _png(image), "image/png")},
+            data={"lesion_id": "narrow-check"},
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["product_mode"], "narrow")
+
+        serialised = json.dumps(body)
+        for forbidden in ("native_class", "risk_category", "risk_reason",
+                          "probabilities", "diagnosis"):
+            self.assertNotIn(forbidden, serialised)
+        for label in ("ACK", "BCC", "MEL", "NEV", "SCC", "SEK"):
+            self.assertNotIn(f'"{label}"', serialised)
+
+    def test_default_response_still_carries_what_the_product_ships(self):
+        image = cv2.imread(str(REPO_ROOT / self.pad_row["image_path"]))
+        response = self.client.post(
+            "/assess",
+            files={"image": ("current.png", _png(image), "image/png")},
+            data={"lesion_id": "narrow-keeps"},
+        )
+        assessment = response.json()["assessments"][0]
+        self.assertEqual(assessment["lesion_id"], "narrow-keeps")
+        self.assertIn("temporal", assessment)
+        self.assertIn("quality_flags", assessment)
+        self.assertIn("image_quality", response.json())
