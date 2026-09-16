@@ -24,24 +24,38 @@ that cannot be recovered later.
       the same fields from the prompt, the grounding check and the
       fallback together.
 - [x] **Full assessment still logged server-side** for Plan C.
+- [x] **Consent and linkage identifiers — designed and implemented.**
+      `src/serving/linkage.py` (16 tests), specified in
+      `plan_c_linkage_spec.md`. Patient pseudonym for split grouping,
+      consent gating that returns nothing to write when training use is
+      declined, and a hand-transcribable checksummed linkage code that
+      catches every single-character error and every transposition.
+      **Consent WORDING remains outstanding and is a legal/ethics task,
+      not an engineering one** (spec §6).
+- [x] **Written decision on `narrow` vs `full`.**
+      `decision_001_narrow_product_mode.md` — production runs `narrow`;
+      `full` requires a superseding decision record naming an owner and
+      citing a melanoma-routing measurement on the deployment capture
+      path.
 - [x] **Contract unchanged.** CV-8 still emits v1.2 in full; the
       narrowing is a presentation boundary at the API edge.
 
-## Blocking, not yet done
+## Blocking, outstanding
 
 - [ ] **BLOCKING — the client must not render what it is not given.**
       Narrow mode stops the fields leaving the server. It cannot stop a
       UI inventing a verdict from `requires_review`, or a screen headed
       "Your result". Copy review against §5 of the spec is a human task
       and nobody has done it.
-- [ ] **BLOCKING — consent and the Plan C linkage identifier.**
-      Patient ID, retention consent covering model training, and a
-      linkage code that survives to a biopsy result.
-      **Cannot be retrofitted to photos already captured**, so it must be
-      in the first release or Plan C starts from zero later.
-- [ ] **BLOCKING — a decision on `narrow` vs `full` in the deployment
-      environment**, written down, with whoever owns the deploy aware
-      that `full` emits diagnoses.
+- [ ] **BLOCKING — consent wording approved by legal/ethics**, covering
+      model training (not merely service provision), separable and
+      revocable, and stating honestly that revocation cannot un-train a
+      model. `Consent.policy_version` records which approved wording the
+      user agreed to; it is `"unset"` until that exists.
+- [ ] **BLOCKING — the storage and UI layer** that calls the linkage
+      module: persisting records, the account model holding the
+      pseudonym and consent state, printing the code on the clinician
+      page, and the revocation path that deletes stored records.
 
 ## Required before real users, not blocking a pilot
 
@@ -50,7 +64,6 @@ that cannot be recovered later.
 - [ ] 3-month reminder scheduling. **CV-7 is the headline feature and
       never fires without a second visit** — without reminders the
       product has no core.
-- [ ] Prediction logging schema that Plan C can join against.
 - [ ] Regulatory opinion on whether a measure-and-compare product with
       no clinical assertion sits outside SaMD. Flagged in the spec as
       needing an opinion, not an engineering assumption.
