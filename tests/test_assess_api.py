@@ -315,3 +315,128 @@ class NarrowModeApiTests(unittest.TestCase):
         self.assertIn("temporal", assessment)
         self.assertIn("quality_flags", assessment)
         self.assertIn("image_quality", response.json())
+
+
+class PlanCEndpointTests(unittest.TestCase):
+    """Accounts, consent, the clinician handoff and revocation.
+
+    No checkpoints: these are the storage layer, not the CV path.
+    """
+
+    def setUp(self) -> None:
+        import tempfile
+
+        from fastapi.testclient import TestClient
+
+        from src.serving import assess_api
+        from src.serving.capture_store import CaptureStore
+
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+
+        self.api = assess_api
+        self.store = CaptureStore(self._tmp.name)
+        self.addCleanup(self.store.close)
+        assess_api._state["store"] = self.store
+        self.client = TestClient(assess_api.app)
+        self.policy = "consent-v1-2026-09"
+
+    def tearDown(self) -> None:
+        self.api._state.pop("store", None)
+
+    def _consented_account(self, training_use: bool = True) -> str:
+        pseudonym = self.client.post("/accounts").json()["patient_pseudonym"]
+        response = self.client.post(
+            f"/accounts/{pseudonym}/consent",
+            data={"training_use": training_use, "policy_version": self.policy},
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        return pseudonym
+
+    def test_storage_is_off_unless_a_deployment_configures_it(self):
+        """A dev instance must not quietly accumulate medical photos."""
+        self.api._state.pop("store", None)
+        self.assertEqual(self.client.post("/accounts").status_code, 503)
+
+    def test_consent_requires_naming_the_approved_wording(self):
+        pseudonym = self.client.post("/accounts").json()["patient_pseudonym"]
+        response = self.client.post(
+            f"/accounts/{pseudonym}/consent",
+            data={"training_use": True, "policy_version": "unset"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_mistyped_and_unknown_codes_get_different_status_codes(self):
+        """400 means re-read the form; 404 means the join has failed and
+        needs a person. Collapsing them would hide the second."""
+        from src.serving.linkage import new_linkage_code
+
+        body = {
+            "label": "MEL",
+            "label_source": "biopsy",
+            "reported_at": "2026-11-01T00:00:00Z",
+        }
+        self.assertEqual(
+            self.client.post(
+                "/outcomes", data={"linkage_code": "DS-ZZZZ-ZZZZ-00", **body}
+            ).status_code,
+            400,
+        )
+        self.assertEqual(
+            self.client.post(
+                "/outcomes", data={"linkage_code": new_linkage_code(), **body}
+            ).status_code,
+            404,
+        )
+
+    def test_conflicting_result_is_a_conflict_not_an_overwrite(self):
+        pseudonym = self._consented_account()
+        record = self.store.save_capture(pseudonym, image_bytes=b"jpegbytes")
+        base = {"linkage_code": record.linkage_code, "reported_at": "2026-11-01T00:00:00Z"}
+
+        self.assertEqual(
+            self.client.post(
+                "/outcomes", data={**base, "label": "NEV", "label_source": "consensus"}
+            ).status_code,
+            201,
+        )
+        self.assertEqual(
+            self.client.post(
+                "/outcomes", data={**base, "label": "MEL", "label_source": "biopsy"}
+            ).status_code,
+            409,
+        )
+
+    def test_revocation_response_carries_the_limit_it_cannot_honour(self):
+        pseudonym = self._consented_account()
+        self.store.save_capture(pseudonym, image_bytes=b"jpegbytes")
+
+        payload = self.client.post(f"/accounts/{pseudonym}/revoke").json()
+
+        self.assertEqual(payload["captures_deleted"], 1)
+        self.assertEqual(payload["images_deleted"], 1)
+        self.assertIn("weights", payload["caveat"])
+
+    def test_revoking_an_unknown_account_is_404(self):
+        self.assertEqual(self.client.post("/accounts/p_nope/revoke").status_code, 404)
+
+    def test_coverage_counts_only_labelled_captures(self):
+        pseudonym = self._consented_account()
+        record = self.store.save_capture(pseudonym, image_bytes=b"jpegbytes")
+        self.store.save_capture(pseudonym, image_bytes=b"jpegbytes")
+        self.client.post(
+            "/outcomes",
+            data={
+                "linkage_code": record.linkage_code,
+                "label": "MEL",
+                "label_source": "biopsy",
+                "reported_at": "2026-11-01T00:00:00Z",
+            },
+        )
+
+        payload = self.client.get("/plan_c/coverage").json()
+
+        self.assertEqual(payload["captures"], 2)
+        self.assertEqual(payload["outcomes"], 1)
+        self.assertEqual(payload["biopsy_confirmed"], 1)
+        self.assertEqual(payload["coverage"], 0.5)

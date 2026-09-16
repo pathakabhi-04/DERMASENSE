@@ -144,16 +144,68 @@ fails at entry rather than silently matching nothing.
 Implemented here: identifiers, consent gating, record schemas, checksum
 guarantees.
 
-Not implemented, and not this module's job — the storage and UI layer
-that calls it:
+Since implemented in `capture_store.py` (§9): persistence, the account
+model, consent history, outcome entry, revocation, and export.
 
-- persisting `CaptureRecord` and the image itself
-- the account model holding `patient_pseudonym` and consent state
-- printing the linkage code on the clinician page
-- the revocation path that deletes stored records
-- body-site tap and self-reported Fitzpatrick type at capture
+Not implemented, and not engineering's to start:
+
+- the consent screen itself, which needs the approved wording (§6)
+- the clinician page that prints the linkage code
+- body-site tap and self-reported Fitzpatrick type at capture — the
+  store accepts both today; nothing collects them yet
+- authentication. The pseudonym and the linkage code are unguessable,
+  which is capability security: enough for a supervised pilot, not
+  enough for public deployment, because a leaked pseudonym is a
+  permanent credential with no rotation path
 
 Milestone 2 of `plan_c_dataset_collection_spec.md` — "linkage
 demonstrably works end-to-end on 10 cases" — is the gate that proves
 this design survives contact with an actual clinic, and it should be
 run early, while changing the format is still cheap.
+
+## 9. The store, as built
+
+`src/serving/capture_store.py` — SQLite, stdlib only. The schema is the
+part that cannot be retrofitted; the database it sits in can be swapped
+later without changing what any capture means.
+
+**Consent is snapshotted, never referenced.** `consent_events` is
+append-only and every `CaptureRecord` embeds consent as it stood when
+the shutter fired. When wording v2 ships, a capture taken under v1 still
+says v1 — which is the only question an ethics committee actually asks.
+
+**The consent check runs before the image is written.** A declined
+capture leaves no row *and* no JPEG. A record insert that fails deletes
+the file it had just written, so no photograph exists on disk without a
+record saying whose it is.
+
+**Two different join failures, two different exceptions.** A checksum
+failure (400) means re-read the form. `UnknownLinkageCode` (404) means
+the code was read correctly and there is no such capture — never stored,
+or already revoked. Those need different human responses. A conflicting
+result for a capture that already has one raises (409) rather than
+overwriting: a silently replaced label changes a dataset underneath a
+training run with no record of why.
+
+**Revocation** deletes captures, images, and the outcomes belonging to
+them — an outcome without its photograph is a label for nothing. It
+keeps the account row and the consent history including the revocation
+event, which is the only proof the request was honoured. The receipt
+carries the caveat about weights in the response body, so no client can
+present revocation as more complete than it is.
+
+**`export_for_training()` has no mode that omits `patient_pseudonym`.**
+The leak it prevents is invisible in every metric it corrupts, so the
+grouping key travels with the data rather than being reconstructed by
+whoever builds the split.
+
+**`linkage_coverage()`** reports labelled fraction and biopsy-confirmed
+count. Captures are cheap and outcomes are not, so a collection can look
+healthy while almost nothing is usable; milestone 2 is answered with a
+query rather than an estimate.
+
+One correction recorded during the build: the store's first version used
+a default SQLite connection, which FastAPI's threadpool breaks —
+`SQLite objects created in a thread can only be used in that same
+thread`. That would have failed in production, not only under test. Now
+`check_same_thread=False` behind a lock, with a threaded test.

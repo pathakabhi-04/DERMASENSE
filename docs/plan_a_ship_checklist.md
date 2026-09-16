@@ -37,6 +37,16 @@ that cannot be recovered later.
       `full` requires a superseding decision record naming an owner and
       citing a melanoma-routing measurement on the deployment capture
       path.
+- [x] **Storage layer, accounts, and revocation.**
+      `src/serving/capture_store.py` (20 tests) plus the `/accounts`,
+      `/consent`, `/outcomes`, `/revoke` and `/plan_c/coverage`
+      endpoints (7 tests). Consent snapshotted per capture, nothing
+      written without it — including the image file — outcome entry that
+      distinguishes a mis-typed code from a failed join, revocation that
+      deletes captures, images and outcomes while keeping the proof it
+      happened, and an export that always carries the patient grouping
+      key. Persistence is opt-in via `DERMASENSE_CAPTURE_STORE`, so a
+      dev instance cannot quietly accumulate medical photographs.
 - [x] **Contract unchanged.** CV-8 still emits v1.2 in full; the
       narrowing is a presentation boundary at the API edge.
 
@@ -52,15 +62,18 @@ that cannot be recovered later.
       revocable, and stating honestly that revocation cannot un-train a
       model. `Consent.policy_version` records which approved wording the
       user agreed to; it is `"unset"` until that exists.
-- [ ] **BLOCKING — the storage and UI layer** that calls the linkage
-      module: persisting records, the account model holding the
-      pseudonym and consent state, printing the code on the clinician
-      page, and the revocation path that deletes stored records.
+- [ ] **BLOCKING — the CLIENT half of capture and consent.** The server
+      half is built (below); what remains is UI: the consent screen
+      wording a user actually taps, the clinician page that prints the
+      linkage code, and the revoke button. None of it is engineering
+      that can proceed before the consent wording exists.
 
 ## Required before real users, not blocking a pilot
 
-- [ ] Body-site tap at capture (Plan C metadata, cheap now).
-- [ ] Self-reported Fitzpatrick type, optional, once.
+- [ ] Body-site tap at capture. The server accepts `body_site` and
+      `device` on `/assess` today; the body map is client work.
+- [ ] Self-reported Fitzpatrick type, optional, once. Accepted and
+      range-checked by the store; nothing asks for it yet.
 - [ ] 3-month reminder scheduling. **CV-7 is the headline feature and
       never fires without a second visit** — without reminders the
       product has no core.

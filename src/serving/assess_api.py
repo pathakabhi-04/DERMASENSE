@@ -33,6 +33,16 @@ Section A, once the prerequisite it named was actually answered:
 pre-committed 2.0s rule, so a synchronous endpoint is viable and the
 async question does not need reopening.
 
+## Plan C endpoints (added 2026-09-16)
+
+`/accounts`, `/consent`, `/outcomes`, `/revoke` and `/plan_c/coverage`
+are the storage half of the collection loop -- see the section above
+them near the bottom of this file. `/assess` gains an optional
+`patient_pseudonym`: supply it and the capture is retained IF that
+account consented, and the response carries the `linkage_code` to print
+for the clinician. Persistence is off unless `DERMASENSE_CAPTURE_STORE`
+names a directory.
+
 ## Deliberately absent
 
 Section A's "explicitly not now" list, unchanged: no authentication, no
@@ -68,6 +78,7 @@ Run:
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -80,6 +91,12 @@ import json
 
 from src.inference.orchestrator import DermaSensePipeline, PipelineOutcome
 from src.risk.convergence import CONTRACT_VERSION
+from src.serving.capture_store import (
+    CaptureStore,
+    ConsentRequired,
+    UnknownLinkageCode,
+)
+from src.serving.linkage import LinkageError
 from src.serving.product_mode import apply_product_mode, current_mode, is_narrow
 from src.temporal.calibration import RulerCalibration
 from src.temporal.measurement import LesionMeasurement
@@ -99,6 +116,26 @@ CLASSIFIER_CHECKPOINT = (
 _state: dict[str, Any] = {"pipeline": None}
 
 
+# Persistence is OPT-IN, by an explicit path. A development instance
+# must not quietly accumulate medical photographs because someone ran
+# the server to try an endpoint: if the operator has not named a place
+# for captures to live, there is no place for them to live.
+CAPTURE_STORE_ENV = "DERMASENSE_CAPTURE_STORE"
+
+
+def _store() -> CaptureStore:
+    """The Plan C store, or 503 if this deployment has none configured."""
+
+    store = _state.get("store")
+    if store is None:
+        raise HTTPException(
+            503,
+            f"Capture storage is not configured on this deployment. Set "
+            f"{CAPTURE_STORE_ENV} to a directory to enable Plan C collection.",
+        )
+    return store
+
+
 def load_pipeline() -> DermaSensePipeline:
     return DermaSensePipeline.from_checkpoints(
         router_checkpoint=ROUTER_CHECKPOINT,
@@ -114,10 +151,20 @@ async def lifespan(app: FastAPI):
     # Validate before loading anything: a bad mode must stop the server,
     # not surface as a 500 on the first real assessment.
     logger.info("Product mode: %s", current_mode())
+    store_root = os.environ.get(CAPTURE_STORE_ENV)
+    if store_root:
+        _state["store"] = CaptureStore(store_root)
+        logger.info("Plan C capture store: %s", store_root)
+    else:
+        logger.info("Plan C capture store: disabled (%s unset)", CAPTURE_STORE_ENV)
+
     logger.info("Loading CV checkpoints...")
     _state["pipeline"] = load_pipeline()
     logger.info("CV pipeline ready.")
     yield
+    store = _state.get("store")
+    if store is not None:
+        store.close()
     _state.clear()
 
 
@@ -199,6 +246,28 @@ def _parse_prior_measurement(
     return measurement, calibration
 
 
+def _parse_device(raw: str | None) -> dict[str, str]:
+    """Device model and OS, which Plan C §2 collects to measure whether
+    capture quality tracks hardware.
+
+    Malformed input is dropped rather than rejected: this is metadata
+    about the phone, and losing it must never cost the user the capture
+    itself. Everything that WOULD be worth a 400 -- the image, the prior
+    measurement -- is validated strictly above.
+    """
+
+    if not raw:
+        return {}
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        logger.warning("device metadata was not valid JSON; dropped")
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    return {str(k): str(v) for k, v in payload.items()}
+
+
 def _measurement_token(result: Any) -> dict[str, Any] | None:
     """
     The opaque token a caller stores and returns at the next visit.
@@ -239,6 +308,20 @@ async def assess(
         None, description="Previous visit's photo of the SAME lesion."
     ),
     lesion_id: str | None = Form(None),
+    body_site: str | None = Form(
+        None, description="Plan C: where on the body, from the client's body map."
+    ),
+    device: str | None = Form(
+        None, description='Plan C: {"model": ..., "os": ...} as JSON.'
+    ),
+    patient_pseudonym: str | None = Form(
+        None,
+        description=(
+            "Plan C: the account this capture belongs to. Supplying it stores "
+            "the capture IF that account has consented to training use, and "
+            "returns the linkage code to print for the clinician."
+        ),
+    ),
     prior_timestamp: str | None = Form(None),
     current_timestamp: str | None = Form(None),
     prior_measurement: str | None = Form(
@@ -287,7 +370,8 @@ async def assess(
     if pipeline is None:
         raise HTTPException(503, "Pipeline is still loading; retry shortly.")
 
-    image_bgr = _decode(image, await image.read(), "image")
+    image_raw = await image.read()
+    image_bgr = _decode(image, image_raw, "image")
 
     prior_bgr = None
     if prior_image is not None and prior_image.filename:
@@ -326,6 +410,45 @@ async def assess(
             "cv8_internal %s",
             json.dumps({"assessments": assessments}, default=str),
         )
+
+    # Stored BEFORE narrowing, and only the full assessment is worth
+    # storing: a prediction sitting beside a future biopsy result is the
+    # evaluation this project has never been able to make
+    # (decision_001). `save_capture` reads consent from the store and
+    # returns None when it does not permit retention, so a declined
+    # account silently stores nothing -- no record, no photograph.
+    linkage_code = None
+    if patient_pseudonym and _state.get("store") is not None:
+        try:
+            record = _state["store"].save_capture(
+                patient_pseudonym,
+                image_bytes=image_raw,
+                lesion_id=lesion_id,
+                # All of them, not the first. One photo can yield
+                # several lesions and the biopsy result will name one;
+                # keeping only the first would silently discard the
+                # prediction the outcome turns out to be about.
+                assessment={
+                    "assessments": assessments,
+                    # Plan C §2: the honest distribution of real-world
+                    # photos, including the ones CV-1 rejected. A dataset
+                    # of only the images that passed quality is exactly
+                    # the clinic-conditions bias this collection exists
+                    # to escape.
+                    "outcome": result.outcome.value,
+                    "image_quality": {
+                        "usable": result.quality.usable,
+                        "score": result.quality.quality_score,
+                    },
+                },
+                body_site=body_site,
+                device=_parse_device(device),
+            )
+        except ConsentRequired as error:
+            raise HTTPException(409, str(error))
+        if record is not None:
+            linkage_code = record.linkage_code
+
     assessments = apply_product_mode(assessments)
 
     return {
@@ -343,4 +466,146 @@ async def assess(
         # Store this and send it back as `prior_measurement` next visit.
         # Opaque: return exactly what you were given.
         "measurement": _measurement_token(result),
+        # Present only when the capture was actually retained. Absent
+        # means nothing was stored -- no store configured, no pseudonym
+        # supplied, or consent declined -- and a client must not print a
+        # code for a capture that does not exist to be joined to.
+        "linkage_code": linkage_code,
     }
+
+
+# ----------------------------------------------------------------------
+# Plan C: accounts, consent, the clinician handoff, and revocation.
+#
+# These endpoints are the storage layer the ship checklist listed as
+# blocking. They are the API half; the UI half -- the consent screen, the
+# printed clinician page, the revoke button -- is a client task, and
+# `plan_a_narrow_product_spec.md` §5 governs its copy.
+#
+# ## Authentication, honestly
+#
+# There is none, as elsewhere in this file. What protects these is that
+# `patient_pseudonym` (128 bits) and `linkage_code` (~40 bits) are
+# unguessable rather than sequential, so holding one grants access to
+# exactly one subject and reveals nothing about any other. That is
+# capability security, and it is enough for a supervised pilot and NOT
+# enough for public deployment: a leaked pseudonym is a permanent
+# credential with no rotation path. Real auth is a prerequisite for real
+# users, and saying so here is cheaper than discovering it later.
+# ----------------------------------------------------------------------
+
+
+@app.post("/accounts", status_code=201)
+def create_account() -> dict[str, Any]:
+    """Mint an account. Returns the only identity the server holds for
+    this person -- random, and never derived from an email or a phone
+    number (`linkage.py` on why a hash would not be pseudonymous)."""
+
+    return {"patient_pseudonym": _store().create_account()}
+
+
+@app.post("/accounts/{patient_pseudonym}/consent")
+def record_consent(
+    patient_pseudonym: str,
+    training_use: bool = Form(
+        ..., description="Whether captures may be retained to train models."
+    ),
+    policy_version: str = Form(
+        ...,
+        description=(
+            "The approved consent wording the user actually agreed to. Required, "
+            "with no default: the wording is a legal/ethics deliverable "
+            "(plan_c_linkage_spec.md §6), and a default here would record "
+            "agreement to a document that does not exist."
+        ),
+    ),
+) -> dict[str, Any]:
+    """Record a consent decision.
+
+    `training_use` is separable from using the app: declining it still
+    gets the whole product, and simply means nothing is retained.
+    """
+
+    try:
+        consent = _store().record_consent(
+            patient_pseudonym,
+            training_use=training_use,
+            policy_version=policy_version,
+        )
+    except ConsentRequired as error:
+        raise HTTPException(404, str(error))
+    except ValueError as error:
+        raise HTTPException(400, str(error))
+
+    return consent.to_dict()
+
+
+@app.post("/accounts/{patient_pseudonym}/revoke")
+def revoke(patient_pseudonym: str) -> dict[str, Any]:
+    """Withdraw consent and delete what was retained under it.
+
+    The receipt says what was deleted AND what revocation cannot do --
+    a capture already used in training has influenced weights that
+    cannot be selectively unlearned. That sentence travels in the
+    response so a client cannot present revocation as more complete than
+    it is.
+    """
+
+    try:
+        return _store().revoke(patient_pseudonym).to_dict()
+    except ConsentRequired as error:
+        raise HTTPException(404, str(error))
+
+
+@app.post("/outcomes", status_code=201)
+def record_outcome(
+    linkage_code: str = Form(..., description="The code printed on the clinician page."),
+    label: str = Form(...),
+    label_source: str = Form(..., description="'biopsy' or 'consensus'."),
+    reported_at: str = Form(...),
+) -> dict[str, Any]:
+    """Attach a clinical result to the capture it came from.
+
+    Three failures, kept distinct because each needs a different human
+    response:
+
+        400  the code failed its checksum -- re-read the form
+        404  the code is valid but matches no capture here
+        409  this capture already has a DIFFERENT result on file
+
+    The 404 matters most. A valid code with no capture means the join
+    has genuinely failed, and inserting the label anyway would put a row
+    in the dataset that traces to no image.
+    """
+
+    try:
+        outcome = _store().record_outcome(
+            linkage_code,
+            label=label,
+            label_source=label_source,
+            reported_at=reported_at,
+        )
+    except UnknownLinkageCode as error:
+        raise HTTPException(404, str(error))
+    except LinkageError as error:
+        raise HTTPException(400, str(error))
+    except ValueError as error:
+        # Both a bad label_source and a conflicting stored result. The
+        # conflict is the one worth a 409: refusing to overwrite is the
+        # point, not a validation slip.
+        raise HTTPException(409 if "already has outcome" in str(error) else 400, str(error))
+
+    return outcome.to_dict()
+
+
+@app.get("/plan_c/coverage")
+def plan_c_coverage() -> dict[str, Any]:
+    """The number Plan C lives or dies on: what fraction of captures ever
+    got a label, and how many of those came from a pathologist.
+
+    Captures are cheap and outcomes are not, so a collection can look
+    healthy while almost nothing is usable. Milestone 2 of
+    `plan_c_dataset_collection_spec.md` is answered from here.
+    """
+
+    return _store().linkage_coverage().to_dict()
