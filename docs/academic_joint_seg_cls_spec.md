@@ -18,7 +18,78 @@ One question, one dataset, three arms, fixed seeds. Nothing else.
 
 ---
 
-## 2. Why this dataset (data check, done before writing this spec)
+## 2. Design decision: what is merged and why
+
+In the product pipeline, CV-2 (detection, YOLO11s on iToBoS), CV-3
+(segmentation, U-Net on ISIC 2018 Task 1) and CV-4 (classification, ResNet-50
+on ISIC 2019) are three separate models. The academic track asked whether one
+model could do all three. **Decision: merge segmentation and classification
+into one shared-encoder model. Keep learned detection out.**
+
+### 2.1 Why not all three in one model
+
+1. **No dataset has all three labels on the same images.** Each of our tasks
+   was trained on a different dataset carrying one label type: iToBoS has
+   boxes only (no diagnosis, no masks), ISIC 2018 Task 1 has masks only, and
+   ISIC 2019 has diagnoses only. A single forward pass that learns boxes, masks
+   and diagnoses together needs all three on one image. The obvious in-house
+   join (ISIC 2018 masks × ISIC 2019 labels) was checked and fails (Section 3).
+   No public dataset we know of has wide-field images with a box *and* a
+   diagnosis per lesion.
+
+2. **Detection and diagnosis work at incompatible scales.** iToBoS lesions
+   have a median area of 0.00097 of the image (a few tens of pixels across in
+   a wide-field photo). That scale caps CV-2 image-level recall at 0.81
+   (`docs/cv2_status.md`). A lesion that small carries essentially no
+   diagnostic texture, so classification cannot run on the detection pass
+   anyway. Even a "single" model would run twice (full image → detect → crop
+   → classify), so merging detection saves weights, not passes.
+
+3. **Training on the three datasets separately (partial labels) confounds
+   the result.** One backbone could be trained by alternating iToBoS,
+   ISIC 2018 and ISIC 2019 batches, each supervising only its own head. But the
+   three datasets differ in domain as well as task (wide-field clinical TBP vs
+   dermoscopic close-ups). Any gain or loss could then come either from
+   sharing across tasks or from the domain shift, and the experiment could not
+   separate the two. Negative transfer from the tiny-lesion detection task is
+   also the most likely outcome. That makes this a second-stage experiment,
+   not the first.
+
+4. **A learned box head on lesion-centric images is trivial.** On datasets
+   that do have masks and diagnoses (HAM10000, ISIC 2017, PH2), every image
+   has one centred lesion. A box head would learn "the lesion is in the
+   middle" and give no measurable result.
+
+### 2.2 Why segmentation + classification is the merge we made
+
+1. **Same image, same scale.** In the pipeline, CV-3 and CV-4 already run in
+   sequence on the same lesion-centric crop, so a shared encoder changes no
+   interface. Only CV-2 works on a different image, the wide-field photo.
+2. **Both labels exist on the same images, without leakage.** HAM10000 plus
+   the Tschandl masks gives 10,015 images with a mask and an 8-class diagnosis
+   each, and all of them already sit in our lesion-grouped ISIC 2019 split
+   (Section 3).
+3. **Only one thing changes.** Holding the dataset, backbone and split fixed,
+   the only difference between the arms is whether the tasks share an encoder.
+   Any effect can be attributed to that, which the full three-task merge
+   cannot offer (2.1.3).
+4. **It tests the implicit version of a hypothesis we already falsified
+   explicitly.** Commit `9c1b0dc` showed that hand-crafted ABCD geometry
+   measured from U-Net masks does not help diagnosis (asymmetry AUC 0.44,
+   border-solidity 0.48, both in the wrong direction). Joint training asks
+   instead whether *learning* to segment shapes the encoder's features
+   usefully for diagnosis, without relying on measurements from a predicted
+   border. It also uses dermatologist-curated masks rather than U-Net outputs.
+5. **Localisation still comes out.** The box is taken as the tight box around
+   the predicted mask, so the model reports box, mask and diagnosis. Only the
+   box is not a separately learned head.
+
+**Re-entry for detection:** the iToBoS partial-label version (2.1.3) gets its
+own spec only if this experiment ends in outcome A or B (Section 8).
+
+---
+
+## 3. Why this dataset (data check, done before writing this spec)
 
 No dataset we use has boxes + masks + diagnosis on the same images. The two
 obvious in-house candidates were checked:
@@ -56,24 +127,21 @@ so it is disjoint from HAM.
 
 ---
 
-## 3. Scope
+## 4. Scope
 
 **In:** segmentation + classification from one encoder. A bounding box is
 reported as a derived output (tight box of the predicted mask), not a learned
 head.
 
 **Out, and why:**
-- **Learned detection head.** Every HAM image has one centred lesion; a box
-  head would learn trivial localisation and add no measurable result.
-  Wide-field detection (iToBoS) is a separate, later spec — only if this one
-  ends in outcome A or B (Section 7).
+- **Learned detection head, and iToBoS.** See Section 2.1.
 - **ISIC 2017 / PH2 / Dermofit.** Extra external sets need de-duplication
   against HAM and widen the experiment. Not in this spec.
 - **Loss-weight tuning, GradNorm / uncertainty weighting, backbone changes.**
 
 ---
 
-## 4. Arms
+## 5. Arms
 
 All arms: ResNet-50 ImageNet-pretrained encoder (same as the CV-4 baseline),
 input 512×512 (CV-3 resolution), same augmentation, same optimizer, same epoch
@@ -90,7 +158,7 @@ metric; J uses val macro-F1).
 
 ---
 
-## 5. Metrics
+## 6. Metrics
 
 | Metric | Split | Role |
 |---|---|---|
@@ -109,7 +177,7 @@ as mean and per-seed values.
 
 ---
 
-## 6. Preconditions (stop if any fails)
+## 7. Preconditions (stop if any fails)
 
 1. Masks downloaded; licence permits academic use; recorded in `docs/`.
 2. Mask count matches: ≥ 99% of the 10,015 HAM image IDs have a mask. If
@@ -137,7 +205,7 @@ masks inverted, without any error. Always load with
 
 ---
 
-## 7. Decision rule (committed before running)
+## 8. Decision rule (committed before running)
 
 Margins: classification −0.02 macro-F1, segmentation −0.01 Dice.
 
@@ -155,9 +223,9 @@ but it does not change the outcome letter.
 
 ---
 
-## 8. Anti-rabbit-hole boundary
+## 9. Anti-rabbit-hole boundary
 
-After the 9 runs, apply Section 7 and stop. Do **not**:
+After the 9 runs, apply Section 8 and stop. Do **not**:
 - sweep λ, loss-weighting schemes, decoder variants, or resolutions;
 - add seeds, datasets, or proxy metrics to move a borderline result;
 - open per-class or per-image investigations into why J won or lost.
@@ -167,9 +235,9 @@ and the track moves on.
 
 ---
 
-## 9. Deliverables
+## 10. Deliverables
 
 - `evaluation/academic_joint/results.csv` — one row per (arm, seed) with all
-  Section 5 metrics.
+  Section 6 metrics.
 - `docs/academic_joint_seg_cls_result.md` — outcome letter, paired table,
   limitations.
