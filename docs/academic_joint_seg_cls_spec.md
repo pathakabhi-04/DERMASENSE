@@ -1,6 +1,6 @@
 # Academic Track — Joint Segmentation + Classification (Single Model)
 
-**Status:** SPEC — preconditions passed (2026-09-25); runs not started.
+**Status:** DONE — outcome **C** (fails to match at λ = 1). See `docs/academic_joint_seg_cls_result.md`.
 **Purpose:** Test whether one shared-encoder model can replace the separate
 CV-3 (segmentation) and CV-4 (classification) models, on images that carry
 both labels.

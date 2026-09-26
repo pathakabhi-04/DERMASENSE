@@ -84,3 +84,6 @@ data/raw
 
 # Academic data bundles (rebuildable via scripts/academic_joint/build_bundle.py)
 data/processed/
+
+# Bundle as it lands on the pod (synced into the repo folder)
+data/academic_joint_bundle/

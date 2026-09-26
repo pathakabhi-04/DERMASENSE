@@ -1,0 +1,10 @@
+{
+  "mean_J_minus_C_macro_f1": -0.033655202934781414,
+  "mean_J_minus_S_dice": -0.012596663775678363,
+  "matches": false,
+  "improves_classification": false,
+  "outcome": "C",
+  "pad_transfer_mean_J_minus_C": 0.027149706602818013,
+  "pad_transfer_improves": true,
+  "rule": "match: mean dF1 >= -0.02 and mean dDice >= -0.01; improve: dF1 > 0 in all seeds and mean >= 0.02"
+}
