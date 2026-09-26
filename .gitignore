@@ -1,0 +1,83 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Raw dataset archives
+data/raw/**/*.zip
+data/raw/**/*.7z
+data/raw/**/*.tar.gz
+
+# Extracted dataset images
+data/raw/**/*.jpg
+data/raw/**/*.jpeg
+data/raw/**/*.png
+
+# Large extracted dataset directories
+data/raw/isic2019/ISIC_2019_Training_Input/
+data/raw/pad_ufes/images/
+
+# OS files
+.DS_Store
+
+
+# Raw datasets and dataset metadata
+data/raw/
+
+# Pre-resized training copies (1.7 GB, rebuildable from raw via
+# scripts/preresize_cv4b_dataset.py)
+data/processed/cv4b_finetune_256/
+
+# GPU upload bundle (1.7 GB of hardlinks + tar, rebuildable via
+# scripts/build_gpu_bundle.py). dataset.csv/SHA256SUMS/BUNDLE.json live
+# inside it and are regenerated with it, so the whole tree stays out.
+data/processed/cv4b_bundle/
+data/processed/cv4b_bundle.tar
+
+# Model checkpoints / trained weights
+checkpoints/
+artifacts/**/*.pt
+artifacts/**/*.pth
+artifacts/**/*.ckpt
+
+# Generated analysis outputs
+analysis/**/*.npz
+analysis/**/*.png
+analysis/**/*.jpg
+analysis/**/*.jpeg
+analysis/**/*.webp
+
+# Generated analysis tables/reports can be committed selectively.
+# Do not blanket-ignore analysis/**/*.csv or analysis/**/*.txt.
+
+
+# Generated experiment artifacts
+artifacts/
+
+# RAG generated/raw data
+data/rag/raw/
+data/rag/processed/
+data/rag/indexes/
+
+# RAG evaluation outputs (regenerate with: python -m src.rag.evaluate_cv_integration)
+evaluation/rag/
+
+# Referral head (CV-4b): small JSON weights, tracked despite checkpoints/
+!checkpoints/referral_head/
+!checkpoints/referral_head/*.json
+
+# Academic track: run outputs and weights (pulled back from the pod)
+runs/
+*.pt
+*.pth
+*.ckpt
+
+# Data store is a symlink to the HDD
+data/raw
