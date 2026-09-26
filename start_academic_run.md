@@ -79,7 +79,7 @@ never in git):
 
 ```bash
 export S3="--region eu-ro-1 --endpoint-url https://s3api-eu-ro-1.runpod.io"
-export BUCKET=s3://4tlwcuo1xg
+export BUCKET=s3://mw759kkbok      # academic volume (eu-ro-1), created 2026-09-26
 aws s3 ls $BUCKET/ $S3               # confirm the volume still exists first
 ```
 
@@ -131,6 +131,19 @@ PYTHONPATH=. python3 scripts/<train_script>.py \
   --data-root /workspace/dermasense_academic/data/<bundle> \
   --run-root  /workspace/dermasense_academic/runs/<run_name>
 # detach: ctrl-b d. The run survives an SSH drop.
+```
+
+**Experiment 1 (joint seg+cls)**: bundle `academic_joint_bundle`, all 9 runs
+plus evaluation and PAD transfer in one resumable command:
+
+```bash
+tmux new -s academic
+cd /workspace/dermasense_academic
+bash scripts/academic_joint/run_all.sh \
+  /workspace/dermasense_academic/data/academic_joint_bundle \
+  /workspace/dermasense_academic/runs/academic_joint
+# rerun the same command after any crash: finished parts are skipped,
+# an interrupted training run resumes from its last.pt
 ```
 
 Checkpoints go to `/workspace/...` (the volume) every epoch, never to the
