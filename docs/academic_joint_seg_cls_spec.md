@@ -156,6 +156,43 @@ metric; J uses val macro-F1).
 
 **Seeds:** 42, 43, 44 per arm → 9 runs total. Fixed; not enlarged.
 
+### 5.1 Training settings (fixed 2026-09-26, before the first run)
+
+Section 5 says the arms share these settings but does not give values. They
+are fixed here, before any run, and are identical for S, C and J. The CV-3 and
+CV-4 baselines disagree on some of them, so each choice below says which one
+it follows.
+
+| Setting | Value | Source |
+|---|---|---|
+| Encoder | torchvision ResNet-50, `ResNet50_Weights.DEFAULT` | CV-4 |
+| Decoder (S, J) | U-Net: 5 blocks (256, 128, 64, 32, 16 ch), nearest ×2 upsample, skips from stem / layer1–3, 2× conv3×3-BN-ReLU per block; 1×1 conv to 1 logit | — |
+| Classifier (C, J) | GAP on layer4 → Linear(2048, 8) | CV-4 |
+| Input | 512×512 squash resize, ImageNet mean/std | spec §5 (resolution); normalisation because the encoder is ImageNet-pretrained |
+| Augmentation | hflip 0.5, vflip 0.5, rotation ±15°, colour jitter (0.10, 0.10, 0.10, 0.02); geometric ops applied jointly to the mask (nearest) | CV-4 (CV-3 used none) |
+| Optimizer | AdamW, lr 1e-4, weight decay 1e-4, no scheduler, no grad clipping | CV-4 (CV-3: same lr) |
+| Batch size | 16 | between CV-4 (32 at 224) and CV-3 (8 at 512) |
+| Epochs | 30 for all arms; best-val checkpoint | — (CV-4: 10 on ~18k images; CV-3: 50 on ~2k images) |
+| Precision | fp16 autocast + GradScaler on CUDA | CV-3 |
+| Class weights (C, J) | sqrt inverse frequency, mean-normalised, from HAM train | CV-4 |
+| Seg metric | thresholded Dice at 0.5, smooth 1, per image, at 512×512; HAM masks resized nearest | CV-3 |
+| Pairing | For a given seed, all arms get the same shuffle order and augmentations (dedicated DataLoader generator), and J starts from the same classifier-head init as C and the same decoder init as S | — |
+
+**PAD-UFES transfer (Section 6, secondary).** This is the C1 protocol with
+C1's hyperparameters unchanged: layer4 + a new 6-class head, lr 1e-5 / 1e-4,
+weight decay 1e-4, batch 32, ≤ 30 epochs, patience 7, input 224×224, best by
+val macro-F1, scored once on PAD test. It uses the run's own seed so that C
+and J transfers are paired. The encoders are trained at 512 but fine-tuned at
+C1's 224; this mismatch is the same for C and J. PAD images are stored in the
+bundle already resized to 224×224. Train-time augmentation therefore runs
+after the resize, where C1 ran it before; this is also the same for C and J.
+
+**ISIC 2018 external test.** The images are stored already resized to
+512×512, using the resize CV-3 evaluation applies (cv2 linear / nearest), so
+the Dice matches `scripts/evaluate_cv3.py` on main.
+
+Code: `src/academic/`, `scripts/academic_joint/`.
+
 ---
 
 ## 6. Metrics

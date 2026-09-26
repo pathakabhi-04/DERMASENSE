@@ -81,3 +81,6 @@ runs/
 
 # Data store is a symlink to the HDD
 data/raw
+
+# Academic data bundles (rebuildable via scripts/academic_joint/build_bundle.py)
+data/processed/
