@@ -51,6 +51,70 @@ how their baselines were produced.
 Implementation note: the CV-3 ResNet-50 U-Net is the same module the joint
 spec's segmentation-only and joint arms need. Build it once and reuse it.
 
+### 3.1 Settings (fixed 2026-09-27, before the first run)
+
+The table in Section 3 names the model, data, resolution, loss, epochs and
+seed. The remaining settings are fixed here, before any run.
+
+**CV-2: Faster R-CNN.** "torchvision defaults" means the defaults of the
+torchvision detection reference recipe (`references/detection/train.py`),
+scaled to one GPU:
+
+| Setting | Value |
+|---|---|
+| Weights | `FasterRCNN_ResNet50_FPN_V2_Weights.COCO_V1`; box predictor replaced by `FastRCNNPredictor(1024, 2)`; default trainable backbone layers (3) |
+| Resolution | `min_size=1280, max_size=1280`. iToBoS images are ≈1094×894 or 945×771, so the long side becomes 1280 (as §3 requires) |
+| Optimizer | SGD, momentum 0.9, weight decay 1e-4, lr 0.005 (the reference 0.02 at 16 images/batch, scaled linearly to batch 4) |
+| Schedule | linear warmup over the first 1,000 iterations (factor 0.001); MultiStepLR ×0.1 at epochs 31 and 42 (the reference 16/22 of 26, scaled to 50) |
+| Augmentation | horizontal flip 0.5 (the reference `hflip` policy) |
+| Data | all 6,778 train images, including the 1,401 zero-lesion images (empty targets), as B1/E |
+| Precision | fp16 autocast (the reference `--amp` option), for cost |
+| Checkpoint | final epoch. The reference recipe does no val selection, and val is also the evaluation set |
+| Export | `box_score_thresh=0.001`, NMS 0.5, `detections_per_img=100` (torchvision defaults apart from the score threshold, which §4 sets) |
+| Matching | IoU ≥ 0.5, greedy IoU-first, exactly as `scripts/analyze_cv2_predictions.py` on main |
+
+Baseline note: `predictions.csv` only has rows for images with at least one
+candidate. E's committed burden figures therefore cover 330 of the 349
+zero-lesion val images; the other 19 had no candidates at conf 0.001.
+Recall is unaffected, since all 1,346 lesion images are present. The
+decision uses the spec's script unchanged for both models. A corrected
+burden over all 349 zero-lesion images is reported alongside it for both
+models, as a secondary figure.
+
+**CV-3: ResNet-50 U-Net.** This is the module from
+`src/academic/model.py` (arm S), trained with the CV-3 baseline's settings:
+batch 8, AdamW lr 1e-4, weight decay 0.01 (the PyTorch default the baseline
+used), no augmentation, fp16, 50 epochs, seed 42, best by val Dice. The one
+difference from the baseline is ImageNet mean/std normalisation, which a
+pretrained encoder needs. Images and masks are stored already resized to
+512×512 with the resize `evaluate_cv3.py` applies (cv2 linear / nearest).
+
+**CV-4.** `isic2019_resnet50_weighted_best.pt`, loaded into a torchvision
+ResNet-50 by key remapping. Before any map is computed, the loaded model must
+reproduce test macro-F1 0.5756 on the ISIC 2019 test split. If it does not,
+stop.
+
+**Attention maps, the details §5 leaves open:**
+- Maps are compared with ground truth at model-input resolution: CV-4 at
+  224×224, CV-3 at 512×512, CV-2 at the original image size. The CAM is
+  upsampled bilinearly and ground-truth masks nearest-neighbour.
+- Pointing game: the location of the map's maximum. An all-zero map counts
+  as a miss.
+- Energy fraction: the map's sum inside the ground truth divided by its total
+  sum. An all-zero map scores 0.
+- IoU@0.5: the map normalised to [0, 1] by its maximum, thresholded at 0.5,
+  as `gradcam_mask_iou` does.
+- CV-2 maps are standard Grad-CAM over the whole layer2 map, so energy is
+  measured against the whole image.
+- CV-3: the predicted mask is the region of probability ≥ 0.5. If it is empty
+  the map is undefined; the count of such images is reported, and they are
+  excluded.
+- Sanity check: 50 items sampled with seed 42 (images for CV-3 and CV-4,
+  true-positive boxes for CV-2). The target layer is re-initialised with
+  `reset_parameters()` under seed 42. The target (class, mask region or box)
+  is held at the original model's. Spearman correlation is computed on the
+  native CAM grid. An undefined correlation (a constant map) counts as 0.
+
 ---
 
 ## 4. Performance decision rule (committed before running)

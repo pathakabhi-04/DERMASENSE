@@ -24,7 +24,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Subset
 
-from src.academic.data import ISIC2019_CLASSES, HamJointDataset
+from src.academic.data import ISIC2019_CLASSES, HamJointDataset, SegTestDataset
 from src.academic.metrics import BCEDiceLoss, macro_f1, per_image_dice, sqrt_inverse_frequency_weights
 from src.academic.model import ARMS, AcademicModel
 
@@ -42,6 +42,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--learning-rate", type=float, default=1e-4)
     p.add_argument("--weight-decay", type=float, default=1e-4)
     p.add_argument("--image-size", type=int, default=512)
+    p.add_argument("--dataset", choices=("ham", "isic2018"), default="ham",
+                   help="isic2018 (arm S only) is the Experiment 2 CV-3 run.")
+    p.add_argument("--augment", choices=("cv4", "none"), default="cv4")
     p.add_argument("--num-workers", type=int, default=8)
     p.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     p.add_argument("--no-pretrained", action="store_true", help="Smoke tests only.")
@@ -131,8 +134,15 @@ def main() -> None:
     use_amp = device.type == "cuda"
     select_key = "val_dice" if args.arm == "S" else "val_macro_f1"
 
-    train_ds = HamJointDataset(args.data_root, "train", image_size=args.image_size)
-    val_ds = HamJointDataset(args.data_root, "val", image_size=args.image_size)
+    augment = args.augment == "cv4"
+    if args.dataset == "ham":
+        train_ds = HamJointDataset(args.data_root, "train", image_size=args.image_size, train=augment)
+        val_ds = HamJointDataset(args.data_root, "val", image_size=args.image_size)
+    else:
+        if args.arm != "S":
+            raise SystemExit("--dataset isic2018 has masks only; use --arm S")
+        train_ds = SegTestDataset(args.data_root, image_size=args.image_size, split="train", augment=augment)
+        val_ds = SegTestDataset(args.data_root, image_size=args.image_size, split="val")
 
     # A dedicated generator fixes shuffling and per-worker augmentation seeds,
     # so for a given seed all three arms see the same batches and augmentations.
@@ -143,7 +153,8 @@ def main() -> None:
                              shuffle=False, max_batches=args.max_val_batches)
 
     model = AcademicModel(args.arm, pretrained=not args.no_pretrained, seed=args.seed).to(device)
-    class_weights = sqrt_inverse_frequency_weights(train_ds.targets, len(ISIC2019_CLASSES))
+    class_weights = (sqrt_inverse_frequency_weights(train_ds.targets, len(ISIC2019_CLASSES))
+                     if args.arm != "S" else torch.ones(len(ISIC2019_CLASSES)))
     ce = nn.CrossEntropyLoss(weight=class_weights.to(device))
     seg_loss = BCEDiceLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)

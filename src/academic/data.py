@@ -104,15 +104,16 @@ class HamJointDataset(Dataset):
 
 
 class SegTestDataset(Dataset):
-    """ISIC 2018 Task 1 test images + masks (external segmentation test)."""
+    """ISIC 2018 Task 1 images + masks: the external test in Experiment 1,
+    and the CV-3 train/val/test data in Experiment 2."""
 
-    def __init__(self, root: Path, *, image_size: int = 512) -> None:
+    def __init__(self, root: Path, *, image_size: int = 512, split: str = "test", augment: bool = False) -> None:
         self.root = Path(root)
         df = read_bundle(self.root)
-        self.df = df[(df.source == "isic2018") & (df.split == "test")].reset_index(drop=True)
+        self.df = df[(df.source == "isic2018") & (df.split == split)].reset_index(drop=True)
         if len(self.df) == 0:
-            raise ValueError("no isic2018 test rows in bundle")
-        self.transform = build_transform(image_size, train=False)
+            raise ValueError(f"no isic2018 {split} rows in bundle")
+        self.transform = build_transform(image_size, train=augment)
 
     def __len__(self) -> int:
         return len(self.df)

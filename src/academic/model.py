@@ -131,6 +131,27 @@ class AcademicModel(nn.Module):
         return out
 
 
+def load_cv4_resnet50(path, map_location="cpu") -> nn.Module:
+    """The production CV-4 checkpoint as a plain torchvision ResNet-50 (fc: 8 ISIC 2019 classes).
+
+    main's DermaSenseNativeClassifier stores the backbone as
+    backbone.features = Sequential(conv1, bn1, relu, maxpool, layer1..4, avgpool)
+    and the ISIC head as isic2019_head.classifier (a Linear, dropout 0).
+    """
+    names = {"0": "conv1", "1": "bn1", "4": "layer1", "5": "layer2", "6": "layer3", "7": "layer4"}
+    ckpt = torch.load(path, map_location=map_location, weights_only=False)
+    state = {}
+    for key, value in ckpt["model_state_dict"].items():
+        if key.startswith("backbone.features."):
+            index, rest = key[len("backbone.features."):].split(".", 1)
+            state[f"{names[index]}.{rest}"] = value
+        elif key.startswith("isic2019_head.classifier."):
+            state["fc." + key[len("isic2019_head.classifier."):]] = value
+    net = resnet50(weights=None, num_classes=NUM_CLASSES)
+    net.load_state_dict(state, strict=True)
+    return net
+
+
 def mask_to_box(mask: torch.Tensor) -> tuple[int, int, int, int] | None:
     """Tight (x0, y0, x1, y1) box around a binary [H,W] mask, or None if empty.
 
