@@ -1,0 +1,11 @@
+{
+  "cv2_matches": true,
+  "cv3_matches": true,
+  "outcome": "A",
+  "cv2_recall_ge_0.90_notable": false,
+  "claims": {
+    "cv2": false,
+    "cv3": true,
+    "cv4": true
+  }
+}

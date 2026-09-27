@@ -1,0 +1,11 @@
+task,metric,resnet50,baseline,threshold,pass
+CV-2,image_recall,0.8304446119065562,0.8098068350668648,>= 0.78,True
+CV-2,burden_median,0.0,0.0,<= 1,True
+CV-2,burden_p90,2.0,1.0,<= 2,True
+CV-2,box_recall (secondary),0.5422403535611082,0.5022861981371719,,
+CV-2,binary_zero_fpr (secondary),0.472636815920398,0.17575757575757575,,
+CV-2,"burden_p90, all 349 zero-lesion images (secondary)",1.1999999999999886,1.0,,
+CV-2,"burden_median, all 349 zero-lesion images (secondary)",0.0,0.0,,
+CV-3,test_dice,0.896374598942657,0.864,>= 0.854,True
+CV-3,test_iou (secondary),0.8295095644409439,0.7851,,
+CV-4,test_macro_f1,0.5756,0.5756,by construction,True

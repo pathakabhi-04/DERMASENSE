@@ -1,6 +1,6 @@
 # Academic Track — One Backbone, Three Tasks (ResNet-50) + Attention Maps
 
-**Status:** SPEC — not yet run.
+**Status:** DONE — outcome **A** (CV-2 marginal on false positives). See `docs/academic_resnet50_three_task_result.md`.
 **Companion to:** `docs/academic_joint_seg_cls_spec.md` (that spec shares one
 encoder *across* tasks; this one trains the *same backbone* separately for
 each task).

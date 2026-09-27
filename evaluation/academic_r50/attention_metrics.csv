@@ -1,0 +1,4 @@
+task,n,pointing_game,energy_in_lesion,sanity_n,sanity_median_spearman,sanity_pass,eval_set,method,energy_denominator,claim_allowed,iou_at_0.5,empty_prediction_excluded,ham_test_macro_f1
+cv2,3190,0.02037617554858934,0.002312519009087901,50,0.00755571402805918,True,"iToBoS val, true-positive boxes at conf 0.25","Grad-CAM per box, lesion logit through RoI-Align, backbone layer2 (stride 8)",whole image,False,,,
+cv3,259,0.9884169884169884,0.7992527625850729,50,0.20398528457746276,True,ISIC 2018 Task 1 test,"Seg-Grad-CAM, sum of mask logits in predicted mask, encoder layer4 (16x16 at 512)",,True,0.2590025710444551,1.0,
+cv4,1451,0.9662301860785665,0.7259429800949945,50,0.19428624711053022,True,HAM10000 in ISIC 2019 test,"Grad-CAM, predicted-class logit, layer4 (7x7 at 224)",,True,0.31539951447548803,,0.6410179440438275
