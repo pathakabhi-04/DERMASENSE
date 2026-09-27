@@ -21,15 +21,22 @@ including the RAG collaborator (Section 5).
 
 | Experiment | Status | Result |
 |---|---|---|
-| 1 — joint seg+cls (`docs/academic_joint_seg_cls_spec.md`) | DONE 2026-09-26 | Outcome **C**: J − C macro-F1 −0.034, J − S Dice −0.013, both outside the margins. PAD-UFES transfer favours J (+0.027, 3/3 seeds, secondary only). Details: `docs/academic_joint_seg_cls_result.md` |
-| 2 — ResNet-50 on three tasks + attention maps (`docs/academic_resnet50_three_task_spec.md`) | DONE 2026-09-27 | Outcome **A**: CV-2 recall 0.830 (burden p90 2 = at limit; zero-lesion FPR 0.47 vs YOLO 0.18), CV-3 Dice 0.896 (vs 0.864). Attention claim allowed for CV-4 and CV-3, withheld for CV-2. Details: `docs/academic_resnet50_three_task_result.md` |
-| 3 — ViT-B/16 on CV-3 and CV-4 + attention maps (`docs/academic_vit_spec.md`) | spec written; ready to run (CV-3 comparator 0.8964) | — |
+| 1 — joint seg+cls (`docs/academic_joint_seg_cls_spec.md`) | DONE 2026-09-26 | Outcome **C**: J − C macro-F1 −0.034, J − S Dice −0.013, both outside the margins. PAD-UFES transfer favours J (+0.027, 3/3 seeds, secondary only; seen-source adaptation, not unseen-source generalisation). Details: `docs/academic_joint_seg_cls_result.md` |
+| 2 — ResNet-50 on three tasks + attention maps (`docs/academic_resnet50_three_task_spec.md`) | DONE 2026-09-27 | Outcome **A**: CV-2 recall 0.830 (burden p90 2 = at limit; zero-lesion FPR 0.47 vs YOLO 0.18), CV-3 Dice 0.896 (vs 0.864; paired bootstrap +0.032, 95% CI [+0.020, +0.046]). Attention claim allowed for CV-4 and CV-3, withheld for CV-2. Details: `docs/academic_resnet50_three_task_result.md` |
+| 3 — ViT-B/16 on CV-3 and CV-4 + attention maps (`docs/academic_vit_spec.md`) | spec revised 2026-09-28 after reviewing main's docs (reuses main's validated 320 px ISIC bundle plus DF/VASC; no detection unlock); not yet run | — |
 
 Rules shared by both specs (and any new one):
 - Every experiment fixes its question, sample, metrics and decision rule
   **before** it runs, and ends with an anti-rabbit-hole boundary.
 - Results are reported whichever way they come out. A failed match is a
   finding, not a reason to tune until it passes.
+
+**Before any new experiment**, check the docs on `main` for work that is
+already settled: `docs/project_state.md` (status and committed decisions),
+`docs/cv_metrics_improvement_plan.md` and `docs/data_constraint_spec.md`
+(what has been ruled out for CV-4), `docs/cv2_section22_finalized.md` (the
+CV-2 stopping rule), and `docs/cv4b_backbone_finetune_design.md` §11–12
+(validated pre-resizing, and why bundles are uploaded as one tar).
 
 Useful background that lives on `main`, not here (read with
 `git show origin/main:<path>`):

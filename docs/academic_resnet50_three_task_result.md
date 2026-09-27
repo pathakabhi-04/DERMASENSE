@@ -37,9 +37,18 @@ Secondary numbers, reported only (they do not change the letter):
 
 - **CV-3: a clear improvement.** The ImageNet-pretrained ResNet-50 encoder
   under the unchanged U-Net recipe beats the from-scratch U-Net by +0.032 Dice
-  and +0.044 IoU on the same test split. This is one seed. Experiment 1 put the
-  seed-to-seed spread on this test set at about 0.008 Dice, so the gap is
-  about four times that spread. Best epoch 41 of 50 (val Dice 0.888).
+  and +0.044 IoU on the same test split. Best epoch 41 of 50 (val Dice 0.888).
+  - **Paired bootstrap** (added 2026-09-28, the same method as main's CV-3
+    loss ablation, `docs/cv3_segmentation_baseline.md` §7): 10,000 resamples
+    of the 260 per-image differences give Dice **+0.0324, 95% CI [+0.0198,
+    +0.0461]** and IoU **+0.0444, CI [+0.0306, +0.0595]**. The ResNet-50
+    U-Net is better on 183 of 260 images (baseline 77, no ties), with a
+    median per-image gain of +0.0104. Both intervals exclude zero. Source:
+    `evaluation/academic_r50/cv3_paired_bootstrap.json`, from
+    `scripts/academic_r50/paired_bootstrap_cv3.py`.
+  - This is still one training seed. The bootstrap covers test-image
+    sampling, not training randomness. Experiment 1 put the seed-to-seed
+    spread on this test set at about 0.008 Dice, well below the gap.
 - **CV-2: recall slightly higher, false alarms clearly worse.** Faster R-CNN
   catches a lesion in 83.0% of lesion-containing images against YOLO11s's
   81.0%, and it finds more individual boxes (0.54 vs 0.50). But it puts at
@@ -121,6 +130,17 @@ Claim rule (§5.3): sanity pass, pointing game ≥ 0.80, and energy-in-lesion
 6. **The CV-3 comparison changes more than the backbone:** it swaps a
    from-scratch U-Net for a pretrained ResNet-50 encoder, and adds ImageNet
    normalisation, which the pretrained encoder requires.
+7. **Batch size differs from the baseline's actual run (found 2026-09-28).**
+   Spec §3.1 took "batch 8" from `docs/cv3_segmentation_baseline.md` §2 and
+   `scripts/train_cv3.py`'s default. But the official baseline checkpoint's own
+   `checkpoints/cv3_512/config.json` on main records **`batch_size: 16`**.
+   Its val Dice (0.8652 at epoch 50) matches the baseline doc, so that is the
+   run behind 0.8640. The comparison is therefore batch 8 (ResNet-50) against
+   batch 16 (baseline), a second difference. It is recorded here and not
+   re-run: the effect of batch size on this recipe is unmeasured, and a
+   +0.032 Dice gap with a CI excluding zero is unlikely to come from it. The
+   baseline doc's "batch 8" is itself a discrepancy on main, noted here but
+   not edited from this branch.
 
 ## 4. What happens next
 

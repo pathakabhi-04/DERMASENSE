@@ -89,6 +89,12 @@ difference from the baseline is ImageNet mean/std normalisation, which a
 pretrained encoder needs. Images and masks are stored already resized to
 512×512 with the resize `evaluate_cv3.py` applies (cv2 linear / nearest).
 
+> **Correction (2026-09-28, after the run, recorded rather than rewritten):**
+> "batch 8" came from `docs/cv3_segmentation_baseline.md` and
+> `train_cv3.py`'s default. The official baseline checkpoint's own
+> `config.json` (`checkpoints/cv3_512`) records batch 16. The run used 8
+> as written above. See the result doc, limitation 7.
+
 **CV-4.** `isic2019_resnet50_weighted_best.pt`, loaded into a torchvision
 ResNet-50 by key remapping. Before any map is computed, the loaded model must
 reproduce test macro-F1 0.5756 on the ISIC 2019 test split. If it does not,

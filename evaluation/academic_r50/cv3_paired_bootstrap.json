@@ -1,0 +1,31 @@
+{
+  "n": 260,
+  "resamples": 10000,
+  "seed": 42,
+  "dice": {
+    "baseline_mean": 0.8640105652697527,
+    "candidate_mean": 0.896374598942657,
+    "mean_diff": 0.03236403367290433,
+    "median_diff": 0.010353833436965998,
+    "ci95": [
+      0.01984478820719618,
+      0.04608592552866657
+    ],
+    "candidate_better": 183,
+    "baseline_better": 77,
+    "ties": 0
+  },
+  "iou": {
+    "baseline_mean": 0.7851390301897692,
+    "candidate_mean": 0.8295095644409439,
+    "mean_diff": 0.044370534251174834,
+    "median_diff": 0.01770058274269104,
+    "ci95": [
+      0.030565002383720917,
+      0.05950123348911418
+    ],
+    "candidate_better": 183,
+    "baseline_better": 77,
+    "ties": 0
+  }
+}

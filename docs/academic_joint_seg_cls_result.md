@@ -66,10 +66,24 @@ partial-label spec (unlocked only by outcome A or B) stays **locked**.
   investigation into why). Caveats: PAD test has 352 images, and MEL has only
   9 of them; the transfer fine-tunes at 224 px an encoder trained at 512 px.
 
+- **Scope of the PAD-UFES result: seen-source adaptation, not
+  generalisation** (note added 2026-09-28). The C1 protocol fine-tunes on
+  PAD-UFES *train* before scoring PAD-UFES *test*, so PAD is a **seen** source
+  when the metric is taken. Main's CV-4b experiments found exactly this split:
+  adaptation to seen sources works (e.g. Fitzpatrick 0.93 AUC in the `pooled`
+  fold), while transfer to an **unseen** capture source does not (0.63–0.67),
+  across four experiments that isolated the gap as a data constraint
+  (`docs/data_constraint_spec.md`, `cv4b_backbone_finetune_result.md` on
+  main). J's +0.027 therefore says that a segmentation-shaped encoder adapts
+  slightly better to a source it is then trained on. It says nothing about
+  performance on an unseen capture source such as a user's phone, and must
+  not be cited as evidence for that.
+
 **One-line summary:** at λ = 1, one shared ResNet-50 encoder does both tasks
 worse in-domain than two specialists (−0.034 macro-F1, −0.013 Dice). Its
-encoder does, however, transfer better to smartphone images under the C1
-protocol (+0.027 macro-F1 on PAD-UFES, 3/3 seeds).
+encoder does, however, adapt slightly better to smartphone clinical images
+when fine-tuned on them under the C1 protocol (+0.027 macro-F1 on PAD-UFES,
+3/3 seeds). This is a seen-source result, not unseen-source generalisation.
 
 ## 4. Context (not comparable; spec §6)
 

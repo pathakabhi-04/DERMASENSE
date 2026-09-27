@@ -1,8 +1,8 @@
 # Academic Track — ViT Backbone on CV-3 and CV-4, with Real Attention Maps
 
-**Status:** SPEC — not yet run. It depends on Experiment 2
-(`docs/academic_resnet50_three_task_spec.md`), whose ResNet-50 CV-3 result is
-this spec's segmentation comparator.
+**Status:** SPEC — not yet run. Revised 2026-09-28, before any run, after a
+review of main's CV-2/3/4 docs (see §2.1). Experiment 2 is complete; its
+ResNet-50 CV-3 test Dice, **0.8964**, is this spec's segmentation comparator.
 **Companion to:** Experiment 1 (shared encoder) and Experiment 2 (same
 ResNet-50 backbone, trained separately). This experiment changes the backbone
 family and nothing else.
@@ -34,11 +34,40 @@ family and nothing else.
 - **CV-2 detection is out** (Section 4). iToBoS lesions are about 30 px at
   1280 px, roughly two 16×16 patches. Global attention over the resulting 6,400
   tokens is expensive, and a hierarchical detector (ViTDet, Swin) is a
-  different design, not a backbone swap. It gets its own spec if this one ends
-  in outcome A (Section 7).
+  different design, not a backbone swap. It is **not** unlocked by any
+  outcome here: main's CV-2 stopping rule (`docs/cv2_section22_finalized.md`,
+  `docs/cv2_status.md`) closes further detector work until the iToBoS→phone
+  domain gap is answered, and a new wide-field detector architecture is
+  gated on a product decision (`docs/build_on_baseline_1.md` §B item 1).
 - **The ViT does not revive the joint model.** A ViT backbone still needs
   boxes, masks and diagnoses on the same images for a single joint model.
   Experiment 1's outcome C stands.
+
+### 2.1 What main already settled, and what that means here
+
+Reviewed 2026-09-28 so that this experiment does not repeat settled work:
+
+- **Capacity is not what limits CV-4.** ResNet-18 and ResNet-50 gave the same
+  melanoma recall (0.56 vs 0.54–0.57; `docs/cv_metrics_improvement_plan.md`
+  on main). A larger or different backbone is therefore **not expected to
+  improve CV-4**, and this experiment is not a CV-4 improvement attempt. Its
+  value is the backbone comparison and the real attention maps. A CV-4 "beats"
+  result would be reported under this prior, not as a product lever.
+- **The unseen-source gap is a data constraint** (`docs/data_constraint_spec.md`,
+  four experiments). Nothing here is evaluated on, or may be claimed for, an
+  unseen capture source such as a user's phone.
+- **ISIC 2019 pre-resizing was already chosen by measurement**
+  (`docs/cv4b_backbone_finetune_design.md` §11). 256 px bilinear and JPEG q95
+  were rejected on paired feature fidelity; **320 px LANCZOS q100** was
+  validated (feature cosine 0.993 against originals). This spec reuses that
+  setting and bundle (§3.1), instead of the new 224 px bundle an earlier
+  draft proposed.
+- **Higher CV-3 resolution was already tried** (`checkpoints/cv3_768` on main:
+  val Dice 0.829 at 768 vs 0.865 at 512). CV-3 stays at 512.
+- **Grad-CAM++, Score-CAM and other CAM variants are ruled out**
+  (`docs/cv5_explainability_spec.md`), consistent with §8.
+- **CV-3 comparisons use a paired bootstrap** over the 260 test images
+  (`docs/cv3_segmentation_baseline.md` §7). §5 adds it.
 
 ---
 
@@ -46,8 +75,8 @@ family and nothing else.
 
 | Task | ViT model | Data / split | Comparator (ResNet-50) |
 |---|---|---|---|
-| **CV-4 classification** | `torchvision` `vit_b_16`, `ViT_B_16_Weights.IMAGENET1K_V1`; head: CLS token → Linear(768, 8) | ISIC 2019, existing CV-4 split (seed 42), 224×224 | Production CV-4 weighted ResNet-50: test macro-F1 **0.5756** |
-| **CV-3 segmentation** | same ViT-B/16 as the encoder; simple feature pyramid (Li et al. 2022, ViTDet) from the last block to strides 2 / 4 / 8 / 16 / 32 with ResNet-50's channel counts (64 / 256 / 512 / 1024 / 2048), feeding the **unchanged** U-Net decoder from `src/academic/model.py` | ISIC 2018 Task 1, existing CV-3 split, 512×512 (position embeddings interpolated from 14×14 to 32×32) | Experiment 2 ResNet-50 U-Net: test Dice (from `evaluation/academic_r50/performance.csv`) |
+| **CV-4 classification** | `torchvision` `vit_b_16`, `ViT_B_16_Weights.IMAGENET1K_V1`; head: CLS token → Linear(768, 8) | ISIC 2019, existing CV-4 split (seed 42), 224×224 input from the validated 320 px bundle (§3.1) | Production CV-4 weighted ResNet-50, **re-scored on the same bundle images** (R50ᵦ, §5). Originals: test macro-F1 0.5756 (context) |
+| **CV-3 segmentation** | same ViT-B/16 as the encoder; simple feature pyramid (Li et al. 2022, ViTDet) from the last block to strides 2 / 4 / 8 / 16 / 32 with ResNet-50's channel counts (64 / 256 / 512 / 1024 / 2048), feeding the **unchanged** U-Net decoder from `src/academic/model.py` | ISIC 2018 Task 1, existing CV-3 split, 512×512 (position embeddings interpolated from 14×14 to 32×32) | Experiment 2 ResNet-50 U-Net: test Dice **0.8964** (`evaluation/academic_r50/performance.csv`) |
 
 **Pretraining is held fixed at ImageNet-1k.** ResNet-50 used ImageNet-1k
 weights, and `IMAGENET1K_V1` is the ImageNet-1k ViT-B/16. Stronger ViT
@@ -80,10 +109,21 @@ This is the only deviation, and it is not swept.
 | Precision | fp16 autocast | fp16 autocast |
 | Seed | 42 | 42 |
 
-**Data:** ISIC 2019 train/val/test goes into a new bundle, pre-resized to
-224×224 (the CV-4 eval resize). The CV-3 and HAM data reuse
-`academic_r50_bundle` and `academic_joint_bundle`, which are already on the
-volume.
+**Data:**
+- **ISIC 2019: reuse main's validated `cv4b_bundle`**, at 320 px LANCZOS
+  q100 JPEG. It covers 18,062 / 3,304 / 3,473 of the 18,402 / 3,375 / 3,554
+  train/val/test images. **The gap is exactly DF and VASC**: that bundle held
+  only the ISIC classes that map onto PAD-UFES's six, and DF and VASC have
+  none. The 492 missing images (train 340, val 71, test 81) are added with
+  the **same** function (`resize_one` in `scripts/preresize_cv4b_dataset.py`
+  on main), so all eight classes share one preprocessing. At train and eval
+  time the images are resized to 224×224 with the CV-4 transform, as main
+  did with this bundle.
+- **Upload it as a single tar**, not loose files: per-object overhead
+  dominates at this file count (main §12.4, and the slow mask upload in
+  Experiment 1).
+- CV-3 and HAM data reuse `academic_r50_bundle` and `academic_joint_bundle`,
+  which are already on the volume.
 
 ---
 
@@ -93,8 +133,8 @@ volume.
 and attention maps.
 
 **Out, and why:**
-- **CV-2 detection with a ViT** (Section 2). It gets its own spec, and only
-  after outcome A.
+- **CV-2 detection with a ViT** (Section 2). Not unlocked by any outcome
+  here. Main's CV-2 stopping rule applies.
 - **Other ViTs or pretraining** (ViT-S, Swin, DeiT, SWAG, DINOv2): each is a
   second change.
 - **Learning-rate or schedule sweeps.** Section 3.1 is fixed.
@@ -110,12 +150,27 @@ the seed-to-seed spread measured in Experiment 1: classification macro-F1 SD
 
 | Task | "Matches" if | "Beats" if | Metric source |
 |---|---|---|---|
-| CV-4 | test macro-F1 ≥ 0.5756 − 0.02 = **0.5556** | ≥ 0.5756 + 0.02 = **0.5956** | same test split and metric as CV-4 |
-| CV-3 | test Dice ≥ R50 Dice − **0.01** | ≥ R50 Dice + **0.01** | `scripts/academic_r50/evaluate_cv3.py` |
+| CV-4 | test macro-F1 ≥ R50ᵦ − 0.02 | ≥ R50ᵦ + 0.02 | CV-4 test split (3,554), both models scored on the **same** bundle images |
+| CV-3 | test Dice ≥ 0.8964 − 0.01 = **0.8864** | ≥ 0.8964 + 0.01 = **0.9064** | `scripts/academic_r50/evaluate_cv3.py` |
+
+**R50ᵦ** is the production CV-4 ResNet-50 scored on the bundle images, so
+the two backbones see identical inputs. It must come within ±0.01 of 0.5756
+(its score on the originals, reproduced in Experiment 2). If it does not,
+the pre-resized images are not faithful enough for this 8-class task, which
+main validated only for its binary referral head: stop and report before
+training.
+
+**Reported alongside, not decision-changing:**
+- CV-3: a paired bootstrap (10,000 resamples, 95% CI) of ViT − ResNet-50
+  Dice over the 260 test images (`scripts/academic_r50/paired_bootstrap_cv3.py`).
+- CV-4: melanoma recall on the 3,554-image test split, with a Wilson
+  interval, for both models. Main treats this as the metric that matters
+  (`docs/cv_metrics_improvement_plan.md`), and macro-F1 alone can hide a
+  melanoma regression.
 
 | Outcome | Condition | Action |
 |---|---|---|
-| **A** | Both match | Claim: a ViT backbone serves segmentation and classification as well as ResNet-50 (report "beats" separately). Unlocks a ViT detection spec. |
+| **A** | Both match | Claim: a ViT backbone serves segmentation and classification as well as ResNet-50 (report "beats" separately). Unlocks nothing further; detection stays closed (§2). |
 | **B** | Exactly one matches | Finding: the swap works for one task only. Report which. |
 | **C** | Neither matches | Finding: an ImageNet-1k ViT-B/16 underperforms ResNet-50 on these datasets at these sizes. |
 
@@ -170,6 +225,8 @@ against ViT Grad-CAM compares methods with the model held fixed.
    torchvision's own model on 10 random tensors (max abs difference < 1e-4).
 3. Smoke test: one CV-3 batch at 512 with the interpolated position
    embeddings runs forward and backward, and memory is recorded.
+4. The completed ISIC 2019 bundle has all 25,331 split images (18,402 / 3,375
+   / 3,554), checksums verify, and R50ᵦ is within ±0.01 of 0.5756 (§5).
 
 ---
 
@@ -189,7 +246,8 @@ and stop. Do **not**:
 ## 9. Deliverables
 
 - `evaluation/academic_vit/performance.csv`: ViT vs ResNet-50 per task, with
-  the Section 5 thresholds.
+  the Section 5 thresholds, R50ᵦ, melanoma recall with Wilson intervals, and
+  the CV-3 paired-bootstrap CI.
 - `evaluation/academic_vit/attention_metrics.csv`: per task and map
   (attention, Grad-CAM), the §6.2 metrics and sanity correlation, with
   Experiment 2's ResNet-50 Grad-CAM rows repeated for comparison.
