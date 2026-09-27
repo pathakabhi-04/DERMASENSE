@@ -16,6 +16,13 @@ including the RAG collaborator (Section 5).
 | 3 | `docs/academic_joint_seg_cls_spec.md` §1, §3–§10 | Experiment 1: one shared-encoder model (segmentation + classification) on HAM10000, three setups × 3 seeds, decision rule, stop conditions |
 | 4 | `docs/academic_resnet50_three_task_spec.md` | Experiment 2: the same ResNet-50 backbone trained separately for CV-2, CV-3 and CV-4, plus Grad-CAM attention maps and how they are scored |
 
+**Experiment status**
+
+| Experiment | Status | Result |
+|---|---|---|
+| 1 — joint seg+cls (`docs/academic_joint_seg_cls_spec.md`) | DONE 2026-09-26 | Outcome **C**: J − C macro-F1 −0.034, J − S Dice −0.013, both outside the margins. PAD-UFES transfer favours J (+0.027, 3/3 seeds, secondary only). Details: `docs/academic_joint_seg_cls_result.md` |
+| 2 — ResNet-50 on three tasks + attention maps (`docs/academic_resnet50_three_task_spec.md`) | in progress | — |
+
 Rules shared by both specs (and any new one):
 - Every experiment fixes its question, sample, metrics and decision rule
   **before** it runs, and ends with an anti-rabbit-hole boundary.
