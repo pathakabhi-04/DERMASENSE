@@ -1,0 +1,43 @@
+{
+  "device": "cpu",
+  "trunk_vs_torchvision_maxdiff": 0.0,
+  "manual_blocks_vs_forward_224_maxdiff": 0.0,
+  "rollout_row_sum_maxdev": 4.76837158203125e-07,
+  "manual_blocks_vs_forward_512_maxdiff": 0.0,
+  "pyramid_shapes": [
+    [
+      2,
+      64,
+      256,
+      256
+    ],
+    [
+      2,
+      256,
+      128,
+      128
+    ],
+    [
+      2,
+      512,
+      64,
+      64
+    ],
+    [
+      2,
+      1024,
+      32,
+      32
+    ],
+    [
+      2,
+      2048,
+      16,
+      16
+    ]
+  ],
+  "seg_512_fwd_bwd_batch": 2,
+  "seg_512_fwd_bwd_seconds": 6.33,
+  "seg_param_millions": 101.8,
+  "all_passed": true
+}

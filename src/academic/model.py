@@ -99,12 +99,23 @@ class AcademicModel(nn.Module):
     "cls" ([B,8] logits), depending on the arm.
     """
 
-    def __init__(self, arm: str, *, pretrained: bool = True, seed: int = 0) -> None:
+    def __init__(self, arm: str, *, pretrained: bool = True, seed: int = 0,
+                 backbone: str = "resnet50", image_size: int = 512) -> None:
         super().__init__()
         if arm not in ARMS:
             raise ValueError(f"arm must be one of {ARMS}, got {arm!r}")
         self.arm = arm
-        self.encoder = ResNet50Encoder(pretrained=pretrained)
+        self.backbone = backbone
+        if backbone == "resnet50":
+            self.encoder = ResNet50Encoder(pretrained=pretrained)
+        elif backbone == "vit_b_16":
+            if arm != "S":
+                raise ValueError("the ViT encoder is only used for arm S (Experiment 3 CV-3)")
+            from src.academic.vit import ViTEncoder
+
+            self.encoder = ViTEncoder(image_size=image_size, pretrained=pretrained)
+        else:
+            raise ValueError(f"unknown backbone {backbone!r}")
 
         # Heads are initialised from fixed, separate generators so arm C and
         # arm J start from the same classifier weights for a given seed, and
@@ -119,6 +130,14 @@ class AcademicModel(nn.Module):
             with torch.random.fork_rng(devices=[]):
                 torch.manual_seed(seed + 1_000)
                 self.decoder = UNetDecoder()
+
+    def param_groups(self, encoder_lr: float, rest_lr: float) -> list[dict]:
+        """Pretrained trunk at encoder_lr; everything else (for the ViT this
+        includes the feature pyramid) at rest_lr."""
+        trunk = self.encoder.vit if self.backbone == "vit_b_16" else self.encoder
+        trunk_ids = {id(p) for p in trunk.parameters()}
+        return [{"params": [p for p in self.parameters() if id(p) in trunk_ids], "lr": encoder_lr},
+                {"params": [p for p in self.parameters() if id(p) not in trunk_ids], "lr": rest_lr}]
 
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         feats = self.encoder(x)

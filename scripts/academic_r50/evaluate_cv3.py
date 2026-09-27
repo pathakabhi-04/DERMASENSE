@@ -32,7 +32,9 @@ def main() -> None:
 
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ck = torch.load(args.run_dir / "best.pt", map_location="cpu", weights_only=False)
-    model = AcademicModel("S", pretrained=False, seed=ck["seed"])
+    cfg = ck.get("config", {})
+    model = AcademicModel("S", pretrained=False, seed=ck["seed"], backbone=cfg.get("backbone", "resnet50"),
+                          image_size=cfg.get("image_size", 512))
     model.load_state_dict(ck["model"])
     model.to(dev).eval()
 

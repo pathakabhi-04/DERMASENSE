@@ -45,6 +45,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--dataset", choices=("ham", "isic2018"), default="ham",
                    help="isic2018 (arm S only) is the Experiment 2 CV-3 run.")
     p.add_argument("--augment", choices=("cv4", "none"), default="cv4")
+    p.add_argument("--backbone", choices=("resnet50", "vit_b_16"), default="resnet50",
+                   help="vit_b_16 (arm S only) is the Experiment 3 CV-3 run.")
+    p.add_argument("--encoder-lr", type=float, default=None,
+                   help="Separate lr for the pretrained trunk (Experiment 3); default: --learning-rate for all.")
+    p.add_argument("--warmup-epochs", type=float, default=0.0,
+                   help="Linear warmup from 0.001x, per iteration (Experiment 3); default none.")
     p.add_argument("--num-workers", type=int, default=8)
     p.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     p.add_argument("--no-pretrained", action="store_true", help="Smoke tests only.")
@@ -152,12 +158,17 @@ def main() -> None:
     val_loader = make_loader(val_ds, batch_size=args.batch_size, num_workers=args.num_workers,
                              shuffle=False, max_batches=args.max_val_batches)
 
-    model = AcademicModel(args.arm, pretrained=not args.no_pretrained, seed=args.seed).to(device)
+    model = AcademicModel(args.arm, pretrained=not args.no_pretrained, seed=args.seed,
+                          backbone=args.backbone, image_size=args.image_size).to(device)
     class_weights = (sqrt_inverse_frequency_weights(train_ds.targets, len(ISIC2019_CLASSES))
                      if args.arm != "S" else torch.ones(len(ISIC2019_CLASSES)))
     ce = nn.CrossEntropyLoss(weight=class_weights.to(device))
     seg_loss = BCEDiceLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+    params = (model.param_groups(args.encoder_lr, args.learning_rate) if args.encoder_lr is not None
+              else model.parameters())
+    optimizer = torch.optim.AdamW(params, lr=args.learning_rate, weight_decay=args.weight_decay)
+    base_lrs = [g["lr"] for g in optimizer.param_groups]
+    warmup_iters = int(args.warmup_epochs * len(train_loader))
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
     config = {
@@ -185,6 +196,7 @@ def main() -> None:
         torch.set_rng_state(ckpt["torch_rng"])
         history, best, start_epoch = ckpt["history"], ckpt["best"], ckpt["epoch"] + 1
         print(f"Resumed from epoch {ckpt['epoch']} (best {select_key}={best:.4f})")
+    it = (start_epoch - 1) * len(train_loader)
 
     print(f"arm={args.arm} seed={args.seed} device={device} amp={use_amp} "
           f"train={len(train_loader.dataset)} val={len(val_loader.dataset)} select={select_key}")
@@ -196,6 +208,11 @@ def main() -> None:
         part_sums: dict[str, float] = {}
         for batch in train_loader:
             batch = {k: (v.to(device, non_blocking=True) if torch.is_tensor(v) else v) for k, v in batch.items()}
+            if warmup_iters:
+                factor = min(1.0, 0.001 + (1 - 0.001) * it / warmup_iters)
+                for g, lr in zip(optimizer.param_groups, base_lrs):
+                    g["lr"] = lr * factor
+            it += 1
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device.type, dtype=torch.float16, enabled=use_amp):
                 out = model(batch["image"])

@@ -56,7 +56,7 @@ def sanity_indices(n_items: int) -> list[int]:
 
 
 def contact_sheet(panels: list[tuple[np.ndarray, str]], path: Path, cols: int = 5, size: int = 256) -> None:
-    rows = (len(panels) + cols - 1) // cols
+    rows = max(1, (len(panels) + cols - 1) // cols)  # an empty selection still writes a (blank) sheet
     sheet = Image.new("RGB", (cols * size, rows * (size + 18)), "white")
     draw = ImageDraw.Draw(sheet)
     for k, (rgb, caption) in enumerate(panels):

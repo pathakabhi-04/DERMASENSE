@@ -160,6 +160,8 @@ def randomize(module: nn.Module, seed: int = 42) -> None:
         for m in module.modules():
             if hasattr(m, "reset_parameters"):  # BatchNorm's also resets running stats
                 m.reset_parameters()
+            elif hasattr(m, "_reset_parameters"):  # nn.MultiheadAttention (Experiment 3)
+                m._reset_parameters()
 
 
 # ---------------------------------------------------------------- figures
@@ -197,3 +199,70 @@ def draw_box(rgb: np.ndarray, box, color, width: int = 2) -> np.ndarray:
     out[y1:y2 + 1, x1:x1 + width] = color
     out[y1:y2 + 1, max(x2 - width + 1, 0):x2 + 1] = color
     return out
+
+
+# ------------------------------------------------------ ViT (Experiment 3)
+
+def _token_grid(t: torch.Tensor, grid: int) -> torch.Tensor:
+    """[1,1+N,C] tokens -> [1,C,g,g] (CLS dropped)."""
+    return t[:, 1:].transpose(1, 2).reshape(1, t.shape[-1], grid, grid)
+
+
+def cam_vit_classifier(model: nn.Module, x: torch.Tensor, target: int | None = None) -> tuple[np.ndarray, int]:
+    """Grad-CAM on the last transformer block's patch tokens (14x14 at 224)."""
+    cap = _Capture(model.vit.encoder.layers[-1])
+    try:
+        with torch.enable_grad():
+            logits = model(x)
+            if target is None:
+                target = int(logits.argmax(1))
+            model.zero_grad(set_to_none=True)
+            logits[0, target].backward()
+        g = int(round((cap.value.shape[1] - 1) ** 0.5))
+        return _cam_from(_token_grid(cap.value, g), _token_grid(cap.value.grad, g)), target
+    finally:
+        cap.remove()
+
+
+def cam_vit_segmenter(model: nn.Module, x: torch.Tensor, region: torch.Tensor | None = None):
+    """Seg-Grad-CAM on the ViT encoder's last block (32x32 at 512); target as cam_segmenter."""
+    cap = _Capture(model.encoder.vit.encoder.layers[-1])
+    try:
+        with torch.enable_grad():
+            logits = model(x)["seg"]
+            if region is None:
+                region = torch.sigmoid(logits.detach()) >= 0.5
+            if not region.any():
+                return None, region
+            model.zero_grad(set_to_none=True)
+            (logits * region).sum().backward()
+        g = model.encoder.grid
+        return _cam_from(_token_grid(cap.value, g), _token_grid(cap.value.grad, g)), region
+    finally:
+        cap.remove()
+
+
+@torch.no_grad()
+def rollout_classifier(model: nn.Module, x: torch.Tensor) -> np.ndarray:
+    """CLS row of the attention rollout over the patch grid (14x14 at 224)."""
+    from src.academic.vit import forward_with_attention, rollout
+
+    _, attns = forward_with_attention(model.vit, x)
+    row = rollout(attns)[0, 0, 1:]
+    g = int(round(row.numel() ** 0.5))
+    return row.reshape(g, g).float().cpu().numpy()
+
+
+@torch.no_grad()
+def rollout_segmenter(model: nn.Module, x: torch.Tensor, region: torch.Tensor) -> np.ndarray | None:
+    """Mean rollout row of the patches inside `region` (patch centre in the
+    predicted mask), over the 32x32 patch grid. None if no patch qualifies."""
+    from src.academic.vit import PATCH, forward_with_attention, rollout
+
+    _, attns = forward_with_attention(model.encoder.vit, x)
+    joint = rollout(attns)[0]
+    centre = region[0, 0, PATCH // 2::PATCH, PATCH // 2::PATCH].flatten()
+    if not centre.any():
+        return None
+    g = model.encoder.grid
+    return joint[1:][centre][:, 1:].mean(0).reshape(g, g).float().cpu().numpy()

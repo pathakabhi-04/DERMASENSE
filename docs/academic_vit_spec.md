@@ -160,6 +160,19 @@ the pre-resized images are not faithful enough for this 8-class task, which
 main validated only for its binary referral head: stop and report before
 training.
 
+**R50ᵦ measured 2026-09-28, before any ViT run**
+(`evaluation/academic_vit/r50_on_bundle.json`,
+`scripts/academic_vit/score_r50_on_bundle.py`):
+- Macro-F1 **0.5683**, which is 0.0073 below 0.5756, so the ±0.01 gate
+  **passes**.
+- The CV-4 thresholds are therefore **match ≥ 0.5483** and **beats ≥ 0.5883**.
+- Recorded as a finding: on the bundle, melanoma recall is **0.533**
+  [0.495, 0.571] (355/666), against 0.566 (377/666) on the originals. The
+  pre-resize costs about 22 melanomas while macro-F1 moves only 0.007. The
+  comparison stays fair, because both models see identical inputs, but the
+  preprocessing is not neutral for melanoma, and main validated it only for a
+  binary head.
+
 **Reported alongside, not decision-changing:**
 - CV-3: a paired bootstrap (10,000 resamples, 95% CI) of ViT − ResNet-50
   Dice over the 260 test images (`scripts/academic_r50/paired_bootstrap_cv3.py`).
@@ -227,6 +240,22 @@ against ViT Grad-CAM compares methods with the model held fixed.
    embeddings runs forward and backward, and memory is recorded.
 4. The completed ISIC 2019 bundle has all 25,331 split images (18,402 / 3,375
    / 3,554), checksums verify, and R50ᵦ is within ±0.01 of 0.5756 (§5).
+
+**Status 2026-09-28 (local):**
+- Precondition 1: passed (Experiment 2 done).
+- Precondition 2: passed on CPU (`evaluation/academic_vit/preflight_cpu.json`).
+  Our trunk equals torchvision's with a max difference of 0.0. The hand-run
+  attention blocks used for rollout reproduce the model's own forward
+  exactly (0.0 at 224 and at 512). Rollout rows sum to 1.
+- Precondition 3: passed on CPU. The 512 px ViT segmenter (101.8M
+  parameters) runs forward and backward. The GPU memory figure is recorded
+  by `run_all.sh`'s preflight on the pod.
+- Precondition 4: passed. The bundle has all 25,331 images (24,839 from
+  cv4b; 492 DF/VASC resized with main's function, which reproduced 50/50
+  cv4b files byte for byte), and R50ᵦ is 0.5683.
+- Attention inputs: the ViT CV-4 maps are computed on the same HAM test
+  originals as Experiment 2's ResNet-50 maps, so the two map sets share
+  inputs.
 
 ---
 
