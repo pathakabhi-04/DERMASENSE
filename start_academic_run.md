@@ -21,7 +21,7 @@ including the RAG collaborator (Section 5).
 | Experiment | Status | Result |
 |---|---|---|
 | 1 — joint seg+cls (`docs/academic_joint_seg_cls_spec.md`) | DONE 2026-09-26 | Outcome **C**: J − C macro-F1 −0.034, J − S Dice −0.013, both outside the margins. PAD-UFES transfer favours J (+0.027, 3/3 seeds, secondary only). Details: `docs/academic_joint_seg_cls_result.md` |
-| 2 — ResNet-50 on three tasks + attention maps (`docs/academic_resnet50_three_task_spec.md`) | in progress | — |
+| 2 — ResNet-50 on three tasks + attention maps (`docs/academic_resnet50_three_task_spec.md`) | code ready, settings fixed (§3.1); not yet run | — |
 
 Rules shared by both specs (and any new one):
 - Every experiment fixes its question, sample, metrics and decision rule
@@ -151,6 +151,18 @@ bash scripts/academic_joint/run_all.sh \
   /workspace/dermasense_academic/runs/academic_joint
 # rerun the same command after any crash: finished parts are skipped,
 # an interrupted training run resumes from its last.pt
+```
+
+**Experiment 2 (ResNet-50 on three tasks)**: needs both bundles on the volume
+(`academic_r50_bundle`, plus `academic_joint_bundle` for the CV-4 maps on HAM
+test). CV-3 training, CV-2 training, prediction export, the three attention
+evaluations and the results table, in one resumable command:
+
+```bash
+tmux new -s academic
+cd /workspace/dermasense_academic && git pull origin academic
+(cd data/academic_r50_bundle && sha256sum -c SHA256SUMS --quiet) && echo "r50 bundle verified"
+bash scripts/academic_r50/run_all.sh /workspace/dermasense_academic
 ```
 
 Checkpoints go to `/workspace/...` (the volume) every epoch, never to the

@@ -87,3 +87,4 @@ data/processed/
 
 # Bundle as it lands on the pod (synced into the repo folder)
 data/academic_joint_bundle/
+data/academic_r50_bundle/
