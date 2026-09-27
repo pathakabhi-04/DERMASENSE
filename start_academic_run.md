@@ -15,6 +15,7 @@ including the RAG collaborator (Section 5).
 | 2 | `docs/academic_joint_seg_cls_spec.md` §2 | **Why the design is what it is**: why detection, segmentation and classification cannot be one jointly trained model, and why segmentation + classification is the pair we merged |
 | 3 | `docs/academic_joint_seg_cls_spec.md` §1, §3–§10 | Experiment 1: one shared-encoder model (segmentation + classification) on HAM10000, three setups × 3 seeds, decision rule, stop conditions |
 | 4 | `docs/academic_resnet50_three_task_spec.md` | Experiment 2: the same ResNet-50 backbone trained separately for CV-2, CV-3 and CV-4, plus Grad-CAM attention maps and how they are scored |
+| 5 | `docs/academic_vit_spec.md` | Experiment 3: ViT-B/16 in place of ResNet-50 for CV-3 and CV-4, with real attention maps (rollout) scored by the Experiment 2 rules |
 
 **Experiment status**
 
@@ -22,6 +23,7 @@ including the RAG collaborator (Section 5).
 |---|---|---|
 | 1 — joint seg+cls (`docs/academic_joint_seg_cls_spec.md`) | DONE 2026-09-26 | Outcome **C**: J − C macro-F1 −0.034, J − S Dice −0.013, both outside the margins. PAD-UFES transfer favours J (+0.027, 3/3 seeds, secondary only). Details: `docs/academic_joint_seg_cls_result.md` |
 | 2 — ResNet-50 on three tasks + attention maps (`docs/academic_resnet50_three_task_spec.md`) | code ready, settings fixed (§3.1); not yet run | — |
+| 3 — ViT-B/16 on CV-3 and CV-4 + attention maps (`docs/academic_vit_spec.md`) | spec written; waits on Experiment 2 | — |
 
 Rules shared by both specs (and any new one):
 - Every experiment fixes its question, sample, metrics and decision rule
